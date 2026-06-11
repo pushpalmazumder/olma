@@ -29,33 +29,6 @@ body::before{
 }
 .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto}
 
-/* ---------- stage header ---------- */
-.masthead{text-align:center; margin-bottom:26px}
-.crest{display:inline-flex; align-items:center; gap:14px; justify-content:center}
-.crest svg{width:42px;height:42px}
-.crest .wm{font-family:'Cinzel',serif; font-weight:700; letter-spacing:.42em; font-size:24px;
-  background:var(--grad-gold); -webkit-background-clip:text; background-clip:text; color:transparent; padding-left:.42em}
-.masthead .sub{font-family:'Cinzel',serif; letter-spacing:.5em; font-size:10px; color:var(--bone-dim); margin-top:10px}
-.masthead .lede{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:17px; color:var(--bone-dim);
-  margin:14px auto 0; max-width:520px; line-height:1.5}
-
-/* ---------- flow rail ---------- */
-.rail{margin:24px auto 30px; max-width:980px}
-.rail-row{display:flex; gap:7px; overflow-x:auto; padding:4px 2px 12px; scrollbar-width:thin; scrollbar-color:var(--gold-deep) transparent}
-.rail-row::-webkit-scrollbar{height:5px}
-.rail-row::-webkit-scrollbar-thumb{background:var(--gold-deep); border-radius:9px}
-.rail-group{display:flex; gap:7px; align-items:center; flex:0 0 auto}
-.rail-tag{font-family:'Cinzel',serif; font-size:8.5px; letter-spacing:.24em; color:var(--bone-faint);
-  writing-mode:vertical-rl; transform:rotate(180deg); text-align:center; padding:2px 0; opacity:.85}
-.chip{flex:0 0 auto; font-size:11.5px; font-weight:500; letter-spacing:.02em; color:var(--bone-dim);
-  background:var(--char); border:1px solid rgba(198,160,78,.14); border-radius:999px;
-  padding:8px 14px; cursor:pointer; white-space:nowrap; transition:.22s; display:flex; align-items:center; gap:7px}
-.chip .n{font-family:'Cinzel',serif; font-size:9px; color:var(--gold-deep)}
-.chip:hover{border-color:var(--gold-line); color:var(--bone); transform:translateY(-1px)}
-.chip.active{background:var(--grad-gold); color:#1a140a; border-color:transparent; box-shadow:0 6px 18px -8px var(--gold)}
-.chip.active .n{color:#3a2d12}
-.rail-div{width:1px; align-self:stretch; background:linear-gradient(180deg,transparent,var(--gold-line),transparent); flex:0 0 auto; margin:0 3px}
-
 /* ---------- phone ---------- */
 .stage{display:flex; justify-content:center}
 .phone{position:relative; width:min(392px,100%); border-radius:46px; padding:13px;
@@ -272,33 +245,16 @@ body::before{
 .atmo{position:absolute; inset:0; z-index:0; opacity:.16; background:center/cover no-repeat var(--gardenbg)}
 .screen > *{position:relative; z-index:1}
 
-.footnote{text-align:center; margin-top:30px; font-size:11px; color:var(--bone-faint); line-height:1.7}
-.footnote .gold-text{font-family:'Cinzel',serif; letter-spacing:.1em}
 
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important; animation:none !important}
 }
 @media (max-width:520px){
   body{padding:18px 8px 48px}
-  .crest .wm{font-size:19px}
-  .rail-tag{display:none}
 }
 </style>
 
 <div class="wrap">
-  <div class="masthead">
-    <div class="crest">
-      <svg viewBox="0 0 100 100" id="crestoct"></svg>
-      <span class="wm">OLMA</span>
-    </div>
-    <div class="sub">DIGITAL&nbsp;LONGEVITY&nbsp;·&nbsp;INTERACTIVE&nbsp;WIREFRAME</div>
-    <p class="lede">A clickable walk-through of the OLMA experience — from first launch to active treatment. Tap through the journey, or jump to any screen. The Home dashboard below switches live across all seven states.</p>
-  </div>
-
-  <!-- FLOW RAIL -->
-  <div class="rail">
-    <div class="rail-row" id="rail"></div>
-  </div>
 
   <!-- PHONE -->
   <div class="stage">
@@ -549,11 +505,6 @@ body::before{
       </div>
     </div>
   </div>
-
-  <p class="footnote">
-    <span class="gold-text">OLMA · CASTELLO DI UVIGLIE</span><br>
-    Interactive wireframe · Tier-1 onboarding &amp; assessment + key revenue flows · prepared by Capital Numbers
-  </p>
 </div>
 
 <script>
@@ -594,28 +545,9 @@ function buildOcta(svg,{size=100,filled=8,total=8,gap=.16,stroke=0,label=''}={})
 }
 
 /* crest + frames */
-buildOcta(document.getElementById('crestoct'),{size:100,filled:8,gap:.18});
 document.querySelectorAll('.octa-frame').forEach(s=>buildOcta(s,{size:100,filled:8,gap:.2}));
 document.querySelectorAll('.octa-frame-lg').forEach(s=>buildOcta(s,{size:100,filled:8,gap:.16}));
 document.querySelectorAll('.octa-mini').forEach(s=>{const x=document.createElementNS('http://www.w3.org/2000/svg','svg');s.replaceWith(x);x.setAttribute('class','oct octa-mini');buildOcta(x,{size:100,filled:8,gap:.22});});
-
-/* ---------- flow rail ---------- */
-const FLOW=[
-  {tag:'ONBOARDING',items:[['splash','Splash','01'],['welcome','Welcome','02'],['register','Register','03'],['verify','Verify','04']]},
-  {tag:'ASSESSMENT',items:[['vita','Meet Vita','05'],['question','Questions','06'],['score','Score','07']]},
-  {tag:'THE APP',items:[['home','Home · 7 states','08'],['labkit','Lab Kit','09'],['school','School','10'],['consult','Consultation','11'],['doctors','Doctors','12'],['booking','Booking','13']]},
-];
-const rail=document.getElementById('rail');
-FLOW.forEach((g,gi)=>{
-  if(gi>0){const d=document.createElement('div');d.className='rail-div';rail.appendChild(d);}
-  const grp=document.createElement('div');grp.className='rail-group';
-  const tag=document.createElement('div');tag.className='rail-tag';tag.textContent=g.tag;grp.appendChild(tag);
-  g.items.forEach(([id,label,n])=>{
-    const c=document.createElement('button');c.className='chip';c.dataset.id=id;
-    c.innerHTML=`<span class="n">${n}</span>${label}`;c.onclick=()=>go(id);grp.appendChild(c);
-  });
-  rail.appendChild(grp);
-});
 
 /* ---------- navigation ---------- */
 const APP_SCREENS=new Set(['home','labkit','school','consult','doctors','booking','score','vita']);
@@ -624,7 +556,6 @@ function go(id){
   const el=document.getElementById('s-'+id);
   if(!el)return;
   el.scrollTop=0; el.classList.add('show');
-  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.id===id));
   // tab bar visibility
   document.getElementById('tabbar').style.display=APP_SCREENS.has(id)?'flex':'none';
   setTab(id);
@@ -632,9 +563,6 @@ function go(id){
   if(id==='score')animateScore();
   if(id==='question')resetQ();
   if(id==='home')renderState(currentState);
-  // keep rail chip in view
-  const chip=document.querySelector(`.chip[data-id="${id}"]`);
-  if(chip)chip.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
 }
 const TAB_FOR={home:'home',labkit:'labkit',vita:'vita',consult:'consult',score:'score',doctors:'consult',booking:'consult',school:'labkit'};
 function setTab(id){const t=TAB_FOR[id];document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.go===t));}
