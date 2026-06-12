@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF-03 · Screen Map & All Screens (static) · OLMA</title>
+<style>
+  :root{
+    --paper:#f4f3ef; --ink:#20242c; --ink-soft:#5b6270; --ink-faint:#8a909b;
+    --line:#d9d6cd; --line-soft:#e7e4db; --device:#ffffff; --fill:#eeece7; --fill-2:#e4e1d9;
+    --accent:#2f6f6a; --accent-soft:#dcebe8;
+    --main:#4b5563; --alt:#b07712; --alt-soft:#f6ecd6;
+    --fail:#bd3b2c; --fail-soft:#f7e2dd; --edge:#6f57b4; --edge-soft:#e8e2f6;
+    --ok:#2f7d52; --ok-soft:#dcefe2;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:14px; --shadow:0 1px 2px rgba(20,24,34,.06),0 12px 30px rgba(20,24,34,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+
+  .doc{max-width:1180px;margin:0 auto;padding:34px 28px 90px}
+  .pagehead{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:30px}
+  .pagehead .wf{font-family:var(--mono);font-size:11px;color:var(--ink-faint);
+    border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+  .pagehead h1{font-size:24px;margin:12px 0 4px;letter-spacing:.2px}
+  .pagehead p{margin:0;color:var(--ink-soft);font-size:13.5px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}
+  .legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft)}
+  .ldot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .ldot.main{background:var(--main)} .ldot.alt{background:var(--alt)}
+  .ldot.fail{background:var(--fail)} .ldot.edge{background:var(--edge)}
+
+  .secband{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);margin:46px 0 16px;display:flex;align-items:center;gap:12px}
+  .secband::after{content:"";flex:1;height:1px;background:var(--line)}
+  .secband:first-of-type{margin-top:8px}
+
+  /* ---------- screen map ---------- */
+  .mapwrap{background:#fbfaf7;border:1px solid var(--line);border-radius:16px;padding:14px;overflow-x:auto}
+  .mapwrap svg{display:block;margin:0 auto}
+
+  /* ---------- board ---------- */
+  .board{display:flex;flex-wrap:wrap;gap:30px 26px;align-items:flex-start}
+  .cell{flex:0 0 auto}
+  .cell.wide{flex-basis:100%}
+  .cap{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .cap .seq{font-family:var(--mono);font-size:12px;font-weight:700;width:24px;height:24px;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
+  .cap .seq.main{background:var(--main)} .cap .seq.alt{background:var(--alt)}
+  .cap .seq.fail{background:var(--fail)} .cap .seq.edge{background:var(--edge)}
+  .cap .ttl{font-size:14px;font-weight:600}
+  .cap .stp{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);
+    border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+  .cap .sid{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint)}
+  .frame{pointer-events:none;user-select:none}
+
+  /* ===== device + screen primitives (shared with clickable version) ===== */
+  .phone{width:360px;background:var(--device);border:1px solid var(--line);border-radius:32px;
+    box-shadow:var(--shadow);overflow:hidden;position:relative}
+  .phone .statusbar{display:flex;justify-content:space-between;align-items:center;
+    padding:10px 20px 5px;font-size:11px;color:var(--ink-soft);font-family:var(--mono)}
+  .phone .scr{padding:6px 16px 16px;min-height:540px;display:flex;flex-direction:column}
+  .phone .bottomnav{display:flex;justify-content:space-around;border-top:1px solid var(--line-soft);
+    padding:9px 6px 13px;background:#fbfaf7}
+  .phone .bottomnav .nb{font-size:9.5px;color:var(--ink-faint);text-align:center;font-family:var(--mono)}
+  .phone .bottomnav .nb.on{color:var(--accent)}
+  .phone .bottomnav .ic{width:19px;height:19px;border-radius:6px;background:var(--fill);margin:0 auto 4px}
+  .phone .bottomnav .nb.on .ic{background:var(--accent-soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
+
+  .browser{width:100%;background:var(--device);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);overflow:hidden}
+  .browser .chrome{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#efece5;border-bottom:1px solid var(--line)}
+  .browser .chrome .tl{display:flex;gap:6px}
+  .browser .chrome .tl i{width:11px;height:11px;border-radius:50%;background:#cfccc3;display:block}
+  .browser .chrome .url{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);
+    background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 12px;flex:1}
+  .browser .body{display:flex;min-height:500px}
+  .browser .side{width:210px;flex:none;border-right:1px solid var(--line-soft);padding:16px 12px;background:#fbfaf7}
+  .browser .main{flex:1;padding:20px 22px;min-width:0}
+
+  .apptop{display:flex;align-items:center;gap:10px;padding:4px 0 14px}
+  .apptop .bk{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;
+    font-size:15px;color:var(--ink-soft);line-height:1}
+  .apptop h2{font-size:16px;margin:0}
+  .apptop .sub{font-size:11px;color:var(--ink-faint);font-family:var(--mono)}
+  .greet{font-size:13px;color:var(--ink-soft)}
+  .greet b{display:block;font-size:20px;color:var(--ink);margin-top:2px}
+  .tierbadge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+    background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 10px;margin-top:8px}
+  .card{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:#fff;margin-bottom:12px}
+  .card.flat{box-shadow:none}
+  .vita{border:1px solid var(--accent);background:linear-gradient(180deg,#f3faf8,#fff);
+    border-radius:var(--r);padding:15px;margin-bottom:14px;position:relative}
+  .vita .tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;
+    color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+  .vita .tag::before{content:"";width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5fb4ab,#2f6f6a)}
+  .vita p{margin:0 0 12px;font-size:13.5px;line-height:1.5}
+  .row{display:flex;gap:10px}
+  .stat{flex:1;border:1px solid var(--line-soft);border-radius:10px;padding:10px;text-align:center;background:#fcfbf8}
+  .stat .v{font-size:17px;font-weight:600}
+  .stat .l{font-size:9.5px;color:var(--ink-faint);font-family:var(--mono);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+  .ph{background:var(--fill);border-radius:6px}
+  .ph.line{height:9px;margin:7px 0}
+  .ph.line.s{width:60%} .ph.line.m{width:80%}
+  .ph.avatar{width:52px;height:52px;border-radius:50%;background:var(--fill-2);flex:none}
+  .ph.img{height:120px;border:1px dashed var(--line);background:repeating-linear-gradient(45deg,#f1efea,#f1efea 9px,#eae7e0 9px,#eae7e0 18px);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-family:var(--mono);font-size:11px;border-radius:10px}
+  .dlist{display:flex;flex-direction:column;gap:10px}
+  .docrow{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+  .docrow .nm{font-size:14px;font-weight:600}
+  .docrow .sp{font-size:12px;color:var(--ink-soft)}
+  .docrow .sc{font-size:11px;color:var(--ink-faint);font-family:var(--mono);margin-top:2px}
+  .docrow .meta{margin-left:auto;text-align:right;flex:none}
+  .docrow .fee{font-weight:600;font-size:14px}
+  .docrow .slot{font-size:10.5px;color:var(--ok);font-family:var(--mono);margin-top:3px}
+  .docrow .slot.none{color:var(--alt)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:#fff;color:var(--ink)}
+  .sechead{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);margin:14px 2px 8px;display:flex;align-items:center;gap:8px}
+  .sechead .ro{margin-left:auto;color:var(--accent);border:1px solid var(--accent-soft);background:var(--accent-soft);
+    border-radius:5px;padding:1px 6px;letter-spacing:.04em}
+  .kv{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--ink-soft)} .kv .v{font-weight:600}
+  .kv .v.mono{font-family:var(--mono);font-weight:500}
+  .btn{display:block;width:100%;border:none;border-radius:11px;padding:13px;font-size:14px;font-weight:600;
+    font-family:var(--sans);margin-top:10px}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn-danger{background:var(--fail);color:#fff}
+  .btn-sm{padding:10px;font-size:13px}
+  .btnrow{display:flex;gap:10px;margin-top:10px}
+  .btnrow .btn{margin-top:0;flex:1}
+  .linkbtn{background:none;border:none;color:var(--accent);font-size:12.5px;text-decoration:underline;
+    padding:8px 0;font-family:var(--sans);width:100%;display:block;text-align:center}
+  .linkbtn.muted{color:var(--ink-faint)}
+  .ac{display:inline-flex;align-items:flex-start;gap:7px;font-family:var(--mono);font-size:11px;
+    background:var(--ok-soft);color:#1f6340;border-radius:8px;padding:8px 11px;margin-top:10px;line-height:1.4}
+  .ac::before{content:"AC";font-weight:700;background:#fff;border-radius:4px;padding:0 4px;flex:none}
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px 0}
+  .badgecircle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:14px}
+  .badgecircle.ok{background:var(--ok-soft);color:var(--ok)}
+  .badgecircle.fail{background:var(--fail-soft);color:var(--fail)}
+  .badgecircle.alt{background:var(--alt-soft);color:var(--alt)}
+  .badgecircle.edge{background:var(--edge-soft);color:var(--edge)}
+  .center h3{margin:0 0 8px;font-size:18px}
+  .center p{margin:0 0 6px;font-size:13px;color:var(--ink-soft);line-height:1.5;max-width:280px}
+  .spinner{width:46px;height:46px;border-radius:50%;border:4px solid var(--accent-soft);border-top-color:var(--accent);margin-bottom:16px}
+  .pushnotif{border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow);padding:13px;display:flex;gap:11px;margin-bottom:14px}
+  .pushnotif .ic{width:34px;height:34px;border-radius:9px;background:var(--accent);flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+  .pushnotif .ti{font-size:13px;font-weight:600}
+  .pushnotif .bd{font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.4}
+  .pushnotif .tm{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-left:auto;flex:none}
+  .videogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .videotile{aspect-ratio:4/3;border-radius:12px;background:#2a2e36;display:flex;align-items:flex-end;padding:9px;color:#cfd3da;font-family:var(--mono);font-size:11px}
+  .videotile.self{background:#3a3f49}
+  textarea.notes{width:100%;min-height:130px;border:1px solid var(--line);border-radius:11px;padding:12px;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fcfbf8}
+  .portalpatient{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .portalpatient .nm{font-size:16px;font-weight:600}
+  .portalpatient .mi{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .sidehead{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px}
+  .sideitem{font-size:12.5px;padding:8px 9px;border-radius:8px;color:var(--ink-soft);margin-bottom:2px}
+  .sideitem.on{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);font-weight:600}
+  .roflag{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:3px 8px}
+</style>
+</head>
+<body>
+<div class="doc">
+  <div class="pagehead">
+    <span class="wf">WF-03 · Doctor Consultation Booking and Execution</span>
+    <h1>Screen Map &amp; Screen Inventory</h1>
+    <p>Static reference sheet — flow diagram followed by all 24 screens. OLMA longevity platform.</p>
+    <div class="legend">
+      <span><i class="ldot main"></i>Main flow</span>
+      <span><i class="ldot alt"></i>Alternate path</span>
+      <span><i class="ldot fail"></i>Failure path</span>
+      <span><i class="ldot edge"></i>Edge case</span>
+    </div>
+  </div>
+
+  <div class="secband">Screen map · flow diagram</div>
+  <div class="mapwrap" id="mapwrap"></div>
+
+  <div id="boardroot"></div>
+</div>
+
+<script>
+/* ============================================================
+   SCREEN RENDERERS (identical output to the clickable version,
+   but inert — every interactive target is a no-op)
+   ============================================================ */
+const go=()=>{}; const _goPrev=()=>{};
+
+const bottomNav=(on)=>`<div class="bottomnav">${['Home','Vita','Labs','Consult','Profile'].map(l=>`<div class="nb ${l===on?'on':''}"><div class="ic"></div>${l}</div>`).join('')}</div>`;
+const status=`<div class="statusbar"><span>9:41</span><span>OLMA · ●●●● ⌁</span></div>`;
+const phone=(inner,navOn)=>`<div class="phone">${status}<div class="scr">${inner}</div>${navOn?bottomNav(navOn):''}</div>`;
+const browser=(url,side,main)=>`<div class="browser"><div class="chrome"><div class="tl"><i></i><i></i><i></i></div><div class="url">${url}</div></div><div class="body"><div class="side">${side}</div><div class="main">${main}</div></div></div>`;
+const appTop=(title,sub)=>`<div class="apptop"><button class="bk">‹</button><div><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div></div>`;
+
+const SCREENS={};
+const def=(id,cfg)=>SCREENS[id]=cfg;
+
+def('home_initial',{type:'main',step:'Trigger',title:'Home Dashboard (S7)',render:()=>phone(`
+  <div style="padding-top:6px"><div class="greet">Good morning,<b>Pushpal</b></div><span class="tierbadge">● Longevity Pro · Senior tier</span></div>
+  <div class="vita" style="margin-top:16px"><span class="tag">Vita recommends</span><p>Your HRV trend dropped <b>12%</b> over the last 7 days. A doctor can review your biomarkers and wearable data with you.</p><button class="btn btn-primary btn-sm">Book consultation</button></div>
+  <div class="sechead">This week</div><div class="row"><div class="stat"><div class="v">61.4</div><div class="l">Bio age</div></div><div class="stat"><div class="v">48ms</div><div class="l">HRV</div></div><div class="stat"><div class="v">6h52</div><div class="l">Sleep</div></div></div>
+  <button class="btn btn-ghost" style="margin-top:14px">Book consultation</button>`,'Home')});
+
+def('doctor_list',{type:'main',step:'Steps 1–2',title:'Doctor Consultation (M11)',render:()=>phone(`
+  ${appTop('Find a doctor','M11 · Doctor Consultation')}<span class="tierbadge">Showing: Longevity Pro doctors</span>
+  <div class="dlist" style="margin-top:14px">${[
+    ['Dr. Elena Marsh','Longevity Medicine','Stanford School of Medicine','$180','Next: Tue 3:00 PM',''],
+    ['Dr. Arman Roy','Endocrinology · Metabolic','Johns Hopkins','$160','Next: Wed 11:00 AM',''],
+    ['Dr. Lena Okafor','Cardiology · Preventive','Harvard Medical School','$200','Fully booked','none'],
+  ].map(d=>`<div class="docrow"><div class="ph avatar"></div><div><div class="nm">${d[0]}</div><div class="sp">${d[1]}</div><div class="sc">${d[2]}</div></div><div class="meta"><div class="fee">${d[3]}</div><div class="slot ${d[5]}">${d[4]}</div></div></div>`).join('')}</div>`,'Consult')});
+
+def('doctor_profile',{type:'main',step:'Step 3',title:'Doctor profile card',render:()=>phone(`
+  ${appTop('Doctor profile','Step 3')}
+  <div class="card"><div style="display:flex;gap:13px;align-items:center"><div class="ph avatar" style="width:60px;height:60px"></div><div><div style="font-size:17px;font-weight:600">Dr. Elena Marsh</div><div style="font-size:12.5px;color:var(--ink-soft)">Longevity Medicine</div><div class="sc" style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:3px">Stanford School of Medicine</div></div></div>
+  <div class="row" style="margin-top:13px"><div class="stat"><div class="v">4.9★</div><div class="l">Rating</div></div><div class="stat"><div class="v">$180</div><div class="l">Fee</div></div><div class="stat"><div class="v">12yr</div><div class="l">Exp</div></div></div></div>
+  <div class="sechead">About</div><div class="ph line m"></div><div class="ph line"></div><div class="ph line s"></div>
+  <div class="sechead">Available slots · this week</div><div class="chips">${['Tue 3:00 PM','Tue 4:30 PM','Wed 10:00 AM','Wed 2:00 PM','Thu 9:30 AM'].map(s=>`<button class="chip">${s}</button>`).join('')}</div>`,'Consult')});
+
+def('slot_select',{type:'main',step:'Step 4',title:'Pre-consultation summary',render:()=>phone(`
+  ${appTop('Review your summary','Step 4')}
+  <div class="card flat" style="display:flex;align-items:center;gap:10px;background:var(--accent-soft);border-color:var(--accent)"><div style="flex:1"><div style="font-size:11px;font-family:var(--mono);color:var(--accent)">SELECTED SLOT</div><div style="font-weight:600;font-size:14px">Tue, 17 Jun · 3:00 PM</div></div><button class="chip">Change</button></div>
+  <p style="font-size:12px;color:var(--ink-soft);margin:4px 2px 0">This summary is shared with Dr. Marsh for the consultation.</p>
+  ${[['Health profile','Age 64 · BMI 24.1 · 2 conditions on file'],['Biomarkers','Latest panel: 14 Jun · 3 flags'],['Wearable data','Last 7 days · HRV, sleep, steps, resting HR'],['Vita session summary','3 sessions · HRV concern raised']].map(s=>`<div class="sechead">${s[0]}</div><div class="card"><div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px">${s[1]}</div><div class="ph line m"></div><div class="ph line s"></div></div>`).join('')}
+  <button class="btn btn-primary">Continue</button>`,'Consult')});
+
+def('review_summary',{type:'main',step:'Step 5',title:'Confirm booking',render:()=>phone(`
+  ${appTop('Confirm booking','Step 5')}
+  <div class="card"><div class="kv"><span class="k">Doctor</span><span class="v">Dr. Elena Marsh</span></div><div class="kv"><span class="k">Date & time</span><span class="v mono">Tue 17 Jun · 3:00 PM</span></div><div class="kv"><span class="k">Time zone</span><span class="v mono">Asia/Kolkata (your local)</span></div><div class="kv"><span class="k">Format</span><span class="v">Video · 30 min</span></div><div class="kv"><span class="k">Consultation fee</span><span class="v">$180.00</span></div></div>
+  <div class="sechead">Shared with the doctor</div><div class="card" style="font-size:12.5px;color:var(--ink-soft)">Health profile · Biomarkers · Wearable data (7 days) · Vita session summary</div>
+  <button class="btn btn-primary">Confirm booking</button><button class="linkbtn">Modify slot</button>`,'Consult')});
+
+def('payment',{type:'main',step:'Step 6',title:'Payment · Stripe',render:()=>phone(`
+  ${appTop('Payment','Step 6 · Stripe')}
+  <div class="card"><div class="kv"><span class="k">Dr. Elena Marsh · 30 min</span><span class="v">$180.00</span></div></div>
+  <div class="sechead">Card details</div><div class="card"><div style="font-size:11px;font-family:var(--mono);color:var(--ink-faint)">CARD NUMBER</div><div class="ph line" style="height:14px;margin:6px 0 12px"></div><div class="row"><div style="flex:1"><div style="font-size:11px;font-family:var(--mono);color:var(--ink-faint)">EXPIRY</div><div class="ph line" style="height:14px"></div></div><div style="flex:1"><div style="font-size:11px;font-family:var(--mono);color:var(--ink-faint)">CVC</div><div class="ph line" style="height:14px"></div></div></div></div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--ink-faint);text-align:center;margin:4px 0">🔒 Secured by Stripe</div>
+  <button class="btn btn-primary">Pay $180.00</button>`,'Consult')});
+
+def('booking_confirmed',{type:'main',step:'Step 6',title:'Booking confirmed',render:()=>phone(`
+  <div class="center" style="min-height:360px"><div class="badgecircle ok">✓</div><h3>Booking confirmed</h3><p>Tue 17 Jun · 3:00 PM with Dr. Elena Marsh.</p><p>Confirmation emails are on their way to you and Dr. Marsh.</p><div class="ac">Confirmation email sent within 60 seconds of successful payment.</div></div>
+  <button class="btn btn-ghost">Add to calendar</button><button class="btn btn-primary">Done</button>`,'Consult')});
+
+def('home_updated',{type:'main',step:'Step 7',title:'Home Dashboard updated (S7)',render:()=>phone(`
+  <div style="padding-top:6px"><div class="greet">Upcoming<b>Next consultation</b></div></div>
+  <div class="card" style="border-color:var(--accent);margin-top:14px"><div style="display:flex;align-items:center;gap:12px"><div class="ph avatar"></div><div style="flex:1"><div style="font-weight:600;font-size:14.5px">Dr. Elena Marsh</div><div style="font-size:12px;color:var(--ink-soft)">Longevity Medicine</div><div class="sc" style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:3px">Tue 17 Jun · 3:00 PM · in 2 days</div></div></div>
+  <button class="btn btn-primary btn-sm" style="margin-top:12px">Join consultation</button><div class="btnrow"><button class="btn btn-ghost btn-sm">Reschedule</button><button class="btn btn-ghost btn-sm">Cancel</button></div></div>`,'Home')});
+
+def('join_launch',{type:'main',step:'Step 8',title:'Join consultation',render:()=>phone(`
+  ${appTop('Joining…','Step 8')}
+  <div class="center" style="min-height:300px"><div class="spinner"></div><h3>Opening your secure video room</h3><p>Launching Zoom · Dr. Elena Marsh’s consultation room.</p><div class="ac">Deep-link to the video platform launches within 3 seconds of the user’s tap.</div></div>`,'Consult')});
+
+const portalSide=(active)=>`<div class="sidehead">Today · appointments</div>${[['3:00 PM','Pushpal M.','summary'],['3:45 PM','R. Banerjee',''],['4:30 PM','A. Khan','']].map(a=>`<div class="sideitem ${a[2]===active?'on':''}"><b>${a[0]}</b> · ${a[1]}</div>`).join('')}<div class="sidehead" style="margin-top:18px">Sections</div>${['Health profile','Biomarkers','Wearables','Vita notes'].map(s=>`<div class="sideitem">${s}</div>`).join('')}`;
+
+def('portal_summary',{type:'main',step:'Step 9',title:'Doctor Portal · patient summary',frame:'browser',render:()=>browser('portal.olma.health/consultation/8841',portalSide('summary'),`
+  <div class="portalpatient"><div class="ph avatar"></div><div><div class="nm">Pushpal Mazumder</div><div class="mi">ID 8841 · 64 yrs · Longevity Pro</div></div><span class="roflag" style="margin-left:auto">● Read-only</span></div>
+  <div class="sechead">Health profile <span class="ro">read-only</span></div><div class="card"><div class="ph line m"></div><div class="ph line"></div><div class="ph line s"></div></div>
+  <div class="sechead">Biomarkers · 14 Jun panel <span class="ro">read-only</span></div><div class="card"><div class="row"><div class="stat"><div class="v">⚑3</div><div class="l">Flags</div></div><div class="stat"><div class="v">5.8</div><div class="l">HbA1c</div></div><div class="stat"><div class="v">142</div><div class="l">LDL</div></div></div></div>
+  <div class="sechead">Wearables · last 7 days <span class="ro">read-only</span></div><div class="card"><div class="ph img">[ HRV / sleep / steps trend ]</div></div>
+  <div class="sechead">Vita notes <span class="ro">read-only</span></div><div class="card"><div class="ph line m"></div><div class="ph line s"></div></div>
+  <div class="btnrow" style="margin-top:16px"><button class="btn btn-primary">Start video consultation</button></div>`)});
+
+def('portal_video_notes',{type:'main',step:'Step 10',title:'Consultation · post-consultation notes',frame:'browser',render:()=>browser('portal.olma.health/consultation/8841/room',portalSide('summary'),`
+  <div class="videogrid"><div class="videotile">Dr. Elena Marsh</div><div class="videotile self">Pushpal M.</div></div>
+  <div class="sechead">Post-consultation notes</div><textarea class="notes" placeholder="Summary, findings, and recommendations for the patient…"></textarea>
+  <div class="btnrow" style="margin-top:12px"><button class="btn btn-primary">Save & share notes</button><button class="btn btn-ghost" style="max-width:220px">Add notes later</button></div>`)});
+
+def('notes_received',{type:'main',step:'Step 11',title:'Notes received · Consultation History',render:()=>phone(`
+  ${appTop('Consultation history','Step 11')}
+  <div class="pushnotif"><div class="ic">✓</div><div><div class="ti">Dr. Marsh shared your consultation notes</div><div class="bd">Tap to read your summary and recommendations.</div></div><div class="tm">now</div></div>
+  <div class="ac">Push notification sent and notes visible in-app within 60 seconds of being saved.</div>
+  <div class="sechead" style="margin-top:16px">History</div><div class="docrow" style="border-color:var(--accent)"><div class="ph avatar"></div><div><div class="nm">Dr. Elena Marsh</div><div class="sp">17 Jun · 3:00 PM</div><div class="sc" style="color:var(--accent);font-family:var(--mono);font-size:11px;margin-top:2px">New notes</div></div><div class="meta">›</div></div>`,'Consult')});
+
+def('history_detail',{type:'main',step:'Step 12',title:'Consultation record',render:()=>phone(`
+  ${appTop('Consultation','Step 12')}
+  <div class="card"><div class="kv"><span class="k">Doctor</span><span class="v">Dr. Elena Marsh</span></div><div class="kv"><span class="k">Date</span><span class="v mono">17 Jun · 3:00 PM</span></div><div class="kv"><span class="k">Duration</span><span class="v">28 min</span></div><div class="kv"><span class="k">Record</span><span class="v" style="color:var(--ok)">● Permanently stored</span></div></div>
+  <div class="sechead">Doctor’s notes</div><div class="card"><div class="ph line m"></div><div class="ph line"></div><div class="ph line s"></div></div>
+  <div class="sechead">Data reviewed</div><div class="card" style="font-size:12.5px;color:var(--ink-soft)">Health profile · Biomarkers · Wearables (7d) · Vita summary</div>
+  <button class="btn btn-primary">Book a follow-up</button>`,'Consult')});
+
+/* ----- Alternate ----- */
+def('no_slots',{type:'alt',step:'Alt · Step 3',title:'No available slots',render:()=>phone(`
+  ${appTop('Doctor profile','Alt · Step 3')}
+  <div class="card"><div style="display:flex;gap:13px;align-items:center"><div class="ph avatar" style="width:60px;height:60px"></div><div><div style="font-size:17px;font-weight:600">Dr. Lena Okafor</div><div style="font-size:12.5px;color:var(--ink-soft)">Cardiology · Preventive</div><div class="sc" style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:3px">Harvard Medical School</div></div></div></div>
+  <div class="center" style="min-height:220px"><div class="badgecircle alt">◷</div><h3>No available slots</h3><p>Dr. Okafor is fully booked through next week. We’ll alert you the moment a slot opens.</p></div>
+  <button class="btn btn-primary">Notify me when available</button><button class="btn btn-ghost">Browse other doctors</button>`,'Consult')});
+
+def('portal_notes_late',{type:'alt',step:'Alt · Step 10',title:'Add notes after the session',frame:'browser',render:()=>browser('portal.olma.health/consultation/8841/notes',portalSide('summary'),`
+  <div class="card" style="border-color:var(--alt);background:var(--alt-soft)"><div style="font-family:var(--mono);font-size:11px;color:var(--alt)">⌛ NOTES DEADLINE</div><div style="font-weight:600;margin-top:4px">Complete by Wed 18 Jun · 3:00 PM (24h after consultation)</div></div>
+  <div class="sechead">Post-consultation notes</div><textarea class="notes" placeholder="Add your notes for this consultation…"></textarea>
+  <button class="btn btn-primary" style="margin-top:12px;max-width:240px">Save & share notes</button>`)});
+
+/* ----- Failure ----- */
+def('payment_fail',{type:'fail',step:'Fail · Step 6',title:'Payment failed',render:()=>phone(`
+  ${appTop('Payment','Fail · Step 6')}
+  <div class="center" style="min-height:300px"><div class="badgecircle fail">!</div><h3>Payment didn’t go through</h3><p>Your card was declined. No charge was made, and your slot is held for 10 minutes.</p></div>
+  <button class="btn btn-primary">Try again</button><button class="btn btn-ghost">Use a different card</button>`,'Consult')});
+
+def('join_fail',{type:'fail',step:'Fail · Step 8',title:'Video link failed',render:()=>phone(`
+  ${appTop('Joining…','Fail · Step 8')}
+  <div class="center" style="min-height:280px"><div class="badgecircle fail">⤢</div><h3>Couldn’t open the video app</h3><p>Open the consultation in your browser instead. We’ve logged this so we can look into it.</p></div>
+  <button class="btn btn-primary">Open in browser</button><button class="btn btn-ghost">Retry the app</button>`,'Consult')});
+
+def('no_join',{type:'fail',step:'Fail · Step 8',title:'User hasn’t joined',render:()=>phone(`
+  ${appTop('Reminder','Fail · Step 8')}
+  <div class="pushnotif" style="margin-top:10px"><div class="ic">◷</div><div><div class="ti">Your consultation has started</div><div class="bd">Dr. Marsh is waiting in the room. Tap to join — your slot is still active.</div></div><div class="tm">now</div></div>
+  <div class="center" style="min-height:180px"><p>Not cancelled automatically. The user can still join.</p></div>
+  <button class="btn btn-primary">Join now</button>`,'Home')});
+
+def('portal_unavailable',{type:'fail',step:'Fail · Step 9',title:'Doctor Portal unavailable',frame:'browser',render:()=>browser('portal.olma.health/consultation/8841',portalSide(''),`
+  <div class="center" style="min-height:360px"><div class="badgecircle fail">⚠</div><h3>Doctor Portal is temporarily unavailable</h3><p>We’ve emailed a secure PDF of this patient’s summary to your registered address so your consultation can go ahead.</p><button class="btn btn-primary" style="max-width:280px">Download backup summary (PDF)</button><button class="btn btn-ghost" style="max-width:280px">Retry portal</button></div>`)});
+
+/* ----- Edge ----- */
+def('cancel_early',{type:'edge',step:'Edge',title:'Cancel · more than 24h before',render:()=>phone(`
+  ${appTop('Cancel consultation','Edge · >24h')}
+  <div class="card" style="border-color:var(--edge);background:var(--edge-soft)"><div style="font-family:var(--mono);font-size:11px;color:var(--edge)">CANCELLING > 24h AHEAD</div><div style="font-weight:600;margin-top:4px">You’ll receive a full refund.</div></div>
+  <div class="card"><div class="kv"><span class="k">Consultation</span><span class="v">Dr. Marsh · 17 Jun</span></div><div class="kv"><span class="k">Refund</span><span class="v" style="color:var(--ok)">$180.00 (full)</span></div></div>
+  <div class="ac">Refund processed within 5–10 business days via Stripe.</div>
+  <button class="btn btn-danger">Cancel & refund</button><button class="linkbtn muted">Keep my consultation</button>`,'Consult')});
+
+def('cancel_done',{type:'edge',step:'Edge',title:'Cancelled · refunded',render:()=>phone(`
+  <div class="center" style="min-height:380px"><div class="badgecircle edge">✓</div><h3>Consultation cancelled</h3><p>A full refund of $180.00 is on its way. Both you and Dr. Marsh have been notified.</p><div class="ac">Refund processed within 5–10 business days via Stripe.</div></div>
+  <button class="btn btn-primary">Back to home</button>`,'Consult')});
+
+def('cancel_late',{type:'edge',step:'Edge',title:'Cancel · within 24h',render:()=>phone(`
+  ${appTop('Cancel consultation','Edge · <24h')}
+  <div class="card" style="border-color:var(--alt);background:var(--alt-soft)"><div style="font-family:var(--mono);font-size:11px;color:var(--alt)">CANCELLING WITHIN 24h</div><div style="font-weight:600;margin-top:4px">No refund. Your slot will be freed for others.</div></div>
+  <div class="card"><div class="kv"><span class="k">Consultation</span><span class="v">Dr. Marsh · today 3:00 PM</span></div><div class="kv"><span class="k">Refund</span><span class="v" style="color:var(--fail)">None</span></div><div class="kv"><span class="k">Slot</span><span class="v">Released to other users</span></div></div>
+  <button class="btn btn-danger">Cancel anyway</button><button class="linkbtn muted">Keep my consultation</button>`,'Consult')});
+
+def('doctor_cancel',{type:'edge',step:'Edge',title:'Doctor cancelled',render:()=>phone(`
+  ${appTop('Consultation update','Edge')}
+  <div class="pushnotif"><div class="ic" style="background:var(--edge)">!</div><div><div class="ti">Dr. Marsh had to cancel</div><div class="bd">Your 17 Jun consultation is cancelled. You’ve been fully refunded.</div></div><div class="tm">now</div></div>
+  <div class="center" style="min-height:200px"><div class="badgecircle edge">↻</div><h3>Let’s find a new time</h3><p>Full refund of $180.00 processed. Rebook with Dr. Marsh or choose another doctor.</p></div>
+  <button class="btn btn-primary">Rebook with Dr. Marsh</button><button class="btn btn-ghost">Choose another doctor</button>`,'Consult')});
+
+def('timezone',{type:'edge',step:'Edge',title:'Time-zone display',render:()=>phone(`
+  ${appTop('Your consultation time','Edge')}
+  <div class="card" style="border-color:var(--accent)"><div style="font-family:var(--mono);font-size:11px;color:var(--accent)">YOUR LOCAL TIME</div><div style="font-size:20px;font-weight:600;margin-top:4px">Tue 17 Jun · 3:00 PM</div><div style="font-size:12px;color:var(--ink-soft);margin-top:2px">Asia/Kolkata · from your profile country (India)</div></div>
+  <div class="sechead">For reference</div><div class="card"><div class="kv"><span class="k">Doctor (Pacific)</span><span class="v mono">Mon · 2:30 AM</span></div><div class="kv"><span class="k">UTC</span><span class="v mono">Tue · 09:30</span></div></div>
+  <p style="font-size:12px;color:var(--ink-soft);margin:2px 2px">Reminders and the “Join” button use your local time automatically.</p>
+  <button class="btn btn-primary">Got it</button>`,'Consult')});
+
+/* ============================================================
+   BOARD (static, ordered, sectioned)
+   ============================================================ */
+const BOARD=[
+  ['Main flow', ['home_initial','doctor_list','doctor_profile','slot_select','review_summary','payment','booking_confirmed','home_updated','join_launch','portal_summary','portal_video_notes','notes_received','history_detail']],
+  ['Alternate paths', ['no_slots','portal_notes_late']],
+  ['Failure paths', ['payment_fail','join_fail','no_join','portal_unavailable']],
+  ['Edge cases', ['cancel_early','cancel_done','cancel_late','doctor_cancel','timezone']],
+];
+
+function buildBoard(){
+  const root=document.getElementById('boardroot');
+  let html='';
+  BOARD.forEach(([label,ids])=>{
+    html+=`<div class="secband">${label}</div><div class="board">`;
+    ids.forEach((id,i)=>{
+      const s=SCREENS[id];
+      const wide = s.frame==='browser';
+      const seq = label==='Main flow' ? (i+1) : '·';
+      html+=`<div class="cell ${wide?'wide':''}">
+        <div class="cap"><span class="seq ${s.type}">${seq}</span><span class="ttl">${s.title}</span>
+          <span class="stp">${s.step}</span><span class="sid">#${id}</span></div>
+        <div class="frame">${s.render()}</div></div>`;
+    });
+    html+=`</div>`;
+  });
+  root.innerHTML=html;
+}
+
+/* ============================================================
+   SCREEN MAP (SVG flow diagram)
+   ============================================================ */
+const C={main:'#4b5563',alt:'#b07712',fail:'#bd3b2c',edge:'#6f57b4'};
+const FILL={main:'#ffffff',alt:'#f9f1de',fail:'#f9e6e1',edge:'#ece6f7'};
+
+function nodeBox(x,y,w,h,type,title,sub,num){
+  const stroke=C[type], fill=FILL[type];
+  let badge='';
+  if(num){badge=`<circle cx="${x+16}" cy="${y+16}" r="11" fill="${stroke}"/><text x="${x+16}" y="${y+20}" font-family="${MONO}" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">${num}</text>`;}
+  const tx = num ? x+34 : x+12;
+  return `<g>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+    ${badge}
+    <text x="${tx}" y="${y+21}" font-family="${SANS}" font-size="11.5" font-weight="600" fill="#20242c">${title}</text>
+    <text x="${tx}" y="${y+37}" font-family="${MONO}" font-size="9.5" fill="#8a909b">${sub}</text>
+  </g>`;
+}
+const SANS='-apple-system,Segoe UI,Roboto,sans-serif';
+const MONO='ui-monospace,Menlo,Consolas,monospace';
+
+function arrow(x1,y1,x2,y2,type,dash){
+  const d = dash?'stroke-dasharray="5 4"':'';
+  return `<path d="M ${x1} ${y1} L ${x2} ${y2}" fill="none" stroke="${C[type]}" stroke-width="1.6" ${d} marker-end="url(#a-${type})"/>`;
+}
+function elbow(x1,y1,x2,y2,type,dash){
+  const midx=(x1+x2)/2;
+  const d=dash?'stroke-dasharray="5 4"':'';
+  return `<path d="M ${x1} ${y1} L ${midx} ${y1} L ${midx} ${y2} L ${x2} ${y2}" fill="none" stroke="${C[type]}" stroke-width="1.6" ${d} marker-end="url(#a-${type})"/>`;
+}
+function edgeLabel(x,y,txt,type){
+  return `<text x="${x}" y="${y}" font-family="${MONO}" font-size="9" fill="${C[type]}" text-anchor="middle">${txt}</text>`;
+}
+
+function buildMap(){
+  const W=820, MW=200, BW=190, H=54;
+  const MX=(W-MW)/2;            // main column left = 310
+  const LX=24, RX=W-BW-24;      // left=24, right=606
+  const top=24, gap=92;
+  const my=i=>top+i*gap;        // main node y (top)
+  const cx=MX+MW/2;             // main center x
+  const mainNodes=[
+    ['home_initial','Home Dashboard','S7 · trigger'],
+    ['doctor_list','Doctor listing','M11 · steps 1–2'],
+    ['doctor_profile','Doctor profile','step 3'],
+    ['slot_select','Pre-consult summary','step 4'],
+    ['review_summary','Confirm booking','step 5'],
+    ['payment','Payment · Stripe','step 6'],
+    ['booking_confirmed','Booking confirmed','step 6'],
+    ['home_updated','Home updated','S7 · step 7'],
+    ['join_launch','Join consultation','step 8'],
+    ['portal_summary','Doctor Portal summary','step 9'],
+    ['portal_video_notes','Video + notes','step 10'],
+    ['notes_received','Patient notified','step 11'],
+    ['history_detail','Record stored','step 12'],
+  ];
+  const totalH = my(mainNodes.length-1)+H+30;
+
+  let svg=`<svg viewBox="0 0 ${W} ${totalH}" width="${W}" height="${totalH}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WF-03 screen map">`;
+  // markers
+  svg+=`<defs>`;
+  ['main','alt','fail','edge'].forEach(t=>{
+    svg+=`<marker id="a-${t}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${C[t]}"/></marker>`;
+  });
+  svg+=`</defs>`;
+
+  // ---- main spine arrows ----
+  for(let i=0;i<mainNodes.length-1;i++){
+    svg+=arrow(cx,my(i)+H,cx,my(i+1),'main');
+  }
+
+  // ---- branch + edge connectors (drawn under nodes) ----
+  // profile(2) -> no_slots (right)
+  svg+=elbow(MX+MW,my(2)+H/2,RX,my(2)+H/2,'alt');
+  svg+=edgeLabel((MX+MW+RX)/2,my(2)+H/2-6,'no slots','alt');
+  // pre-consult(3) -> modify (left) and loop back to profile(2)
+  svg+=elbow(MX,my(3)+H/2,LX+BW,my(3)+H/2,'alt');
+  svg+=edgeLabel((MX+LX+BW)/2,my(3)+H/2-6,'modify','alt');
+  svg+=elbow(LX+BW/2,my(3),LX+BW/2,my(2)+H, 'alt', true); // visual loop up (drawn as upward line)
+  // payment(5) -> payment_fail (right) + retry loop
+  svg+=elbow(MX+MW,my(5)+H/2,RX,my(5)+H/2,'fail');
+  svg+=edgeLabel((MX+MW+RX)/2,my(5)+H/2-6,'declined','fail');
+  svg+=`<path d="M ${RX} ${my(5)+H-8} L ${RX-16} ${my(5)+H+10} L ${MX+MW} ${my(5)+H+10}" fill="none" stroke="${C.fail}" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#a-fail)"/>`;
+  svg+=edgeLabel(RX-40,my(5)+H+22,'retry','fail');
+  // home_updated(7) -> edge cluster (left)
+  svg+=elbow(MX,my(7)+H/2,LX+BW,my(7)+22,'edge');
+  svg+=edgeLabel((MX+LX+BW)/2,my(7)+14,'cancel / TZ','edge');
+  // join(8) -> join_fail + no_join (right)
+  svg+=elbow(MX+MW,my(8)+H/2,RX,my(8)+18,'fail');
+  svg+=edgeLabel((MX+MW+RX)/2-4,my(8)+10,'link fails','fail');
+  svg+=elbow(MX+MW,my(8)+H/2,RX,my(8)+78,'fail');
+  svg+=edgeLabel((MX+MW+RX)/2-4,my(8)+96,'no-join 15m','fail');
+  // portal(9) -> portal_unavailable (right)
+  svg+=elbow(MX+MW,my(9)+H/2,RX,my(9)+H/2,'fail');
+  svg+=edgeLabel((MX+MW+RX)/2,my(9)+H/2-6,'portal down','fail');
+  // video(10) -> notes_late (left)
+  svg+=elbow(MX,my(10)+H/2,LX+BW,my(10)+H/2,'alt');
+  svg+=edgeLabel((MX+LX+BW)/2,my(10)+H/2-6,'≤24h','alt');
+
+  // ---- main nodes ----
+  mainNodes.forEach((n,i)=>{ svg+=nodeBox(MX,my(i),MW,H,'main',n[1],n[2],i+1); });
+
+  // ---- right branch nodes ----
+  svg+=nodeBox(RX,my(2),BW,H,'alt','No available slots','alt · notify me');
+  svg+=nodeBox(RX,my(5),BW,H,'fail','Payment failed','fail · retry');
+  svg+=nodeBox(RX,my(8)-10,BW,46,'fail','Video link failed','fail · direct link');
+  svg+=nodeBox(RX,my(8)+52,BW,46,'fail','User not joined','fail · reminder');
+  svg+=nodeBox(RX,my(9),BW,H,'fail','Portal unavailable','fail · backup PDF');
+
+  // ---- left branch nodes ----
+  svg+=nodeBox(LX,my(3),BW,H,'alt','Modify slot','alt · re-select');
+  svg+=nodeBox(LX,my(10),BW,H,'alt','Notes added late','alt · doctor');
+
+  // ---- edge cluster box (left, beside steps 6–7) ----
+  const ebx=LX, eby=my(5)+6, ebw=BW, ebh=4*30+34;
+  svg+=`<rect x="${ebx}" y="${eby}" width="${ebw}" height="${ebh}" rx="10" fill="${FILL.edge}" stroke="${C.edge}" stroke-width="1.5"/>`;
+  svg+=`<text x="${ebx+12}" y="${eby+20}" font-family="${MONO}" font-size="9" font-weight="700" fill="${C.edge}">EDGE · ACTIVE BOOKING</text>`;
+  ['Cancel > 24h → full refund','Cancel < 24h → no refund','Doctor cancels → refund + rebook','Time zone → user local time'].forEach((t,i)=>{
+    svg+=`<text x="${ebx+12}" y="${eby+40+i*22}" font-family="${SANS}" font-size="10.5" fill="#20242c">${t}</text>`;
+  });
+
+  svg+=`</svg>`;
+  document.getElementById('mapwrap').innerHTML=svg;
+}
+
+buildMap();
+buildBoard();
+</script>
+</body>
+</html>

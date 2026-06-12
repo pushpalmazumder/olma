@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF-03 · Doctor Consultation — Clickable Wireframe · OLMA</title>
+<style>
+  :root{
+    --paper:#f4f3ef;
+    --ink:#20242c;
+    --ink-soft:#5b6270;
+    --ink-faint:#8a909b;
+    --line:#d9d6cd;
+    --line-soft:#e7e4db;
+    --device:#ffffff;
+    --fill:#eeece7;
+    --fill-2:#e4e1d9;
+    --accent:#2f6f6a;
+    --accent-soft:#dcebe8;
+    --main:#4b5563;
+    --alt:#b07712;
+    --alt-soft:#f6ecd6;
+    --fail:#bd3b2c;
+    --fail-soft:#f7e2dd;
+    --edge:#6f57b4;
+    --edge-soft:#e8e2f6;
+    --ok:#2f7d52;
+    --ok-soft:#dcefe2;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:14px;
+    --shadow:0 1px 2px rgba(20,24,34,.06),0 12px 30px rgba(20,24,34,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;gap:18px;
+    padding:12px 20px;border-bottom:1px solid var(--line);
+    background:#fbfaf7;flex:none;
+  }
+  .brand{display:flex;align-items:baseline;gap:10px}
+  .brand b{font-size:18px;letter-spacing:.5px}
+  .brand .wf{font-family:var(--mono);font-size:11px;color:var(--ink-faint);
+    border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+  .legend{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft)}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dot.main{background:var(--main)} .dot.alt{background:var(--alt)}
+  .dot.fail{background:var(--fail)} .dot.edge{background:var(--edge)}
+  .reset{font-family:var(--mono);font-size:11px;border:1px solid var(--line);
+    background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;color:var(--ink-soft)}
+  .reset:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ---------- layout ---------- */
+  .shell{display:flex;flex:1;min-height:0}
+  .nav{width:288px;flex:none;border-right:1px solid var(--line);
+    background:#fbfaf7;overflow-y:auto;padding:14px 12px 40px}
+  .nav h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-faint);margin:18px 8px 7px}
+  .nav h4:first-child{margin-top:2px}
+  .nav button.item{
+    display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+    border:none;background:none;padding:7px 9px;border-radius:8px;cursor:pointer;
+    font-size:13px;color:var(--ink);line-height:1.25}
+  .nav button.item:hover{background:#efece5}
+  .nav button.item.active{background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+  .nav button.item .num{font-family:var(--mono);font-size:10px;color:var(--ink-faint);
+    width:20px;flex:none}
+  .nav button.item.active .num{color:var(--accent)}
+
+  /* ---------- stage ---------- */
+  .stage{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;
+    padding:26px 24px 80px}
+  .crumb{width:100%;max-width:880px;display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+  .pill{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:999px;
+    border:1px solid var(--line);color:var(--ink-soft);background:#fff}
+  .pill.t{color:#fff;border:none}
+  .pill.t.main{background:var(--main)} .pill.t.alt{background:var(--alt)}
+  .pill.t.fail{background:var(--fail)} .pill.t.edge{background:var(--edge)}
+  .crumb .title{font-size:15px;font-weight:600;margin-left:2px}
+  .crumb .back{margin-left:auto;font-family:var(--mono);font-size:11px;border:1px solid var(--line);
+    background:#fff;border-radius:7px;padding:6px 11px;cursor:pointer;color:var(--ink-soft)}
+  .crumb .back:hover{border-color:var(--accent);color:var(--accent)}
+
+  .note{width:100%;max-width:880px;font-size:12.5px;color:var(--ink-soft);
+    background:#fff;border:1px solid var(--line-soft);border-left:3px solid var(--accent);
+    border-radius:8px;padding:10px 13px;margin-bottom:20px;line-height:1.5}
+  .note b{color:var(--ink)}
+  .note.alt{border-left-color:var(--alt)} .note.fail{border-left-color:var(--fail)}
+  .note.edge{border-left-color:var(--edge)}
+
+  /* ---------- device frames ---------- */
+  .device{animation:fade .28s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.device{animation:none}}
+
+  .phone{width:380px;background:var(--device);border:1px solid var(--line);
+    border-radius:34px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+  .phone .statusbar{display:flex;justify-content:space-between;align-items:center;
+    padding:11px 22px 6px;font-size:12px;color:var(--ink-soft);font-family:var(--mono)}
+  .phone .scr{padding:6px 18px 18px;min-height:560px;display:flex;flex-direction:column}
+  .phone .bottomnav{display:flex;justify-content:space-around;border-top:1px solid var(--line-soft);
+    padding:10px 6px 14px;background:#fbfaf7}
+  .phone .bottomnav .nb{font-size:10px;color:var(--ink-faint);text-align:center;font-family:var(--mono)}
+  .phone .bottomnav .nb.on{color:var(--accent)}
+  .phone .bottomnav .ic{width:20px;height:20px;border-radius:6px;background:var(--fill);margin:0 auto 4px}
+  .phone .bottomnav .nb.on .ic{background:var(--accent-soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
+
+  .browser{width:860px;max-width:100%;background:var(--device);border:1px solid var(--line);
+    border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .browser .chrome{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#efece5;
+    border-bottom:1px solid var(--line)}
+  .browser .chrome .tl{display:flex;gap:6px}
+  .browser .chrome .tl i{width:11px;height:11px;border-radius:50%;background:#cfccc3;display:block}
+  .browser .chrome .url{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);
+    background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 12px;flex:1}
+  .browser .body{display:flex;min-height:520px}
+  .browser .side{width:210px;flex:none;border-right:1px solid var(--line-soft);padding:16px 12px;background:#fbfaf7}
+  .browser .main{flex:1;padding:20px 22px;min-width:0}
+
+  /* ---------- screen primitives ---------- */
+  .apptop{display:flex;align-items:center;gap:10px;padding:4px 0 14px}
+  .apptop .bk{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:#fff;cursor:pointer;font-size:15px;color:var(--ink-soft);line-height:1}
+  .apptop h2{font-size:17px;margin:0}
+  .apptop .sub{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono)}
+
+  .greet{font-size:13px;color:var(--ink-soft)}
+  .greet b{display:block;font-size:21px;color:var(--ink);margin-top:2px}
+  .tierbadge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+    background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 10px;margin-top:8px}
+
+  .card{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:#fff;margin-bottom:12px}
+  .card.flat{box-shadow:none}
+  .vita{border:1px solid var(--accent);background:linear-gradient(180deg,#f3faf8,#fff);
+    border-radius:var(--r);padding:15px;margin-bottom:14px;position:relative}
+  .vita .tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;
+    color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+  .vita .tag::before{content:"";width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#5fb4ab,#2f6f6a)}
+  .vita p{margin:0 0 12px;font-size:14px;line-height:1.5}
+
+  .row{display:flex;gap:10px}
+  .stat{flex:1;border:1px solid var(--line-soft);border-radius:10px;padding:10px;text-align:center;background:#fcfbf8}
+  .stat .v{font-size:18px;font-weight:600}
+  .stat .l{font-size:10px;color:var(--ink-faint);font-family:var(--mono);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+
+  .ph{background:var(--fill);border-radius:6px}
+  .ph.line{height:9px;margin:7px 0}
+  .ph.line.s{width:60%} .ph.line.m{width:80%}
+  .ph.avatar{width:52px;height:52px;border-radius:50%;background:var(--fill-2);flex:none}
+  .ph.img{height:120px;border:1px dashed var(--line);background:repeating-linear-gradient(45deg,#f1efea,#f1efea 9px,#eae7e0 9px,#eae7e0 18px);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-family:var(--mono);font-size:11px;border-radius:10px}
+
+  .dlist{display:flex;flex-direction:column;gap:10px}
+  .docrow{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;
+    padding:12px;cursor:pointer;background:#fff;transition:border-color .15s,transform .1s}
+  .docrow:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .docrow .nm{font-size:14.5px;font-weight:600}
+  .docrow .sp{font-size:12px;color:var(--ink-soft)}
+  .docrow .sc{font-size:11px;color:var(--ink-faint);font-family:var(--mono);margin-top:2px}
+  .docrow .meta{margin-left:auto;text-align:right;flex:none}
+  .docrow .fee{font-weight:600;font-size:14px}
+  .docrow .slot{font-size:10.5px;color:var(--ok);font-family:var(--mono);margin-top:3px}
+  .docrow .slot.none{color:var(--alt)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:9px;
+    padding:8px 11px;cursor:pointer;background:#fff;color:var(--ink)}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chip.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .chip.dis{color:var(--ink-faint);background:#f4f2ee;cursor:not-allowed;text-decoration:line-through}
+
+  .sechead{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);margin:14px 2px 8px;display:flex;align-items:center;gap:8px}
+  .sechead .ro{margin-left:auto;color:var(--accent);border:1px solid var(--accent-soft);
+    background:var(--accent-soft);border-radius:5px;padding:1px 6px;letter-spacing:.04em}
+
+  .kv{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--ink-soft)} .kv .v{font-weight:600}
+  .kv .v.mono{font-family:var(--mono);font-weight:500}
+
+  .btn{display:block;width:100%;border:none;border-radius:11px;padding:14px;font-size:14.5px;
+    font-weight:600;cursor:pointer;font-family:var(--sans);margin-top:10px;transition:filter .15s}
+  .btn:hover{filter:brightness(.96)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);filter:none}
+  .btn-danger{background:var(--fail);color:#fff}
+  .btn-sm{padding:10px;font-size:13px}
+  .btnrow{display:flex;gap:10px;margin-top:10px}
+  .btnrow .btn{margin-top:0;flex:1}
+  .linkbtn{background:none;border:none;color:var(--accent);font-size:12.5px;cursor:pointer;
+    text-decoration:underline;padding:8px 0;font-family:var(--sans);width:100%}
+  .linkbtn.muted{color:var(--ink-faint)}
+
+  .ac{display:inline-flex;align-items:flex-start;gap:7px;font-family:var(--mono);font-size:11px;
+    background:var(--ok-soft);color:#1f6340;border-radius:8px;padding:8px 11px;margin-top:10px;line-height:1.4}
+  .ac::before{content:"AC";font-weight:700;background:#fff;border-radius:4px;padding:0 4px;flex:none}
+
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px 0}
+  .badgecircle{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:34px;margin-bottom:14px}
+  .badgecircle.ok{background:var(--ok-soft);color:var(--ok)}
+  .badgecircle.fail{background:var(--fail-soft);color:var(--fail)}
+  .badgecircle.alt{background:var(--alt-soft);color:var(--alt)}
+  .badgecircle.edge{background:var(--edge-soft);color:var(--edge)}
+  .badgecircle.spin{background:var(--accent-soft);color:var(--accent)}
+  .center h3{margin:0 0 8px;font-size:19px}
+  .center p{margin:0 0 6px;font-size:13.5px;color:var(--ink-soft);line-height:1.5;max-width:280px}
+
+  .spinner{width:46px;height:46px;border-radius:50%;border:4px solid var(--accent-soft);
+    border-top-color:var(--accent);animation:spin 1s linear infinite;margin-bottom:16px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+
+  .pushnotif{border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow);
+    padding:13px;display:flex;gap:11px;margin-bottom:14px}
+  .pushnotif .ic{width:34px;height:34px;border-radius:9px;background:var(--accent);flex:none;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+  .pushnotif .ti{font-size:13px;font-weight:600}
+  .pushnotif .bd{font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.4}
+  .pushnotif .tm{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-left:auto;flex:none}
+
+  .videogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .videotile{aspect-ratio:4/3;border-radius:12px;background:#2a2e36;display:flex;align-items:flex-end;
+    padding:9px;color:#cfd3da;font-family:var(--mono);font-size:11px}
+  .videotile.self{background:#3a3f49}
+
+  textarea.notes{width:100%;min-height:140px;border:1px solid var(--line);border-radius:11px;padding:12px;
+    font-family:var(--sans);font-size:13px;resize:vertical;color:var(--ink);background:#fcfbf8}
+  textarea.notes:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+
+  .portalpatient{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .portalpatient .nm{font-size:16px;font-weight:600}
+  .portalpatient .mi{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .sidehead{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);margin:0 0 10px}
+  .sideitem{font-size:12.5px;padding:8px 9px;border-radius:8px;color:var(--ink-soft);margin-bottom:2px}
+  .sideitem.on{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);font-weight:600}
+  .roflag{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;
+    color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:3px 8px}
+
+  *:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+  @media (max-width:1180px){.legend{display:none}}
+  @media (max-width:860px){.nav{display:none}.browser{width:100%}}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><b>OLMA</b><span class="wf">WF-03 · Doctor Consultation</span></div>
+    <div class="legend">
+      <span><i class="dot main"></i>Main flow</span>
+      <span><i class="dot alt"></i>Alternate</span>
+      <span><i class="dot fail"></i>Failure</span>
+      <span><i class="dot edge"></i>Edge case</span>
+    </div>
+    <button class="reset" onclick="go('home_initial')">⟲ Restart flow</button>
+  </div>
+
+  <div class="shell">
+    <aside class="nav" id="nav"></aside>
+    <main class="stage" id="stage"></main>
+  </div>
+
+<script>
+/* ============================================================
+   WF-03 Doctor Consultation — clickable wireframe
+   ============================================================ */
+
+const back = () => history.length ? window._goPrev() : null;
+
+/* ---------- small builders ---------- */
+const bottomNav = (on) => `
+  <div class="bottomnav">
+    ${['Home','Vita','Labs','Consult','Profile'].map(l=>`
+      <div class="nb ${l===on?'on':''}"><div class="ic"></div>${l}</div>`).join('')}
+  </div>`;
+
+const status = `<div class="statusbar"><span>9:41</span><span>OLMA · ●●●● ⌁</span></div>`;
+
+const phone = (inner, navOn) => `
+  <div class="device"><div class="phone">${status}
+    <div class="scr">${inner}</div>${navOn?bottomNav(navOn):''}
+  </div></div>`;
+
+const browser = (url, side, main) => `
+  <div class="device"><div class="browser">
+    <div class="chrome"><div class="tl"><i></i><i></i><i></i></div>
+      <div class="url">${url}</div></div>
+    <div class="body"><div class="side">${side}</div><div class="main">${main}</div></div>
+  </div></div>`;
+
+const appTop = (title, sub, target='__back') =>
+  `<div class="apptop"><button class="bk" onclick="${target==='__back'?'window._goPrev()':"go('"+target+"')"}">‹</button>
+   <div><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div></div>`;
+
+/* ---------- screen registry ---------- */
+const SCREENS = {};
+const def = (id, cfg) => SCREENS[id] = cfg;
+
+/* ===== 1. HOME (entry / trigger) ===== */
+def('home_initial', {type:'main', step:'Trigger', frame:'phone', title:'Home Dashboard (S7)',
+  note:`<b>Trigger.</b> Subscriber taps “Book Consultation” from the home dashboard (S5/S7), or Vita recommends a consultation. Requires an authenticated, active paid subscription.`,
+  render:()=>phone(`
+    <div style="padding-top:6px">
+      <div class="greet">Good morning,<b>Pushpal</b></div>
+      <span class="tierbadge">● Longevity Pro · Senior tier</span>
+    </div>
+    <div class="vita" style="margin-top:16px">
+      <span class="tag">Vita recommends</span>
+      <p>Your HRV trend dropped <b>12%</b> over the last 7 days. A doctor can review your biomarkers and wearable data with you.</p>
+      <button class="btn btn-primary btn-sm" onclick="go('doctor_list')">Book consultation</button>
+    </div>
+    <div class="sechead">This week</div>
+    <div class="row">
+      <div class="stat"><div class="v">61.4</div><div class="l">Bio age</div></div>
+      <div class="stat"><div class="v">48ms</div><div class="l">HRV</div></div>
+      <div class="stat"><div class="v">6h52</div><div class="l">Sleep</div></div>
+    </div>
+    <button class="btn btn-ghost" onclick="go('doctor_list')" style="margin-top:14px">Book consultation</button>
+  `,'Home')});
+
+/* ===== 2. DOCTOR LISTING (M11) ===== */
+def('doctor_list', {type:'main', step:'Steps 1–2', frame:'phone', title:'Doctor Consultation (M11)',
+  note:`<b>Steps 1–2.</b> The listing is filtered by subscription tier. Vitality (Junior only) sees a limited panel; Longevity Pro sees all tiers.`,
+  render:()=>phone(`
+    ${appTop('Find a doctor','M11 · Doctor Consultation','home_initial')}
+    <span class="tierbadge">Showing: Longevity Pro doctors</span>
+    <div class="dlist" style="margin-top:14px">
+      ${[
+        ['Dr. Elena Marsh','Longevity Medicine','Stanford School of Medicine','$180','Next: Tue 3:00 PM','','doctor_profile'],
+        ['Dr. Arman Roy','Endocrinology · Metabolic','Johns Hopkins','$160','Next: Wed 11:00 AM','','doctor_profile'],
+        ['Dr. Lena Okafor','Cardiology · Preventive','Harvard Medical School','$200','Fully booked','none','no_slots'],
+      ].map(d=>`
+        <div class="docrow" onclick="go('${d[6]}')" tabindex="0" onkeypress="if(event.key==='Enter')go('${d[6]}')">
+          <div class="ph avatar"></div>
+          <div><div class="nm">${d[0]}</div><div class="sp">${d[1]}</div><div class="sc">${d[2]}</div></div>
+          <div class="meta"><div class="fee">${d[3]}</div><div class="slot ${d[5]}">${d[4]}</div></div>
+        </div>`).join('')}
+    </div>
+  `,'Consult')});
+
+/* ===== 3. DOCTOR PROFILE ===== */
+def('doctor_profile', {type:'main', step:'Step 3', frame:'phone', title:'Doctor profile card',
+  note:`<b>Step 3.</b> Profile card shows name, specialty, school affiliation, available slots, and fee. Selecting a slot advances to the pre-consultation summary.`,
+  render:()=>phone(`
+    ${appTop('Doctor profile','Step 3','doctor_list')}
+    <div class="card">
+      <div style="display:flex;gap:13px;align-items:center">
+        <div class="ph avatar" style="width:60px;height:60px"></div>
+        <div><div style="font-size:17px;font-weight:600">Dr. Elena Marsh</div>
+          <div style="font-size:12.5px;color:var(--ink-soft)">Longevity Medicine</div>
+          <div class="sc" style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:3px">Stanford School of Medicine</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:13px">
+        <div class="stat"><div class="v">4.9★</div><div class="l">Rating</div></div>
+        <div class="stat"><div class="v">$180</div><div class="l">Fee</div></div>
+        <div class="stat"><div class="v">12yr</div><div class="l">Exp</div></div>
+      </div>
+    </div>
+    <div class="sechead">About</div>
+    <div class="ph line m"></div><div class="ph line"></div><div class="ph line s"></div>
+    <div class="sechead">Available slots · this week</div>
+    <div class="chips">
+      ${['Tue 3:00 PM','Tue 4:30 PM','Wed 10:00 AM','Wed 2:00 PM','Thu 9:30 AM'].map(s=>
+        `<button class="chip" onclick="go('slot_select')">${s}</button>`).join('')}
+    </div>
+    <button class="linkbtn muted" onclick="go('no_slots')">Demo → see “no slots” state</button>
+  `,'Consult')});
+
+/* ===== ALT 3. NO SLOTS ===== */
+def('no_slots', {type:'alt', step:'Alt · Step 3', frame:'phone', title:'No available slots',
+  note:`<b>Alternate path (Step 3).</b> No slots available for the selected doctor: the user is shown a “No available slots” state with a “Notify me when available” option.`,
+  render:()=>phone(`
+    ${appTop('Doctor profile','Alt · Step 3','doctor_list')}
+    <div class="card">
+      <div style="display:flex;gap:13px;align-items:center">
+        <div class="ph avatar" style="width:60px;height:60px"></div>
+        <div><div style="font-size:17px;font-weight:600">Dr. Lena Okafor</div>
+          <div style="font-size:12.5px;color:var(--ink-soft)">Cardiology · Preventive</div>
+          <div class="sc" style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:3px">Harvard Medical School</div></div>
+      </div>
+    </div>
+    <div class="center" style="min-height:220px">
+      <div class="badgecircle alt">◷</div>
+      <h3>No available slots</h3>
+      <p>Dr. Okafor is fully booked through next week. We’ll alert you the moment a slot opens.</p>
+    </div>
+    <button class="btn btn-primary" onclick="alert('Demo: you’ll be notified when Dr. Okafor has an opening.')">Notify me when available</button>
+    <button class="btn btn-ghost" onclick="go('doctor_list')">Browse other doctors</button>
+  `,'Consult')});
+
+/* ===== 4. SLOT + PRE-CONSULT SUMMARY ===== */
+def('slot_select', {type:'main', step:'Step 4', frame:'phone', title:'Pre-consultation summary',
+  note:`<b>Step 4.</b> After the time slot is selected, the pre-consultation health summary is displayed: health profile, biomarkers, wearable data (last 7 days), and the Vita session summary. The slot can still be changed here (Alt · Step 5).`,
+  render:()=>phone(`
+    ${appTop('Review your summary','Step 4','doctor_profile')}
+    <div class="card flat" style="display:flex;align-items:center;gap:10px;background:var(--accent-soft);border-color:var(--accent)">
+      <div style="flex:1"><div style="font-size:11px;font-family:var(--mono);color:var(--accent)">SELECTED SLOT</div>
+        <div style="font-weight:600;font-size:14px">Tue, 17 Jun · 3:00 PM</div></div>
+      <button class="chip" onclick="go('doctor_profile')">Change</button>
+    </div>
+    <p style="font-size:12px;color:var(--ink-soft);margin:4px 2px 0">This summary is shared with Dr. Marsh for the consultation.</p>
+    ${[
+      ['Health profile','Age 64 · BMI 24.1 · 2 conditions on file'],
+      ['Biomarkers','Latest panel: 14 Jun · 3 flags'],
+      ['Wearable data','Last 7 days · HRV, sleep, steps, resting HR'],
+      ['Vita session summary','3 sessions · HRV concern raised']
+    ].map(s=>`
+      <div class="sechead">${s[0]}</div>
+      <div class="card"><div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px">${s[1]}</div>
+        <div class="ph line m"></div><div class="ph line s"></div></div>`).join('')}
+    <button class="btn btn-primary" onclick="go('review_summary')">Continue</button>
+  `,'Consult')});
+
+/* ===== 5. REVIEW + CONFIRM ===== */
+def('review_summary', {type:'main', step:'Step 5', frame:'phone', title:'Confirm booking',
+  note:`<b>Step 5.</b> The user reviews the booking and taps “Confirm Booking”. The time is shown in the user’s local time zone (edge case). Slot can still be modified before payment (Alt · Step 5).`,
+  render:()=>phone(`
+    ${appTop('Confirm booking','Step 5','slot_select')}
+    <div class="card">
+      <div class="kv"><span class="k">Doctor</span><span class="v">Dr. Elena Marsh</span></div>
+      <div class="kv"><span class="k">Date & time</span><span class="v mono">Tue 17 Jun · 3:00 PM</span></div>
+      <div class="kv"><span class="k">Time zone</span><span class="v mono">Asia/Kolkata (your local)</span></div>
+      <div class="kv"><span class="k">Format</span><span class="v">Video · 30 min</span></div>
+      <div class="kv"><span class="k">Consultation fee</span><span class="v">$180.00</span></div>
+    </div>
+    <div class="sechead">Shared with the doctor</div>
+    <div class="card" style="font-size:12.5px;color:var(--ink-soft)">
+      Health profile · Biomarkers · Wearable data (7 days) · Vita session summary
+    </div>
+    <button class="btn btn-primary" onclick="go('payment')">Confirm booking</button>
+    <button class="linkbtn" onclick="go('slot_select')">Modify slot</button>
+  `,'Consult')});
+
+/* ===== 6. PAYMENT (Stripe) ===== */
+def('payment', {type:'main', step:'Step 6', frame:'phone', title:'Payment · Stripe',
+  note:`<b>Step 6.</b> Payment is processed via the Stripe API. On success the booking is confirmed and confirmation emails are sent to both the user and the doctor.`,
+  render:()=>phone(`
+    ${appTop('Payment','Step 6 · Stripe','review_summary')}
+    <div class="card">
+      <div class="kv"><span class="k">Dr. Elena Marsh · 30 min</span><span class="v">$180.00</span></div>
+    </div>
+    <div class="sechead">Card details</div>
+    <div class="card">
+      <div style="font-size:11px;font-family:var(--mono);color:var(--ink-faint)">CARD NUMBER</div>
+      <div class="ph line" style="height:14px;margin:6px 0 12px"></div>
+      <div class="row"><div style="flex:1"><div style="font-size:11px;font-family:var(--mono);color:var(--ink-faint)">EXPIRY</div><div class="ph line" style="height:14px"></div></div>
+        <div style="flex:1"><div style="font-size:11px;font-family:var(--mono);color:var(--ink-faint)">CVC</div><div class="ph line" style="height:14px"></div></div></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--ink-faint);text-align:center;margin:4px 0">🔒 Secured by Stripe</div>
+    <button class="btn btn-primary" onclick="go('booking_confirmed')">Pay $180.00</button>
+    <button class="linkbtn muted" onclick="go('payment_fail')">Demo → simulate payment failure</button>
+  `,'Consult')});
+
+/* ===== FAIL 6. PAYMENT FAILURE ===== */
+def('payment_fail', {type:'fail', step:'Fail · Step 6', frame:'phone', title:'Payment failed',
+  note:`<b>Failure path (Step 6).</b> Payment failure: the booking is not confirmed, an error is shown, and the user can retry.`,
+  render:()=>phone(`
+    ${appTop('Payment','Fail · Step 6','payment')}
+    <div class="center" style="min-height:300px">
+      <div class="badgecircle fail">!</div>
+      <h3>Payment didn’t go through</h3>
+      <p>Your card was declined. No charge was made, and your slot is held for 10 minutes.</p>
+    </div>
+    <button class="btn btn-primary" onclick="go('payment')">Try again</button>
+    <button class="btn btn-ghost" onclick="go('payment')">Use a different card</button>
+  `,'Consult')});
+
+/* ===== 6b. BOOKING CONFIRMED ===== */
+def('booking_confirmed', {type:'main', step:'Step 6', frame:'phone', title:'Booking confirmed',
+  note:`<b>Step 6.</b> Booking confirmed. Confirmation emails are sent to the user and the doctor.`,
+  render:()=>phone(`
+    <div class="center" style="min-height:360px">
+      <div class="badgecircle ok">✓</div>
+      <h3>Booking confirmed</h3>
+      <p>Tue 17 Jun · 3:00 PM with Dr. Elena Marsh.</p>
+      <p>Confirmation emails are on their way to you and Dr. Marsh.</p>
+      <div class="ac">Confirmation email sent within 60 seconds of successful payment.</div>
+    </div>
+    <button class="btn btn-ghost" onclick="alert('Demo: added to your calendar.')">Add to calendar</button>
+    <button class="btn btn-primary" onclick="go('home_updated')">Done</button>
+  `,'Consult')});
+
+/* ===== 7. HOME UPDATED ===== */
+def('home_updated', {type:'main', step:'Step 7', frame:'phone', title:'Home Dashboard updated (S7)',
+  note:`<b>Step 7.</b> The home dashboard updates to show the “Next Consultation” slot. From here the user can join, reschedule, or cancel.`,
+  render:()=>phone(`
+    <div style="padding-top:6px">
+      <div class="greet">Upcoming<b>Next consultation</b></div>
+    </div>
+    <div class="card" style="border-color:var(--accent);margin-top:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="ph avatar"></div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14.5px">Dr. Elena Marsh</div>
+          <div style="font-size:12px;color:var(--ink-soft)">Longevity Medicine</div>
+          <div class="sc" style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:3px">Tue 17 Jun · 3:00 PM · in 2 days</div></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="go('join_launch')" style="margin-top:12px">Join consultation</button>
+      <div class="btnrow">
+        <button class="btn btn-ghost btn-sm" onclick="go('cancel_early')">Reschedule</button>
+        <button class="btn btn-ghost btn-sm" onclick="go('cancel_early')">Cancel</button>
+      </div>
+    </div>
+    <div class="sechead">Also</div>
+    <button class="linkbtn" onclick="go('timezone')">View time-zone handling (edge case)</button>
+    <button class="linkbtn" onclick="go('doctor_cancel')">Demo → doctor cancels (edge case)</button>
+  `,'Home')});
+
+/* ===== 8. JOIN ===== */
+def('join_launch', {type:'main', step:'Step 8', frame:'phone', title:'Join consultation',
+  note:`<b>Step 8.</b> At consultation time the user taps “Join Consultation”; the Zoom / Google Meet deep-link or in-app browser launches.`,
+  render:()=>phone(`
+    ${appTop('Joining…','Step 8','home_updated')}
+    <div class="center" style="min-height:300px">
+      <div class="spinner"></div>
+      <h3>Opening your secure video room</h3>
+      <p>Launching Zoom · Dr. Elena Marsh’s consultation room.</p>
+      <div class="ac">Deep-link to the video platform launches within 3 seconds of the user’s tap.</div>
+    </div>
+    <button class="btn btn-primary" onclick="go('portal_summary')">▶ Continue to doctor’s side</button>
+    <button class="linkbtn" onclick="go('join_fail')">Video didn’t open?</button>
+    <button class="linkbtn muted" onclick="go('no_join')">Demo → user hasn’t joined yet</button>
+  `,'Consult')});
+
+/* ===== FAIL 8. LINK FAILS ===== */
+def('join_fail', {type:'fail', step:'Fail · Step 8', frame:'phone', title:'Video link failed',
+  note:`<b>Failure path (Step 8).</b> If the Zoom / Google Meet link fails, the user is shown a direct link to the video platform, and OLMA logs the failure.`,
+  render:()=>phone(`
+    ${appTop('Joining…','Fail · Step 8','join_launch')}
+    <div class="center" style="min-height:280px">
+      <div class="badgecircle fail">⤢</div>
+      <h3>Couldn’t open the video app</h3>
+      <p>Open the consultation in your browser instead. We’ve logged this so we can look into it.</p>
+    </div>
+    <button class="btn btn-primary" onclick="go('portal_summary')">Open in browser</button>
+    <button class="btn btn-ghost" onclick="go('join_launch')">Retry the app</button>
+  `,'Consult')});
+
+/* ===== FAIL 8. NO-JOIN ===== */
+def('no_join', {type:'fail', step:'Fail · Step 8', frame:'phone', title:'User hasn’t joined',
+  note:`<b>Failure path (Step 8).</b> If the user does not join within 15 minutes of the scheduled time, a reminder push notification is sent. The consultation is <b>not</b> automatically cancelled.`,
+  render:()=>phone(`
+    ${appTop('Reminder','Fail · Step 8','home_updated')}
+    <div class="pushnotif" style="margin-top:10px">
+      <div class="ic">◷</div>
+      <div><div class="ti">Your consultation has started</div>
+        <div class="bd">Dr. Marsh is waiting in the room. Tap to join — your slot is still active.</div></div>
+      <div class="tm">now</div>
+    </div>
+    <div class="center" style="min-height:180px">
+      <p>Not cancelled automatically. The user can still join.</p>
+    </div>
+    <button class="btn btn-primary" onclick="go('join_launch')">Join now</button>
+  `,'Home')});
+
+/* ===== 9. DOCTOR PORTAL — PATIENT SUMMARY ===== */
+const portalSide = (active) => `
+  <div class="sidehead">Today · appointments</div>
+  ${[['3:00 PM','Pushpal M.','summary'],['3:45 PM','R. Banerjee',''],['4:30 PM','A. Khan','']].map(a=>`
+    <div class="sideitem ${a[2]===active?'on':''}"><b>${a[0]}</b> · ${a[1]}</div>`).join('')}
+  <div class="sidehead" style="margin-top:18px">Sections</div>
+  ${['Health profile','Biomarkers','Wearables','Vita notes'].map(s=>`<div class="sideitem">${s}</div>`).join('')}`;
+
+def('portal_summary', {type:'main', step:'Step 9', frame:'browser', title:'Doctor Portal · patient summary',
+  note:`<b>Step 9.</b> The doctor accesses the patient summary in the Doctor Portal — a <b>read-only</b> view of health profile, biomarkers, wearables, and Vita notes.`,
+  render:()=>browser('portal.olma.health/consultation/8841', portalSide('summary'), `
+    <div class="portalpatient"><div class="ph avatar"></div>
+      <div><div class="nm">Pushpal Mazumder</div><div class="mi">ID 8841 · 64 yrs · Longevity Pro</div></div>
+      <span class="roflag" style="margin-left:auto">● Read-only</span></div>
+    <div class="sechead">Health profile <span class="ro">read-only</span></div>
+    <div class="card"><div class="ph line m"></div><div class="ph line"></div><div class="ph line s"></div></div>
+    <div class="sechead">Biomarkers · 14 Jun panel <span class="ro">read-only</span></div>
+    <div class="card"><div class="row"><div class="stat"><div class="v">⚑3</div><div class="l">Flags</div></div>
+      <div class="stat"><div class="v">5.8</div><div class="l">HbA1c</div></div>
+      <div class="stat"><div class="v">142</div><div class="l">LDL</div></div></div></div>
+    <div class="sechead">Wearables · last 7 days <span class="ro">read-only</span></div>
+    <div class="card"><div class="ph img">[ HRV / sleep / steps trend ]</div></div>
+    <div class="sechead">Vita notes <span class="ro">read-only</span></div>
+    <div class="card"><div class="ph line m"></div><div class="ph line s"></div></div>
+    <div class="btnrow" style="margin-top:16px">
+      <button class="btn btn-primary" onclick="go('portal_video_notes')">Start video consultation</button>
+      <button class="btn btn-ghost" onclick="go('portal_unavailable')" style="max-width:200px">Demo → portal down</button>
+    </div>`)});
+
+/* ===== FAIL 9. PORTAL DOWN ===== */
+def('portal_unavailable', {type:'fail', step:'Fail · Step 9', frame:'browser', title:'Doctor Portal unavailable',
+  note:`<b>Failure path (Step 9).</b> If the Doctor Portal is unavailable, the doctor uses a backup PDF export of the patient summary, delivered via secure email — so the consultation isn’t delayed.`,
+  render:()=>browser('portal.olma.health/consultation/8841', portalSide(''), `
+    <div class="center" style="min-height:360px">
+      <div class="badgecircle fail">⚠</div>
+      <h3>Doctor Portal is temporarily unavailable</h3>
+      <p>We’ve emailed a secure PDF of this patient’s summary to your registered address so your consultation can go ahead.</p>
+      <button class="btn btn-primary" style="max-width:280px" onclick="alert('Demo: backup patient-summary PDF downloaded.')">Download backup summary (PDF)</button>
+      <button class="btn btn-ghost" style="max-width:280px" onclick="go('portal_summary')">Retry portal</button>
+    </div>`)});
+
+/* ===== 10. VIDEO + NOTES ===== */
+def('portal_video_notes', {type:'main', step:'Step 10', frame:'browser', title:'Consultation · post-consultation notes',
+  note:`<b>Step 10.</b> The video consultation is conducted and the doctor adds post-consultation notes in the Doctor Portal. Saving notes notifies the patient.`,
+  render:()=>browser('portal.olma.health/consultation/8841/room', portalSide('summary'), `
+    <div class="videogrid">
+      <div class="videotile">Dr. Elena Marsh</div>
+      <div class="videotile self">Pushpal M.</div>
+    </div>
+    <div class="sechead">Post-consultation notes</div>
+    <textarea class="notes" placeholder="Summary, findings, and recommendations for the patient…"></textarea>
+    <div class="btnrow" style="margin-top:12px">
+      <button class="btn btn-primary" onclick="go('notes_received')">Save & share notes</button>
+      <button class="btn btn-ghost" onclick="go('portal_notes_late')" style="max-width:220px">Add notes later</button>
+    </div>`)});
+
+/* ===== ALT 10. NOTES LATE ===== */
+def('portal_notes_late', {type:'alt', step:'Alt · Step 10', frame:'browser', title:'Add notes after the session',
+  note:`<b>Alternate path (Step 10).</b> If the doctor can’t add notes during the session, notes can be added up to 24 hours after the consultation time.`,
+  render:()=>browser('portal.olma.health/consultation/8841/notes', portalSide('summary'), `
+    <div class="card" style="border-color:var(--alt);background:var(--alt-soft)">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--alt)">⌛ NOTES DEADLINE</div>
+      <div style="font-weight:600;margin-top:4px">Complete by Wed 18 Jun · 3:00 PM (24h after consultation)</div>
+    </div>
+    <div class="sechead">Post-consultation notes</div>
+    <textarea class="notes" placeholder="Add your notes for this consultation…"></textarea>
+    <button class="btn btn-primary" onclick="go('notes_received')" style="margin-top:12px;max-width:240px">Save & share notes</button>`)});
+
+/* ===== 11. PATIENT NOTIFIED ===== */
+def('notes_received', {type:'main', step:'Step 11', frame:'phone', title:'Notes received · Consultation History',
+  note:`<b>Step 11.</b> The patient is notified via push notification; notes become visible in Consultation History.`,
+  render:()=>phone(`
+    ${appTop('Consultation history','Step 11','home_updated')}
+    <div class="pushnotif">
+      <div class="ic">✓</div>
+      <div><div class="ti">Dr. Marsh shared your consultation notes</div>
+        <div class="bd">Tap to read your summary and recommendations.</div></div>
+      <div class="tm">now</div>
+    </div>
+    <div class="ac">Push notification sent and notes visible in-app within 60 seconds of being saved.</div>
+    <div class="sechead" style="margin-top:16px">History</div>
+    <div class="docrow" onclick="go('history_detail')" style="border-color:var(--accent)">
+      <div class="ph avatar"></div>
+      <div><div class="nm">Dr. Elena Marsh</div><div class="sp">17 Jun · 3:00 PM</div>
+        <div class="sc" style="color:var(--accent);font-family:var(--mono);font-size:11px;margin-top:2px">New notes</div></div>
+      <div class="meta">›</div>
+    </div>
+  `,'Consult')});
+
+/* ===== 12. HISTORY DETAIL (record stored) ===== */
+def('history_detail', {type:'main', step:'Step 12', frame:'phone', title:'Consultation record',
+  note:`<b>Step 12.</b> The consultation record is permanently stored in the patient’s history and in the Doctor Portal.`,
+  render:()=>phone(`
+    ${appTop('Consultation','Step 12','notes_received')}
+    <div class="card">
+      <div class="kv"><span class="k">Doctor</span><span class="v">Dr. Elena Marsh</span></div>
+      <div class="kv"><span class="k">Date</span><span class="v mono">17 Jun · 3:00 PM</span></div>
+      <div class="kv"><span class="k">Duration</span><span class="v">28 min</span></div>
+      <div class="kv"><span class="k">Record</span><span class="v" style="color:var(--ok)">● Permanently stored</span></div>
+    </div>
+    <div class="sechead">Doctor’s notes</div>
+    <div class="card"><div class="ph line m"></div><div class="ph line"></div><div class="ph line s"></div></div>
+    <div class="sechead">Data reviewed</div>
+    <div class="card" style="font-size:12.5px;color:var(--ink-soft)">Health profile · Biomarkers · Wearables (7d) · Vita summary</div>
+    <button class="btn btn-primary" onclick="go('doctor_list')">Book a follow-up</button>
+  `,'Consult')});
+
+/* ===== EDGE: CANCEL >24h ===== */
+def('cancel_early', {type:'edge', step:'Edge', frame:'phone', title:'Cancel · more than 24h before',
+  note:`<b>Edge case.</b> Cancellation more than 24 hours before the consultation: full refund via Stripe; both parties notified.`,
+  render:()=>phone(`
+    ${appTop('Cancel consultation','Edge · >24h','home_updated')}
+    <div class="card" style="border-color:var(--edge);background:var(--edge-soft)">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--edge)">CANCELLING > 24h AHEAD</div>
+      <div style="font-weight:600;margin-top:4px">You’ll receive a full refund.</div>
+    </div>
+    <div class="card">
+      <div class="kv"><span class="k">Consultation</span><span class="v">Dr. Marsh · 17 Jun</span></div>
+      <div class="kv"><span class="k">Refund</span><span class="v" style="color:var(--ok)">$180.00 (full)</span></div>
+    </div>
+    <div class="ac">Refund processed within 5–10 business days via Stripe.</div>
+    <button class="btn btn-danger" onclick="go('cancel_done')">Cancel & refund</button>
+    <button class="btn btn-ghost" onclick="go('cancel_late')">Demo → cancel within 24h</button>
+    <button class="linkbtn muted" onclick="go('home_updated')">Keep my consultation</button>
+  `,'Consult')});
+
+def('cancel_done', {type:'edge', step:'Edge', frame:'phone', title:'Cancelled · refunded',
+  note:`<b>Edge case.</b> Cancellation confirmed; both you and the doctor have been notified.`,
+  render:()=>phone(`
+    <div class="center" style="min-height:380px">
+      <div class="badgecircle edge">✓</div>
+      <h3>Consultation cancelled</h3>
+      <p>A full refund of $180.00 is on its way. Both you and Dr. Marsh have been notified.</p>
+      <div class="ac">Refund processed within 5–10 business days via Stripe.</div>
+    </div>
+    <button class="btn btn-primary" onclick="go('home_initial')">Back to home</button>
+  `,'Consult')});
+
+/* ===== EDGE: CANCEL <24h ===== */
+def('cancel_late', {type:'edge', step:'Edge', frame:'phone', title:'Cancel · within 24h',
+  note:`<b>Edge case.</b> Cancellation within 24 hours: no refund; both parties notified; the slot is freed for other users.`,
+  render:()=>phone(`
+    ${appTop('Cancel consultation','Edge · <24h','cancel_early')}
+    <div class="card" style="border-color:var(--alt);background:var(--alt-soft)">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--alt)">CANCELLING WITHIN 24h</div>
+      <div style="font-weight:600;margin-top:4px">No refund. Your slot will be freed for others.</div>
+    </div>
+    <div class="card">
+      <div class="kv"><span class="k">Consultation</span><span class="v">Dr. Marsh · today 3:00 PM</span></div>
+      <div class="kv"><span class="k">Refund</span><span class="v" style="color:var(--fail)">None</span></div>
+      <div class="kv"><span class="k">Slot</span><span class="v">Released to other users</span></div>
+    </div>
+    <button class="btn btn-danger" onclick="alert('Demo: cancelled. No refund. Slot freed. Both parties notified.')">Cancel anyway</button>
+    <button class="linkbtn muted" onclick="go('home_updated')">Keep my consultation</button>
+  `,'Consult')});
+
+/* ===== EDGE: DOCTOR CANCELS ===== */
+def('doctor_cancel', {type:'edge', step:'Edge', frame:'phone', title:'Doctor cancelled',
+  note:`<b>Edge case.</b> The doctor cancels the consultation: a full refund is processed and the user is notified with a rebooking option.`,
+  render:()=>phone(`
+    ${appTop('Consultation update','Edge','home_updated')}
+    <div class="pushnotif">
+      <div class="ic" style="background:var(--edge)">!</div>
+      <div><div class="ti">Dr. Marsh had to cancel</div>
+        <div class="bd">Your 17 Jun consultation is cancelled. You’ve been fully refunded.</div></div>
+      <div class="tm">now</div>
+    </div>
+    <div class="center" style="min-height:200px">
+      <div class="badgecircle edge">↻</div>
+      <h3>Let’s find a new time</h3>
+      <p>Full refund of $180.00 processed. Rebook with Dr. Marsh or choose another doctor.</p>
+    </div>
+    <button class="btn btn-primary" onclick="go('doctor_profile')">Rebook with Dr. Marsh</button>
+    <button class="btn btn-ghost" onclick="go('doctor_list')">Choose another doctor</button>
+  `,'Consult')});
+
+/* ===== EDGE: TIME ZONE ===== */
+def('timezone', {type:'edge', step:'Edge', frame:'phone', title:'Time-zone display',
+  note:`<b>Edge case.</b> For a user in a different time zone, the consultation time is displayed in the user’s local time zone, based on their profile country.`,
+  render:()=>phone(`
+    ${appTop('Your consultation time','Edge','home_updated')}
+    <div class="card" style="border-color:var(--accent)">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--accent)">YOUR LOCAL TIME</div>
+      <div style="font-size:20px;font-weight:600;margin-top:4px">Tue 17 Jun · 3:00 PM</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">Asia/Kolkata · from your profile country (India)</div>
+    </div>
+    <div class="sechead">For reference</div>
+    <div class="card">
+      <div class="kv"><span class="k">Doctor (Pacific)</span><span class="v mono">Mon · 2:30 AM</span></div>
+      <div class="kv"><span class="k">UTC</span><span class="v mono">Tue · 09:30</span></div>
+    </div>
+    <p style="font-size:12px;color:var(--ink-soft);margin:2px 2px">Reminders and the “Join” button use your local time automatically.</p>
+    <button class="btn btn-primary" onclick="go('home_updated')">Got it</button>
+  `,'Consult')});
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+const GROUPS = [
+  ['Main flow', ['home_initial','doctor_list','doctor_profile','slot_select','review_summary','payment','booking_confirmed','home_updated','join_launch','portal_summary','portal_video_notes','notes_received','history_detail']],
+  ['Alternate paths', ['no_slots','portal_notes_late']],
+  ['Failure paths', ['payment_fail','join_fail','no_join','portal_unavailable']],
+  ['Edge cases', ['cancel_early','cancel_late','doctor_cancel','timezone']],
+];
+const TYPE_LABEL = {main:'main',alt:'alt',fail:'fail',edge:'edge'};
+
+let current = null;
+const histStack = [];
+
+function buildNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = GROUPS.map(([label,ids])=>{
+    const items = ids.map((id,i)=>{
+      const s = SCREENS[id];
+      return `<button class="item" id="nav-${id}" onclick="go('${id}')">
+        <span class="dot ${s.type}"></span>
+        <span class="num">${label==='Main flow'? (i+1) : '·'}</span>
+        <span>${s.title}</span></button>`;
+    }).join('');
+    return `<h4>${label}</h4>${items}`;
+  }).join('');
+}
+
+function render(id, push=true){
+  const s = SCREENS[id];
+  if(!s) return;
+  if(push && current && current!==id) histStack.push(current);
+  current = id;
+  const stage = document.getElementById('stage');
+  stage.scrollTop = 0;
+  stage.innerHTML = `
+    <div class="crumb">
+      <span class="pill t ${s.type}">${TYPE_LABEL[s.type]}</span>
+      <span class="pill">${s.step}</span>
+      <span class="title">${s.title}</span>
+      <button class="back" onclick="window._goPrev()">‹ Back</button>
+    </div>
+    <div class="note ${s.type==='main'?'':s.type}">${s.note}</div>
+    ${s.render()}
+  `;
+  document.querySelectorAll('.nav .item').forEach(b=>b.classList.remove('active'));
+  const active = document.getElementById('nav-'+id);
+  if(active){active.classList.add('active'); active.scrollIntoView({block:'nearest'});}
+}
+
+function go(id){ render(id, true); }
+window.go = go;
+window._goPrev = function(){
+  if(histStack.length){ const prev = histStack.pop(); render(prev, false); }
+};
+
+buildNav();
+go('home_initial');
+</script>
+</body>
+</html>
