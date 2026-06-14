@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OLMA &ndash; Patient App &middot; Single Phone Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --gold:#C9A84C;--gold-l:#E8C97A;--gold-d:#8B6914;
+  --blk:#090909;--dk1:#111;--dk2:#181818;--dk3:#222;--dk4:#2a2a2a;
+  --grey:#888;--light:#E8E4DC;--white:#F8F4EC;
+  --grn:#4CAF50;--amb:#FFA726;--red:#E53935;--blu:#42A5F5;--pur:#9C27B0;
+  --r:14px;--sh:0 8px 32px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0D0D0D;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 10px 40px;color:var(--white);}
+
+/* PAGE TITLE */
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px;text-align:center;}
+.page-sub{font-size:.68rem;color:var(--grey);letter-spacing:.1em;text-align:center;margin-bottom:24px;}
+
+/* FLOW LABELS */
+.flow-wrap{display:flex;flex-wrap:wrap;gap:32px;justify-content:center;max-width:1600px;width:100%;}
+.flow-group{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.flow-label{font-size:.58rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;text-align:center;font-weight:600;padding:4px 12px;border:1px solid rgba(201,168,76,.2);border-radius:20px;background:rgba(201,168,76,.06);}
+.arrow-right{color:var(--gold);font-size:1.2rem;display:flex;align-items:center;justify-content:center;padding:0 6px;margin-top:72px;opacity:.5;}
+
+/* PHONE */
+.phone{
+  width:320px;height:660px;
+  background:var(--dk1);
+  border-radius:38px;
+  border:1.5px solid #2a2a2a;
+  position:relative;overflow:hidden;
+  box-shadow:var(--sh),0 0 0 1px #1a1a1a,inset 0 0 0 1px rgba(255,255,255,.03);
+  flex-shrink:0;
+}
+.phone::before{content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);width:80px;height:3px;background:#1e1e1e;border-radius:3px;z-index:20;}
+
+/* SCREENS */
+.screen{display:none;position:absolute;inset:0;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* STATUS BAR */
+.sb{display:flex;justify-content:space-between;align-items:center;padding:22px 18px 6px;font-size:.6rem;font-weight:600;color:var(--white);flex-shrink:0;z-index:5;}
+
+/* SCROLLABLE CONTENT */
+.cnt{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:none;}
+.cnt::-webkit-scrollbar{display:none;}
+.px{padding-left:16px;padding-right:16px;}
+.pb{padding-bottom:16px;}
+
+/* BOTTOM NAV */
+.bnav{display:flex;justify-content:space-around;padding:8px 0 16px;background:var(--dk2);border-top:1px solid #222;flex-shrink:0;}
+.ni{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 10px;border-radius:10px;transition:all .2s;}
+.ni:hover{background:rgba(201,168,76,.08);}
+.ni.on .nic{color:var(--gold);}
+.ni.on .nil{color:var(--gold);}
+.nic{font-size:1.1rem;color:var(--grey);}
+.nil{font-size:.5rem;color:var(--grey);letter-spacing:.04em;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px;flex-shrink:0;}
+.hback{width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);font-size:1rem;border-radius:8px;background:rgba(201,168,76,.08);}
+.htitle{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--white);letter-spacing:.04em;}
+.hact{width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--grey);font-size:.9rem;}
+
+/* BUTTONS */
+.bg{background:linear-gradient(135deg,var(--gold-d),var(--gold-l));color:var(--blk);border:none;border-radius:50px;padding:13px 22px;font-size:.75rem;font-weight:700;letter-spacing:.07em;cursor:pointer;width:100%;text-transform:uppercase;transition:all .2s;box-shadow:0 4px 14px rgba(201,168,76,.25);}
+.bg:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,.35);}
+.bo{background:transparent;color:var(--gold);border:1px solid rgba(201,168,76,.5);border-radius:50px;padding:11px 22px;font-size:.75rem;font-weight:500;cursor:pointer;width:100%;letter-spacing:.05em;transition:all .2s;}
+.bo:hover{background:rgba(201,168,76,.08);}
+.bgh{background:transparent;color:var(--grey);border:none;padding:6px;font-size:.7rem;cursor:pointer;letter-spacing:.04em;text-decoration:underline;}
+.bsm{padding:9px 16px;font-size:.68rem;letter-spacing:.05em;}
+
+/* INPUTS */
+.inp{width:100%;background:var(--dk3);border:1px solid #333;border-radius:10px;padding:12px 14px;font-size:.8rem;color:var(--white);outline:none;font-family:'Inter',sans-serif;margin-bottom:10px;transition:border-color .2s;}
+.inp:focus{border-color:var(--gold);}
+.inp::placeholder{color:#444;}
+.lbl{font-size:.58rem;color:var(--grey);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;display:block;}
+select.inp{appearance:none;}
+
+/* CARDS */
+.card{background:var(--dk3);border-radius:var(--r);padding:14px;margin-bottom:10px;border:1px solid #252525;}
+.card-g{background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.25);}
+.card-r{background:linear-gradient(135deg,rgba(229,57,53,.12),rgba(229,57,53,.04));border:1px solid rgba(229,57,53,.25);}
+.card-b{background:linear-gradient(135deg,rgba(66,165,245,.1),rgba(66,165,245,.03));border:1px solid rgba(66,165,245,.2);}
+
+/* SCORE RING */
+.sring{position:relative;width:110px;height:110px;flex-shrink:0;}
+.sring svg{transform:rotate(-90deg);}
+.sctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.snum{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--gold);line-height:1;}
+.slbl{font-size:.45rem;color:var(--grey);letter-spacing:.1em;text-transform:uppercase;}
+
+/* BADGES */
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.56rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+.bg-g{background:rgba(76,175,80,.15);color:#81C784;border:1px solid rgba(76,175,80,.25);}
+.bg-a{background:rgba(255,167,38,.15);color:#FFB74D;border:1px solid rgba(255,167,38,.25);}
+.bg-r{background:rgba(229,57,53,.15);color:#EF9A9A;border:1px solid rgba(229,57,53,.25);}
+.bg-gold{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
+.bg-b{background:rgba(66,165,245,.15);color:#90CAF9;border:1px solid rgba(66,165,245,.25);}
+
+/* PILLAR ROW */
+.pr{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #1e1e1e;gap:8px;}
+.pr:last-child{border-bottom:none;}
+.pico{font-size:.9rem;width:22px;}
+.pnm{font-size:.72rem;flex:1;color:var(--light);}
+.pbar{width:60px;height:3px;background:#222;border-radius:2px;}
+.pfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-d),var(--gold));}
+.pval{font-size:.68rem;color:var(--gold);font-weight:600;width:24px;text-align:right;}
+
+/* BIO ROW */
+.bior{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #1e1e1e;gap:6px;}
+.bior:last-child{border-bottom:none;}
+.bionm{font-size:.72rem;flex:1;color:var(--light);}
+.bioval{font-size:.75rem;font-weight:600;margin-right:4px;}
+.biodot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* VITA BUBBLE */
+.vbub{background:linear-gradient(135deg,#16172a,#1a1c38);border:1px solid rgba(201,168,76,.2);border-radius:16px 16px 16px 3px;padding:10px 12px;font-size:.73rem;line-height:1.5;color:var(--light);}
+.vname{font-size:.55rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;font-weight:600;}
+.vav{width:30px;height:30px;background:linear-gradient(135deg,var(--gold-d),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+
+/* OTP */
+.otpw{display:flex;gap:7px;justify-content:center;margin:14px 0;}
+.otpb{width:40px;height:50px;background:var(--dk3);border:1px solid #333;border-radius:9px;font-size:1.3rem;font-weight:700;text-align:center;color:var(--gold);caret-color:var(--gold);}
+
+/* STEP DOTS */
+.sdots{display:flex;justify-content:center;gap:5px;padding:8px 0;}
+.sdot{width:5px;height:5px;border-radius:50%;background:#333;}
+.sdot.on{background:var(--gold);width:16px;border-radius:3px;}
+
+/* TASK */
+.task{display:flex;align-items:flex-start;padding:10px 12px;background:var(--dk3);border-radius:11px;margin-bottom:7px;border:1px solid #252525;cursor:pointer;transition:all .2s;gap:10px;}
+.task:hover{border-color:rgba(201,168,76,.2);}
+.tchk{width:20px;height:20px;border-radius:5px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--gold);transition:all .2s;margin-top:1px;}
+.task.dn .tchk{background:rgba(201,168,76,.15);border-color:var(--gold);}
+.ttxt{font-size:.74rem;flex:1;color:var(--light);}
+.tsub{font-size:.62rem;color:var(--grey);margin-top:2px;}
+
+/* SECTION TITLE */
+.st{font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px;padding-left:1px;}
+
+/* DIVIDER */
+.div{height:1px;background:linear-gradient(90deg,transparent,#2a2a2a,transparent);margin:10px 0;}
+
+/* KIT CARD */
+.kc{background:var(--dk3);border:1.5px solid #2a2a2a;border-radius:var(--r);padding:14px;margin-bottom:9px;cursor:pointer;transition:all .2s;}
+.kc:hover,.kc.sel{border-color:var(--gold);background:rgba(201,168,76,.07);}
+.ktitle{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--white);}
+.kprice{font-size:1.1rem;font-weight:700;color:var(--gold);}
+.kdesc{font-size:.64rem;color:var(--grey);margin-top:3px;line-height:1.4;}
+
+/* PROGRESS BAR */
+.pbw{background:#222;border-radius:4px;height:5px;overflow:hidden;}
+.pbf{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold-d),var(--gold));}
+
+/* TRACKER STEP */
+.trstep{display:flex;align-items:center;gap:9px;padding:7px 0;}
+.trdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.trdot.dn{background:var(--gold);}
+.trdot.ac{background:var(--grn);box-shadow:0 0 7px var(--grn);}
+.trdot.pd{background:#2a2a2a;border:1px solid #444;}
+.trlbl{font-size:.7rem;color:var(--light);}
+
+/* WEARABLE METRIC */
+.wm{background:var(--dk4);border-radius:10px;padding:12px;text-align:center;}
+.wmico{font-size:1.2rem;margin-bottom:3px;}
+.wmval{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);line-height:1;}
+.wmlbl{font-size:.52rem;color:var(--grey);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+
+/* NOTIF ITEM */
+.notif{padding:11px 14px;border-bottom:1px solid #1e1e1e;cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:background .15s;}
+.notif:hover{background:rgba(201,168,76,.04);}
+.notif-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px;}
+.notif-dot.read{background:transparent;border:1px solid #444;}
+.notif-title{font-size:.75rem;font-weight:600;color:var(--white);}
+.notif-desc{font-size:.65rem;color:var(--grey);margin-top:2px;line-height:1.4;}
+.notif-time{font-size:.58rem;color:#555;margin-top:3px;}
+
+/* PLAN CARD */
+.planc{border-radius:var(--r);padding:14px;margin-bottom:9px;cursor:pointer;transition:all .2s;border:1.5px solid transparent;}
+.planc.free{background:var(--dk3);border-color:#2a2a2a;}
+.planc.vit{background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.03));border-color:rgba(201,168,76,.35);}
+.planc.pro{background:linear-gradient(135deg,rgba(139,105,20,.18),rgba(201,168,76,.07));border-color:rgba(201,168,76,.6);}
+.pname{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--white);}
+.ppr{font-size:1.1rem;font-weight:700;color:var(--gold);}
+.pfeat{font-size:.64rem;color:var(--grey);padding:2px 0;}
+.pfeat::before{content:"✓ ";color:var(--gold);}
+
+/* DOC CARD */
+.docc{display:flex;gap:11px;align-items:flex-start;padding:12px;background:var(--dk3);border:1px solid #252525;border-radius:var(--r);margin-bottom:9px;cursor:pointer;transition:all .2s;}
+.docc:hover{border-color:rgba(201,168,76,.3);}
+.docav{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,var(--gold-d));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+
+/* AVATAR SELECT */
+.avopt{background:var(--dk3);border:1.5px solid #2a2a2a;border-radius:18px;padding:14px;width:44%;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:all .2s;}
+.avopt.sel{border-color:var(--gold);background:rgba(201,168,76,.08);}
+
+/* CHAT */
+.cinw{display:flex;gap:7px;align-items:center;padding:9px 14px;background:var(--dk2);border-top:1px solid #222;flex-shrink:0;}
+.cinp{flex:1;background:var(--dk3);border:1px solid #2a2a2a;border-radius:20px;padding:9px 13px;font-size:.73rem;color:var(--white);outline:none;font-family:'Inter',sans-serif;}
+.csend{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:none;color:var(--blk);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+.cmic{width:30px;height:30px;border-radius:50%;background:var(--dk3);border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;flex-shrink:0;}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--dk3);border:1px solid var(--gold);border-radius:50px;padding:9px 18px;font-size:.72rem;color:var(--white);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw;}
+.toast.show{opacity:1;}
+
+/* GATE */
+.gate-card{background:linear-gradient(135deg,rgba(229,57,53,.14),rgba(229,57,53,.04));border:1px solid rgba(229,57,53,.3);border-radius:var(--r);padding:18px;text-align:center;margin-bottom:14px;}
+
+/* CREDIT CARD */
+.cred{background:linear-gradient(135deg,rgba(156,39,176,.12),rgba(156,39,176,.04));border:1px solid rgba(156,39,176,.25);border-radius:var(--r);padding:14px;margin-bottom:9px;cursor:pointer;transition:all .2s;}
+.cred:hover,.cred.sel{border-color:var(--pur);}
+
+/* SUPP CARD */
+.suppc{background:var(--dk3);border:1px solid #252525;border-radius:var(--r);padding:13px;margin-bottom:9px;}
+.suppn{font-size:.85rem;font-weight:600;color:var(--white);}
+.suppdose{font-size:.65rem;color:var(--grey);margin-top:2px;}
+.suppwhy{font-size:.62rem;color:var(--gold);margin-top:4px;cursor:pointer;text-decoration:underline;}
+
+/* SESSION ROW */
+.sessrow{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1e1e1e;cursor:pointer;gap:10px;}
+.sessrow:hover{opacity:.8;}
+
+/* MINI PROGRESS CHART */
+.chart-bars{display:flex;align-items:flex-end;gap:5px;height:50px;}
+.cbar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--gold),var(--gold-d));min-height:3px;cursor:pointer;}
+
+/* PARTNER LAB CARD */
+.labcard{background:var(--dk3);border:1px solid #252525;border-radius:var(--r);padding:13px;margin-bottom:9px;cursor:pointer;transition:all .2s;}
+.labcard:hover{border-color:rgba(201,168,76,.3);}
+
+/* LOGO HEADER */
+.logoh{text-align:center;padding:28px 16px 16px;flex-shrink:0;}
+.logotxt{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;}
+.logosub{font-size:.5rem;color:var(--grey);letter-spacing:.3em;text-transform:uppercase;margin-top:3px;}
+
+/* RING HELPER */
+
+
+html,body{height:100%;overflow:hidden;}
+body{flex-direction:row!important;align-items:stretch!important;padding:0!important;min-height:0!important;height:100vh!important;overflow:hidden!important;}
+.page-title,.page-sub,.flow-wrap,.flow-group,.flow-label,.arrow-right{display:none!important;}
+.phone{width:320px!important;height:660px!important;flex-shrink:0!important;position:relative!important;overflow:hidden!important;}
+.screen{display:none!important;position:absolute!important;inset:0!important;flex-direction:column!important;overflow:hidden!important;}
+.screen.active{display:flex!important;}
+.cnt{flex:1!important;overflow-y:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;scrollbar-width:none;}
+.cnt::-webkit-scrollbar{display:none;}
+.bnav,.cinw{flex-shrink:0!important;}
+#sidebar{width:220px;flex-shrink:0;height:100vh;overflow-y:auto;background:#0c0c0c;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:#2a2a2a #0c0c0c;}
+#sidebar::-webkit-scrollbar{width:3px;}
+#sidebar::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px;}
+.sb-head{padding:16px 14px 12px;border-bottom:1px solid #1e1e1e;flex-shrink:0;}
+.sb-logo{font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:#C9A84C;letter-spacing:.22em;}
+.sb-sub{font-size:.46rem;color:#444;letter-spacing:.12em;text-transform:uppercase;margin-top:3px;}
+.sb-count{font-size:.5rem;color:rgba(201,168,76,.45);margin-top:4px;}
+.sb-group-title{font-size:.46rem;color:#555;letter-spacing:.14em;text-transform:uppercase;padding:9px 14px 3px;font-weight:600;border-top:1px solid #181818;}
+.sb-item{display:block!important;width:100%;text-align:left;background:none;border:none;padding:5px 14px 5px 18px;font-size:.62rem;color:#666;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;border-left:2px solid transparent;line-height:1.35;}
+.sb-item:hover{color:#aaa;background:rgba(255,255,255,.025);}
+.sb-item.on{color:#C9A84C!important;border-left-color:#C9A84C!important;background:rgba(201,168,76,.05);}
+#main{flex:1;display:flex!important;align-items:center;justify-content:center;flex-direction:column;gap:8px;overflow:hidden;}
+#scinfo{font-size:.5rem;color:#333;letter-spacing:.07em;text-align:center;}
+#toast,div.toast{position:fixed!important;bottom:22px!important;left:calc(220px + (100vw - 220px)/2)!important;transform:translateX(-50%)!important;background:#1c1c1c!important;border:1px solid #C9A84C!important;border-radius:50px!important;padding:7px 16px!important;font-size:.68rem!important;color:#F8F4EC!important;z-index:9999!important;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:280px;}
+#toast.show,div.toast.show{opacity:1!important;}
+
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo">&#x2B21; OLMA</div>
+    <div class="sb-sub">Patient App Prototype</div>
+    <div class="sb-count" id="sc-label">loading&hellip;</div>
+  </div>
+  <div id="nav-list"></div>
+</div>
+
+<div id="main">
+  <div class="phone" id="phone"></div>
+  <div id="scinfo"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+let toastTimer;
+function toast(msg){
+  clearTimeout(toastTimer);
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function go(a,b){var sid=(b!==undefined)?b:a;if(!sid)return;document.querySelectorAll("#phone .screen").forEach(function(s){s.classList.remove("active");});var sc=document.getElementById("sc-"+sid);if(sc){sc.classList.add("active");sc.querySelectorAll(".cnt").forEach(function(c){c.scrollTop=0;});}document.querySelectorAll(".sb-item").forEach(function(n){n.classList.remove("on");});var btn=document.querySelector(".sb-item[data-sid=\""+sid+"\"]");if(btn){btn.classList.add("on");btn.scrollIntoView({block:"nearest",behavior:"smooth"});}if(window.FLAT_SCREENS){var all=Object.keys(FLAT_SCREENS),ix=all.indexOf(sid)+1,lb=FLAT_SCREENS[sid]||sid;var inf=document.getElementById("scinfo");if(inf)inf.textContent=ix+" of "+all.length+"  ·  "+lb;}}
+
+function ring(score,color,size=110){
+  const r=size/2-9,cx=size/2,cy=size/2,circ=2*Math.PI*r,off=circ-(score/100)*circ;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e1e1e" stroke-width="7"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+      stroke-dasharray="${circ}" stroke-dashoffset="${off}" stroke-linecap="round"
+      style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px"/>
+  </svg>`;
+}
+
+function scoreRing(score,label,color='#C9A84C',size=110){
+  return `<div class="sring" style="width:${size}px;height:${size}px">
+    ${ring(score,color,size)}
+    <div class="sctr">
+      <div class="snum" style="font-size:${size>90?'1.8rem':'1.2rem'}">${score}</div>
+      <div class="slbl">${label}</div>
+    </div>
+  </div>`;
+}
+
+function sb(){return `<div class="sb"><span>9:41</span><span style="color:#888">●●● ▲ ⬛</span></div>`;}
+
+function bnav(p,active){var it=[["⌂","Home","home-s7"],["📊","Progress","progress"],["👩","Vita","vita-home"],["🛒","Store","store"],["⚙","Profile","profile"]];var h="<div class=\"bnav\">";it.forEach(function(x){h+='<div class="ni'+(active===x[1]?' on':'')+'" onclick="go(\'"+x[2]+"\')"><div class="nic">'+x[0]+'</div><div class="nil">'+x[1]+'</div></div>';});h+="</div>";return h;}
+
+function hdr(p,back,title,act){act=act||'';return '<div class="hdr"><div class="hback" onclick="go(\''+back+'\')">←</div><div class="htitle">'+title+'</div><div class="hact">'+act+'</div></div>';}
+
+// ═══════════════════════════════════════════════════════
+// ALL SCREENS  (phone → screen map)
+// ═══════════════════════════════════════════════════════
+
+const phones = {
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 1: M00 Splash + Onboarding + Auth
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p1: {
+  first:'splash',
+  label:'M00–M01 · Splash, Trust & Auth',
+  screens:{
+
+'splash':`
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,#070707,#0f0f08);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;" onclick="go('onboarding')">
+    <div style="width:80px;height:80px;border-radius:50%;border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;margin-bottom:14px;animation:pulse 3s ease-in-out infinite;">
+      <div style="font-size:2.5rem">⬡</div>
+    </div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:#C9A84C;letter-spacing:.3em;text-transform:uppercase;">OLMA</div>
+    <div style="font-size:.48rem;color:#555;letter-spacing:.35em;text-transform:uppercase;margin-top:4px;">CASTELLO DI UVIGLIE</div>
+    <div style="font-size:.6rem;color:#444;margin-top:36px;letter-spacing:.12em;">Tap to begin</div>
+    <style>@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.15);}50%{box-shadow:0 0 0 16px rgba(201,168,76,.05);}}</style>
+  </div>
+`,
+
+'onboarding':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="text-align:center;padding:12px 0 14px">
+      <div style="font-size:1.6rem;margin-bottom:4px">⬡</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#C9A84C;letter-spacing:.2em;text-transform:uppercase;">OLMA</div>
+      <div style="font-size:.5rem;color:#555;letter-spacing:.25em;text-transform:uppercase;">CASTELLO DI UVIGLIE</div>
+    </div>
+    <div class="card card-g" style="padding:14px;margin-bottom:10px">
+      <div class="st">Trusted Medical Team</div>
+      <div style="display:flex;gap:10px;margin-bottom:9px">
+        <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,#8B6914);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">👩‍⚕️</div>
+        <div>
+          <div style="font-size:.78rem;font-weight:600;color:#F8F4EC">Prof. Ilaria Tresoldi MD, PhD</div>
+          <div style="font-size:.62rem;color:#888;margin-top:1px">Longevity Medicine · 22 years · OLMA Medical Lead</div>
+          <div style="font-size:.62rem;color:#C9A84C;margin-top:2px;font-style:italic">"Prevention is the highest form of medicine."</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,#8B6914);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">👨‍⚕️</div>
+        <div>
+          <div style="font-size:.78rem;font-weight:600;color:#F8F4EC">Dr. Marco Benedetti</div>
+          <div style="font-size:.62rem;color:#888;margin-top:1px">Functional Medicine · 15 years</div>
+          <div style="font-size:.62rem;color:#C9A84C;margin-top:2px;font-style:italic">"Optimise today, thrive tomorrow."</div>
+        </div>
+      </div>
+    </div>
+    <button class="bg" onclick="go('register')">Register</button>
+    <div style="height:7px"></div>
+    <button class="bo" onclick="go('login')">Log In</button>
+    <div style="height:7px"></div>
+    <button class="bgh" style="width:100%;text-align:center" onclick="go('guest-preview')">Continue as Guest</button>
+  </div>
+`,
+
+'guest-preview':`
+  ${sb()}
+  ${hdr('p1','onboarding','Preview')}
+  <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:9px;padding:9px 13px;font-size:.67rem;color:#C9A84C;text-align:center;margin:0 16px 10px;cursor:pointer" onclick="go('register')">
+    👤 Guest Mode · Create account to unlock your journey →
+  </div>
+  <div class="cnt px pb">
+    <div class="st">What is a Longevity Score?</div>
+    <div class="card card-g" style="text-align:center;padding:16px 14px">
+      <div style="display:flex;justify-content:center;margin-bottom:6px">${scoreRing(72,'Sample')}</div>
+      <div style="font-size:.68rem;color:#888">A personalised 0–100 score of your biological longevity, updated with biomarker data from lab testing.</div>
+    </div>
+    <div class="st">The 5 Longevity Pillars</div>
+    <div class="card">
+      ${[['❤️','Happiness',78],['💪','Fitness',65],['🎯','Purpose',82],['🌿','Spirituality',70],['🥗','Nutrition',58]].map(([ic,nm,v])=>`
+        <div class="pr"><span class="pico">${ic}</span><span class="pnm">${nm}</span><div class="pbar"><div class="pfill" style="width:${v}%"></div></div><span class="pval">${v}</span></div>`).join('')}
+    </div>
+    <button class="bg" onclick="go('register')">Create Account to Get Your Score</button>
+  </div>
+`,
+
+'register':`
+  ${sb()}
+  ${hdr('p1','onboarding','Create Account')}
+  <div class="cnt px pb">
+    <div style="display:flex;gap:9px"><div style="flex:1"><label class="lbl">First Name</label><input class="inp" placeholder="Sofia" value="Sofia"></div><div style="flex:1"><label class="lbl">Last Name</label><input class="inp" placeholder="Ricci" value="Ricci"></div></div>
+    <label class="lbl">Email</label><input class="inp" placeholder="email@example.com" value="sofia@example.com">
+    <label class="lbl">Password</label><input class="inp" type="password" placeholder="Min 8 chars, 1 number, 1 uppercase" value="Secure123">
+    <label class="lbl">Date of Birth</label><input class="inp" type="date" value="1978-03-15">
+    <label class="lbl">Country</label>
+    <select class="inp"><option>Italy</option><option>Germany</option><option>France</option><option>Spain</option><option>United Kingdom</option></select>
+    <div style="display:flex;align-items:flex-start;gap:9px;margin:6px 0 14px">
+      <input type="checkbox" id="tc" checked style="margin-top:3px;accent-color:#C9A84C">
+      <label for="tc" style="font-size:.67rem;color:#888;line-height:1.5">I agree to the <span style="color:#C9A84C;text-decoration:underline">Terms & Conditions</span> and <span style="color:#C9A84C;text-decoration:underline">Privacy Policy</span>. I acknowledge immediate access and loss of 14-day withdrawal right.</label>
+    </div>
+    <button class="bg" onclick="go('otp')">Create Account</button>
+    <div style="text-align:center;margin-top:9px"><button class="bgh" onclick="go('login')">Already have an account? Log in</button></div>
+  </div>
+`,
+
+'otp':`
+  ${sb()}
+  ${hdr('p1','register','Verify Email')}
+  <div class="cnt px" style="align-items:center;text-align:center;justify-content:center">
+    <div style="font-size:2.4rem;margin-bottom:10px">📧</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:#F8F4EC;margin-bottom:6px">Check your inbox</div>
+    <div style="font-size:.7rem;color:#888;line-height:1.6;margin-bottom:16px">6-digit code sent to<br><span style="color:#C9A84C">s***@example.com</span><br>Expires in 10 minutes</div>
+    <div class="otpw">
+      <input class="otpb" maxlength="1" value="4">
+      <input class="otpb" maxlength="1" value="7">
+      <input class="otpb" maxlength="1" value="2">
+      <input class="otpb" maxlength="1" value="">
+      <input class="otpb" maxlength="1" value="">
+      <input class="otpb" maxlength="1" value="">
+    </div>
+    <button class="bg" style="margin-top:6px" onclick="go('avatar-select')">Verify Code</button>
+    <button class="bgh" style="margin-top:9px;display:block;width:100%">Resend code (wait 3:00)</button>
+  </div>
+`,
+
+'avatar-select':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="text-align:center;padding:14px 0 12px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC;margin-bottom:5px">Meet Your AI Companion</div>
+      <div style="font-size:.68rem;color:#888">Your guide through your longevity journey</div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:16px">
+      <div class="avopt sel" id="av-f" onclick="document.getElementById('av-m').classList.remove('sel');this.classList.add('sel')">
+        <div style="font-size:2.4rem;margin-bottom:5px">👩</div>
+        <div style="font-size:.78rem;font-weight:600;color:#F8F4EC">Vita</div>
+        <div style="font-size:.62rem;color:#888">Default</div>
+      </div>
+      <div class="avopt" id="av-m" onclick="document.getElementById('av-f').classList.remove('sel');this.classList.add('sel')">
+        <div style="font-size:2.4rem;margin-bottom:5px">👨</div>
+        <div style="font-size:.78rem;font-weight:600;color:#F8F4EC">Vito</div>
+        <div style="font-size:.62rem;color:#888">Alternative</div>
+      </div>
+    </div>
+    <label class="lbl">Companion Name (optional · max 12 chars)</label>
+    <input class="inp" placeholder="Vita" maxlength="12" value="Vita">
+    <div style="height:10px"></div>
+    <button class="bg" onclick="go('profiling-1')">Continue to Health Profile →</button>
+    <div style="text-align:center;margin-top:7px"><button class="bgh" onclick="go('profiling-1')">Skip — use Vita</button></div>
+  </div>
+`,
+
+'login':`
+  ${sb()}
+  ${hdr('p1','onboarding','Welcome Back')}
+  <div class="cnt px" style="justify-content:center">
+    <div style="text-align:center;padding:16px 0 20px">
+      <div style="font-size:1.8rem;margin-bottom:6px">⬡</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:#C9A84C;letter-spacing:.2em;">OLMA</div>
+    </div>
+    <label class="lbl">Email</label><input class="inp" value="sofia@example.com">
+    <label class="lbl">Password</label><input class="inp" type="password" value="••••••••">
+    <div style="text-align:right;margin-bottom:14px"><button class="bgh" onclick="toast('Password reset email sent')">Forgot password?</button></div>
+    <button class="bg" onclick="go('home-s7')">Log In</button>
+    <div class="div"></div>
+    <button class="bo" onclick="toast('Face ID authenticated ✓');setTimeout(()=>go('home-s7'),700)">🔒 Login with Face ID</button>
+    <div style="text-align:center;margin-top:10px"><button class="bgh" onclick="go('register')">Don't have an account? Register</button></div>
+  </div>
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 2: M03 Health Profiling + M04 Score + M05 Free Tier + M06 Subscription
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p2: {
+  first:'profiling-1',
+  label:'M03–M06 · Profiling, Score & Subscription',
+  screens:{
+
+'profiling-1':`
+  ${sb()}
+  <div class="sdots px" style="padding-top:10px"><div class="sdot on"></div><div class="sdot"></div><div class="sdot"></div><div class="sdot"></div></div>
+  <div class="cnt px pb">
+    <div style="display:flex;gap:9px;align-items:flex-start;margin:10px 0">
+      <div class="vav">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>Before we get started, I have a few quick questions to give you your first longevity score, Sofia.</div>
+    </div>
+    <div class="card card-g">
+      <div style="font-size:.6rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;font-weight:600">Question 1 of 4</div>
+      <div style="font-size:.86rem;color:#F8F4EC;margin-bottom:12px;line-height:1.5">How would you rate your average sleep quality?</div>
+      ${['Excellent (7–8h, feel fully rested)','Good (6–7h, mostly rested)','Fair (5–6h, sometimes tired)','Poor (under 5h or disrupted)'].map((o,i)=>`
+        <div style="padding:9px 11px;border-radius:9px;border:1px solid ${i===1?'#C9A84C':'#2a2a2a'};background:${i===1?'rgba(201,168,76,.1)':'var(--dk2)'};margin-bottom:5px;font-size:.74rem;cursor:pointer;color:${i===1?'#F8F4EC':'#666'};transition:all .2s"
+          onclick="this.closest('.cnt').querySelectorAll('[data-qopt]').forEach(d=>{d.style.borderColor='#2a2a2a';d.style.color='#666';d.style.background='var(--dk2)'});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.1)'" data-qopt>${o}</div>`).join('')}
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px">
+      <button class="bo bsm" style="flex:.3">← Back</button>
+      <button class="bg" style="flex:1" onclick="go('profiling-2')">Next →</button>
+    </div>
+  </div>
+`,
+
+'profiling-2':`
+  ${sb()}
+  <div class="sdots px" style="padding-top:10px"><div class="sdot on"></div><div class="sdot on"></div><div class="sdot"></div><div class="sdot"></div></div>
+  <div class="cnt px pb">
+    <div style="display:flex;gap:9px;align-items:flex-start;margin:10px 0">
+      <div class="vav">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>Great. Now, on a scale of 1–10, how would you rate your overall stress level lately?</div>
+    </div>
+    <div class="card card-g">
+      <div style="font-size:.6rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;font-weight:600">Question 2 of 4</div>
+      <div style="font-size:.86rem;color:#F8F4EC;margin-bottom:14px">Rate your stress level (1 = very low, 10 = very high)</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.6rem;color:#666">
+        <span>1 Very Low</span><span>10 Very High</span>
+      </div>
+      <input type="range" min="1" max="10" value="4" style="width:100%;accent-color:#C9A84C;height:4px">
+      <div style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:#C9A84C;margin-top:8px">4</div>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px">
+      <button class="bo bsm" style="flex:.3" onclick="go('profiling-1')">←</button>
+      <button class="bg" style="flex:1" onclick="go('profiling-3')">Next →</button>
+    </div>
+  </div>
+`,
+
+'profiling-3':`
+  ${sb()}
+  <div class="sdots px" style="padding-top:10px"><div class="sdot on"></div><div class="sdot on"></div><div class="sdot on"></div><div class="sdot"></div></div>
+  <div class="cnt px pb">
+    <div style="display:flex;gap:9px;align-items:flex-start;margin:10px 0">
+      <div class="vav">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>How would you describe your usual eating habits?</div>
+    </div>
+    <div class="card card-g">
+      <div style="font-size:.6rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;font-weight:600">Question 3 of 4</div>
+      <div style="font-size:.86rem;color:#F8F4EC;margin-bottom:12px">Describe your usual dietary pattern</div>
+      ${['Mostly whole foods, vegetables, lean protein','Mediterranean-style (fish, olive oil, legumes)','Mixed — some healthy, some processed','Mostly convenience or fast food'].map((o,i)=>`
+        <div style="padding:9px 11px;border-radius:9px;border:1px solid ${i===1?'#C9A84C':'#2a2a2a'};background:${i===1?'rgba(201,168,76,.1)':'var(--dk2)'};margin-bottom:5px;font-size:.74rem;cursor:pointer;color:${i===1?'#F8F4EC':'#666'};transition:all .2s"
+          onclick="this.closest('.card').querySelectorAll('[data-qopt]').forEach(d=>{d.style.borderColor='#2a2a2a';d.style.color='#666';d.style.background='var(--dk2)'});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.1)'" data-qopt>${o}</div>`).join('')}
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px">
+      <button class="bo bsm" style="flex:.3" onclick="go('profiling-2')">←</button>
+      <button class="bg" style="flex:1" onclick="go('profiling-4')">Next →</button>
+    </div>
+  </div>
+`,
+
+'profiling-4':`
+  ${sb()}
+  <div class="sdots px" style="padding-top:10px"><div class="sdot on"></div><div class="sdot on"></div><div class="sdot on"></div><div class="sdot on"></div></div>
+  <div class="cnt px pb">
+    <div style="display:flex;gap:9px;align-items:flex-start;margin:10px 0">
+      <div class="vav">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>Last question — how often do you exercise each week?</div>
+    </div>
+    <div class="card card-g">
+      <div style="font-size:.6rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;font-weight:600">Question 4 of 4</div>
+      <div style="font-size:.86rem;color:#F8F4EC;margin-bottom:12px">Weekly exercise frequency</div>
+      ${['5+ times per week','3–4 times per week','1–2 times per week','Rarely or never'].map((o,i)=>`
+        <div style="padding:9px 11px;border-radius:9px;border:1px solid ${i===1?'#C9A84C':'#2a2a2a'};background:${i===1?'rgba(201,168,76,.1)':'var(--dk2)'};margin-bottom:5px;font-size:.74rem;cursor:pointer;color:${i===1?'#F8F4EC':'#666'};transition:all .2s"
+          onclick="this.closest('.card').querySelectorAll('[data-qopt]').forEach(d=>{d.style.borderColor='#2a2a2a';d.style.color='#666';d.style.background='var(--dk2)'});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.1)'" data-qopt>${o}</div>`).join('')}
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px">
+      <button class="bo bsm" style="flex:.3" onclick="go('profiling-3')">←</button>
+      <button class="bg" style="flex:1" onclick="go('score-prelim')">Calculate My Score →</button>
+    </div>
+  </div>
+`,
+
+'score-prelim':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="text-align:center;padding:12px 0 8px">
+      <div style="font-size:.6rem;color:#C9A84C;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Your Preliminary Score</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:#F8F4EC">Based on your health profile</div>
+    </div>
+    <div class="card card-g" style="text-align:center;padding:18px 14px">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">${scoreRing(68,'Preliminary')}</div>
+      <div style="font-size:.72rem;color:#888;margin-bottom:6px">Good foundation — room for optimisation</div>
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+        <div class="bdg bg-a">Sleep: Borderline</div>
+        <div class="bdg bg-g">Diet: Good</div>
+        <div class="bdg bg-g">Exercise: Active</div>
+      </div>
+    </div>
+    <div class="st">5-Pillar Breakdown</div>
+    <div class="card">
+      ${[['❤️','Happiness',65],['💪','Fitness',74],['🎯','Purpose',70],['🌿','Spirituality',62],['🥗','Nutrition',72]].map(([ic,nm,v])=>`
+        <div class="pr"><span class="pico">${ic}</span><span class="pnm">${nm}</span><div class="pbar"><div class="pfill" style="width:${v}%"></div></div><span class="pval">${v}</span></div>`).join('')}
+    </div>
+    <div class="card" style="background:rgba(201,168,76,.06);border-color:rgba(201,168,76,.2);text-align:center;padding:12px">
+      <div style="font-size:.7rem;color:#C9A84C;font-weight:600;margin-bottom:5px">🔬 Get your precise lab-adjusted score</div>
+      <div style="font-size:.65rem;color:#888;margin-bottom:10px;line-height:1.5">Upgrade to Vitality or Longevity Pro to order a biomarker lab kit and unlock your full personalised plan.</div>
+      <button class="bg bsm" onclick="go('upgrade')">See Plans</button>
+    </div>
+    <button class="bo" style="margin-top:6px" onclick="go('home-s2')">Go to Dashboard →</button>
+  </div>
+`,
+
+'upgrade':`
+  ${sb()}
+  ${hdr('p2','score-prelim','Choose Your Plan')}
+  <div class="cnt px pb">
+    <div class="planc free">
+      <div class="pname">Explorer</div>
+      <div class="ppr" style="color:#888">Free</div>
+      <div style="margin-top:7px"><div class="pfeat" style="color:#444">Preliminary longevity score</div><div class="pfeat" style="color:#444">5-min lifetime Vita session</div><div class="pfeat" style="color:#444">Generic content feed</div></div>
+    </div>
+    <div class="planc vit">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="pname">Vitality</div>
+        <div class="bdg bg-gold">Popular</div>
+      </div>
+      <div class="ppr">€49 <span style="font-size:.68rem;font-weight:400;color:#888">/month</span></div>
+      <div style="margin-top:7px">
+        <div class="pfeat">Lab kit ordering & biomarker results</div>
+        <div class="pfeat">Unlimited Vita sessions</div>
+        <div class="pfeat">Daily personalised journey plan</div>
+        <div class="pfeat">Junior doctor consultations</div>
+        <div class="pfeat">Wearable health integration</div>
+        <div class="pfeat">Supplement store access</div>
+      </div>
+      <button class="bg" style="margin-top:11px;font-size:.7rem" onclick="toast('Vitality activated ✓');go('home-s3')">Subscribe to Vitality</button>
+    </div>
+    <div class="planc pro">
+      <div class="pname">Longevity Pro</div>
+      <div class="ppr">€99 <span style="font-size:.68rem;font-weight:400;color:#888">/month</span></div>
+      <div style="margin-top:7px">
+        <div class="pfeat">Everything in Vitality</div>
+        <div class="pfeat">Senior & Professor consultations</div>
+        <div class="pfeat">Priority medical review</div>
+      </div>
+      <button class="bo" style="margin-top:11px;font-size:.7rem" onclick="toast('Longevity Pro activated ✓');go('home-s3')">Subscribe to Longevity Pro</button>
+    </div>
+  </div>
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 3: M02 Home States S2–S7 + M07 Profiling Retake
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p3: {
+  first:'home-s2',
+  label:'M02 · Home Dashboard S2–S7',
+  screens:{
+
+'home-s2':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="padding:10px 0 8px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:.58rem;color:#888;letter-spacing:.1em;text-transform:uppercase">Welcome Back</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC">Sofia Ricci</div></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="bdg bg-gold">Free Plan</div>
+        <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#8B6914,#C9A84C);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#000">SR</div>
+      </div>
+    </div>
+    <div class="card card-g">
+      <div style="display:flex;justify-content:center;margin-bottom:6px">${scoreRing(68,'Preliminary')}</div>
+      <div style="font-size:.68rem;color:#888;text-align:center">Good foundation · Room for optimisation</div>
+    </div>
+    <div class="card" style="background:rgba(201,168,76,.07);border-color:rgba(201,168,76,.2);text-align:center;padding:12px">
+      <div style="font-size:.7rem;color:#C9A84C;font-weight:600;margin-bottom:4px">🔬 Upgrade to unlock lab testing</div>
+      <div style="font-size:.65rem;color:#888;margin-bottom:9px">Get your precise biomarker-driven score.</div>
+      <button class="bg bsm" onclick="go('upgrade')">See Plans</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;cursor:pointer;padding:8px 0" onclick="go('vita-home')">
+      <div class="vav">👩</div>
+      <div style="flex:1;background:var(--dk3);border-radius:11px;padding:9px 12px;border:1px solid #222">
+        <div style="font-size:.65rem;color:#C9A84C;font-weight:600">Vita · 5 min session available</div>
+        <div style="font-size:.68rem;color:#888;margin-top:1px">Ask me about your score...</div>
+      </div>
+    </div>
+    <div class="st" style="margin-top:4px">Content Feed</div>
+    ${[['🫐','The Mediterranean Diet','General Nutrition'],['☀️','What is Vitamin D3?','Supplement Education']].map(([ic,title,cat])=>`
+      <div class="card" style="display:flex;gap:10px;align-items:center;padding:11px">
+        <div style="font-size:1.4rem">${ic}</div>
+        <div><div style="font-size:.76rem;color:#F8F4EC;font-weight:500">${title}</div><div style="font-size:.6rem;color:#888;margin-top:1px">${cat}</div></div>
+        <div style="color:#555;margin-left:auto">›</div>
+      </div>`).join('')}
+  </div>
+  ${bnav('p3','Home')}
+`,
+
+'home-s3':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="padding:10px 0 8px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:.58rem;color:#888;text-transform:uppercase;letter-spacing:.08em">Vitality Subscriber</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC">Sofia Ricci</div></div>
+      <div class="bdg bg-gold">Vitality</div>
+    </div>
+    <div class="card card-g">
+      <div style="display:flex;justify-content:center;margin-bottom:4px">${scoreRing(68,'Preliminary')}</div>
+      <div style="font-size:.65rem;color:#888;text-align:center">Upgrade to lab-adjusted score with testing</div>
+    </div>
+    <div style="display:flex;gap:7px;margin-bottom:10px">
+      <button class="bg bsm" style="flex:1" onclick="go('kit-select')">Order Lab Kit</button>
+      <button class="bo bsm" style="flex:1" onclick="go('partner-labs')">Visit a Lab</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;cursor:pointer;padding:6px 0" onclick="go('vita-home')">
+      <div class="vav">👩</div>
+      <div style="flex:1;background:var(--dk3);border-radius:11px;padding:9px 12px;border:1px solid #222">
+        <div style="font-size:.65rem;color:#C9A84C;font-weight:600">Vita · Unlimited access unlocked</div>
+        <div style="font-size:.68rem;color:#888;margin-top:1px">Your full plan is coming soon...</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:4px">
+      <div class="st">Book a Consultation</div>
+      <div style="font-size:.68rem;color:#888;margin-bottom:9px">Junior · Senior · Professor tiers available</div>
+      <button class="bg bsm" onclick="go('consult-list')">Browse Doctors</button>
+    </div>
+  </div>
+  ${bnav('p3','Home')}
+`,
+
+'home-s4':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="padding:10px 0 8px;display:flex;justify-content:space-between">
+      <div><div style="font-size:.58rem;color:#888;text-transform:uppercase;letter-spacing:.08em">Kit Ordered</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC">Track My Kit</div></div>
+      <div class="bdg bg-a">In Progress</div>
+    </div>
+    <div class="card card-g">
+      <div style="font-size:.65rem;color:#888;margin-bottom:10px">Order #OLMA-2024-0847 · Basic Kit</div>
+      ${[['✓','Kit Dispatched','dn'],['✓','Kit Delivered','dn'],['●','Sample Sent to Lab','ac'],['○','Results Processing','pd'],['○','Results Ready','pd']].map(([ic,lb,st])=>`
+        <div class="trstep">
+          <div class="trdot ${st}"></div>
+          <div class="trlbl" style="color:${st==='ac'?'#F8F4EC':st==='dn'?'#C9A84C':'#444'}">${lb}</div>
+          ${st==='ac'?'<div class="bdg bg-g" style="margin-left:auto;font-size:.5rem">Current</div>':''}
+        </div>`).join('')}
+      <div class="pbw" style="margin-top:10px"><div class="pbf" style="width:60%"></div></div>
+      <div style="font-size:.6rem;color:#888;margin-top:5px;text-align:center">Estimated results: 2–3 days</div>
+    </div>
+    <button class="bo bsm" onclick="go('kit-guide-1')">📖 Sample Collection Guide</button>
+    <div style="height:6px"></div>
+    <button class="bg bsm" style="background:linear-gradient(135deg,#333,#444);color:#888" onclick="go('home-s5')">Simulate: Gate Triggered →</button>
+    <div style="height:5px"></div>
+    <button class="bg bsm" onclick="go('results-pending')">Simulate: Results Ready →</button>
+  </div>
+  ${bnav('p3','Home')}
+`,
+
+'home-s5':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="padding:10px 0 8px"><div style="font-size:.58rem;color:#EF9A9A;text-transform:uppercase;letter-spacing:.08em">Medical Review Required</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC">Your Results</div></div>
+    <div class="gate-card">
+      <div style="font-size:2.4rem;margin-bottom:8px">🔴</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#EF9A9A;margin-bottom:8px">Doctor Review Required</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.6">Some of your results need a doctor's attention before we provide your personalised plan. This is a precautionary step to ensure you receive the right guidance. Please book a consultation with one of our doctors — they will review your full results with you.</div>
+    </div>
+    <button class="bg" onclick="go('consult-list')">Book a Consultation</button>
+    <div style="height:7px"></div>
+    <button class="bgh" style="width:100%;text-align:center;font-size:.68rem" onclick="toast('PDF summary downloaded — flag category only, no raw values')">I have a doctor I prefer to see — what should I share?</button>
+    <div class="card" style="margin-top:10px">
+      <div style="font-size:.68rem;color:#888;line-height:1.5">Your OLMA medical team is reviewing your results carefully. This step is to ensure your personalised plan is safe and effective for your specific health profile.</div>
+    </div>
+    <div class="div" style="margin:12px 0"></div>
+    <button class="bo bsm" onclick="go('results-pending')">Simulate: Gate Cleared →</button>
+  </div>
+  ${bnav('p3','Home')}
+`,
+
+'home-s6':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="padding:10px 0 8px;display:flex;justify-content:space-between">
+      <div><div style="font-size:.58rem;color:#888;text-transform:uppercase;letter-spacing:.08em">Results Received</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC">Your Biomarkers</div></div>
+      <div class="bdg bg-g">Gate Cleared</div>
+    </div>
+    <div class="card card-g">
+      <div style="display:flex;justify-content:center;margin-bottom:4px">${scoreRing(74,'Lab-Adjusted')}</div>
+      <div style="font-size:.65rem;color:#888;text-align:center">↑ +6 from preliminary · <span style="color:#81C784">Improving</span></div>
+    </div>
+    <div class="card" style="background:rgba(66,165,245,.06);border-color:rgba(66,165,245,.2)">
+      <div style="font-size:.7rem;color:#90CAF9;font-weight:600;margin-bottom:4px">⏳ Recommendations under review</div>
+      <div style="font-size:.65rem;color:#888;line-height:1.5">Your results are currently being reviewed by our medical team. Your personalised plan will be ready shortly.</div>
+    </div>
+    <button class="bg bsm" onclick="go('home-s7');toast('Plan approved! Your journey begins ✓')">Simulate: Plan Approved →</button>
+    <div class="div"></div>
+    <div class="st">Biomarker Preview</div>
+    <div class="card">
+      ${[['HbA1c','5.2%','green'],['Fasting Glucose','92 mg/dL','green'],['Vitamin D','38 ng/mL','amber'],['hs-CRP','1.2 mg/L','amber']].map(([n,v,c])=>`
+        <div class="bior">
+          <span class="bionm">${n}</span>
+          <span class="bioval" style="color:${c==='green'?'#81C784':'#FFB74D'}">${v}</span>
+          <div class="biodot" style="background:${c==='green'?'#4CAF50':'#FFA726'}"></div>
+        </div>`).join('')}
+      <div style="font-size:.6rem;color:#888;margin-top:6px;padding:6px;background:var(--dk4);border-radius:7px">Medically reviewed by OLMA Medical Team ✓</div>
+    </div>
+  </div>
+  ${bnav('p3','Home')}
+`,
+
+'home-s7':`
+  ${sb()}
+  <div class="cnt px pb">
+    <div style="padding:10px 0 7px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:.58rem;color:#888;text-transform:uppercase;letter-spacing:.08em">Active Treatment · Day 14</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC">Good morning, Sofia 🌿</div></div>
+      <div class="bdg bg-gold">🔥 14-day streak</div>
+    </div>
+    <div class="card card-g" style="padding:12px">
+      <div style="display:flex;align-items:center;gap:11px">
+        ${scoreRing(82,'Lab',undefined,80)}
+        <div>
+          <div style="font-size:.68rem;color:#C9A84C;font-weight:600">↑ +14 from baseline</div>
+          <div style="font-size:.62rem;color:#888;margin-top:2px;line-height:1.4">OLMA International<br>Longevity Standard</div>
+          <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">
+            <div class="bdg bg-g" style="font-size:.48rem">Metabolic ↑</div>
+            <div class="bdg bg-gold" style="font-size:.48rem">Nutrition ↑</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:7px;margin-bottom:8px">
+      <button class="bg bsm" style="flex:1" onclick="go('vita-home')">Chat with Vita</button>
+      <button class="bo bsm" style="flex:1" onclick="go('consult-list')">Book Consult</button>
+    </div>
+    <div class="st">Today's Journey</div>
+    <div class="task dn" onclick="this.classList.toggle('dn')"><div class="tchk">✓</div><div><div class="ttxt">🥗 Mediterranean breakfast</div><div class="tsub">Focus: olive oil, leafy greens, fermented dairy</div></div></div>
+    <div class="task dn" onclick="this.classList.toggle('dn')"><div class="tchk">✓</div><div><div class="ttxt">🚶 30–45 min brisk walk</div><div class="tsub">6,240 steps · Goal: 8,000</div></div></div>
+    <div class="task" onclick="this.classList.toggle('dn')"><div class="tchk">✓</div><div><div class="ttxt">💊 Vitamin D3 + K2</div><div class="tsub">2000 IU · Morning · with breakfast</div></div></div>
+    <div class="task" onclick="this.classList.toggle('dn')"><div class="tchk">✓</div><div><div class="ttxt">🐟 Omega-3 EPA/DHA</div><div class="tsub">2g · Evening · with dinner</div></div></div>
+    <div style="font-size:.68rem;color:#888;text-align:center;padding:6px 0">You took 2 of 2 supplements today. <span style="color:#C9A84C">View breakdown</span></div>
+    <div class="card" style="padding:10px 12px;cursor:pointer" onclick="go('wearable-dash')">
+      <div class="st" style="margin-bottom:5px">⌚ Daily Health</div>
+      <div style="display:flex;gap:8px">
+        ${[['❤️','72 bpm','Heart Rate'],['🌙','7.2 h','Sleep'],['👣','6,240','Steps']].map(([ic,v,l])=>`
+          <div style="flex:1;text-align:center;background:var(--dk4);border-radius:8px;padding:7px 3px">
+            <div>${ic}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:.95rem;color:#C9A84C">${v}</div>
+            <div style="font-size:.5rem;color:#555;text-transform:uppercase;letter-spacing:.06em">${l}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>
+  ${bnav('p3','Home')}
+`,
+
+'retake-prompt':`
+  ${sb()}
+  ${hdr('p3','home-s7','Update Profile')}
+  <div class="cnt px pb" style="align-items:center;text-align:center;justify-content:center">
+    <div style="font-size:2.2rem;margin-bottom:10px">🔄</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:#F8F4EC;margin-bottom:8px">Retake Health Profile?</div>
+    <div style="font-size:.7rem;color:#888;line-height:1.6;margin-bottom:6px">Retaking your health profile will update your longevity score based on your latest answers.</div>
+    <div style="font-size:.65rem;color:#C9A84C;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px 12px;margin-bottom:16px;text-align:left">
+      <strong>Note:</strong> Retaking your profile will update your preliminary score only. Your lab-adjusted score will be updated the next time your lab results are reviewed.
+    </div>
+    <div style="font-size:.65rem;color:#888;margin-bottom:14px">Your previous score history will be retained.</div>
+    <button class="bg" onclick="go('profiling-1')">Retake Health Profile Now</button>
+    <div style="height:8px"></div>
+    <button class="bo" onclick="go('home-s7')">Skip for Now</button>
+  </div>
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 4: M08 Lab Kit Ordering + M09 Partner Lab Finder
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p4: {
+  first:'kit-select',
+  label:'M08 · Lab Kit Ordering & Sample Guide',
+  screens:{
+
+'kit-select':`
+  ${sb()}
+  ${hdr('p4','..home-s3','Lab Kit','🔍')}
+  <div class="cnt px pb">
+    <div style="font-size:.68rem;color:#888;margin-bottom:11px;line-height:1.5">Home collection kit · Results processed by OLMA partner labs · Used to generate your precise biomarker-driven longevity score.</div>
+    <div id="kits">
+      ${[['Basic Kit','€249','~30 biomarkers · 3–4 day turnaround','Metabolic, lipid, inflammation, nutritional status'],['Advanced Kit','€449','~55 biomarkers · ~10 day turnaround','+ Cardiovascular risk, thyroid, hormonal health'],['Comprehensive Kit','€699','~75+ biomarkers · ~14 day turnaround','+ Advanced inflammation, bone health, longevity markers']].map((k,i)=>`
+        <div class="kc${i===0?' sel':''}" onclick="document.querySelectorAll('#kits .kc').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div><div class="ktitle">${k[0]}</div><div class="kdesc">${k[2]}<br>${k[3]}</div></div>
+            <div class="kprice">${k[1]}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <button class="bo bsm" style="margin-bottom:8px" onclick="go('kit-compare')">What's the difference? Compare →</button>
+    <button class="bg" onclick="go('kit-checkout')">Select Basic Kit — €249</button>
+  </div>
+`,
+
+'kit-compare':`
+  ${sb()}
+  ${hdr('p4','kit-select','Kit Comparison')}
+  <div class="cnt px pb">
+    <div class="card" style="padding:10px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.62rem">
+        <tr>
+          <th style="color:#888;text-align:left;padding:5px 8px;border-bottom:1px solid #222">Panel</th>
+          <th style="color:#C9A84C;text-align:center;padding:5px 5px;border-bottom:1px solid #222">Basic</th>
+          <th style="color:#C9A84C;text-align:center;padding:5px 5px;border-bottom:1px solid #222">Adv</th>
+          <th style="color:#C9A84C;text-align:center;padding:5px 5px;border-bottom:1px solid #222">Comp</th>
+        </tr>
+        ${[['Complete Blood Count','✓','✓','✓'],['Metabolic Health','✓','✓','✓'],['Lipid Profile','✓','✓','✓'],['Liver & Kidney','✓','✓','✓'],['Inflammation (hs-CRP)','✓','✓','✓'],['Nutritional Status','✓','✓','✓'],['Cardiovascular Risk','—','✓','✓'],['Thyroid Function','—','✓','✓'],['Hormonal Health','—','✓','✓'],['Advanced Inflammation','—','—','✓'],['Bone Health','—','—','✓'],['Oxidative Stress','—','—','✓']].map((r,i)=>`
+          <tr style="background:${i%2===0?'rgba(201,168,76,.03)':'transparent'}">
+            <td style="padding:5px 8px;color:#888;border-bottom:1px solid #1a1a1a">${r[0]}</td>
+            ${r.slice(1).map(v=>`<td style="padding:5px;text-align:center;color:${v==='✓'?'#81C784':'#444'};border-bottom:1px solid #1a1a1a">${v}</td>`).join('')}
+          </tr>`).join('')}
+      </table>
+    </div>
+    <button class="bg bsm" onclick="go('kit-checkout')">Order Basic — €249</button>
+  </div>
+`,
+
+'kit-checkout':`
+  ${sb()}
+  ${hdr('p4','kit-select','Checkout')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="padding:11px;margin-bottom:10px">
+      <div style="font-size:.62rem;color:#888;margin-bottom:6px;letter-spacing:.07em;text-transform:uppercase">Order Summary</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:.82rem;font-weight:600;color:#F8F4EC">OLMA Basic Kit</div><div style="font-size:.62rem;color:#888;margin-top:1px">~30 biomarkers · 3–4 day turnaround</div></div>
+        <div style="font-size:1.1rem;font-weight:700;color:#C9A84C">€249</div>
+      </div>
+      <div class="div" style="margin:9px 0"></div>
+      <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#888">
+        <span>VAT (22% Italy)</span><span>€54.78</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#F8F4EC;margin-top:4px;font-weight:600">
+        <span>Total</span><span style="color:#C9A84C">€249.00</span>
+      </div>
+    </div>
+    <label class="lbl">Delivery Address</label>
+    <input class="inp" placeholder="Full name" value="Sofia Ricci">
+    <input class="inp" placeholder="Address line 1" value="Via Roma 42">
+    <input class="inp" placeholder="City, Postcode" value="Milan, 20121">
+    <select class="inp"><option>Italy</option><option>Germany</option><option>France</option></select>
+    <div class="div"></div>
+    <div style="font-size:.62rem;color:#888;margin-bottom:10px;line-height:1.5">Paid via Stripe. Physical goods are exempt from Apple/Google IAP requirements. Apple Pay and Google Pay accepted.</div>
+    <button class="bg" onclick="toast('Order confirmed! Kit dispatched within 24h ✓');go('home-s4')">Confirm Order — €249</button>
+    <div style="text-align:center;margin-top:7px"><button class="bgh">Cancel</button></div>
+  </div>
+`,
+
+'kit-guide-1':`
+  ${sb()}
+  ${hdr('p4','..home-s4','Sample Guide')}
+  <div class="sdots px" style="padding-top:8px">
+    ${[1,2,3,4,5,6].map((s,i)=>`<div class="sdot${i===0?' on':''}"></div>`).join('')}
+  </div>
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:18px">
+      <div style="font-size:2.5rem;margin-bottom:8px">📦</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#F8F4EC;margin-bottom:6px">Step 1 — What's in your kit</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.5;margin-bottom:12px">Your kit contains: lancets, collection tubes, prepaid return envelope, detailed instructions card, and biohazard bag.</div>
+    </div>
+    <button class="bg" onclick="go('kit-guide-2')">Next Step →</button>
+  </div>
+`,
+
+'kit-guide-2':`
+  ${sb()}
+  ${hdr('p4','kit-guide-1','Sample Guide')}
+  <div class="sdots px" style="padding-top:8px">
+    ${[1,2,3,4,5,6].map((s,i)=>`<div class="sdot${i===1?' on':''}"></div>`).join('')}
+  </div>
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:18px">
+      <div style="font-size:2.5rem;margin-bottom:8px">⏰</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#F8F4EC;margin-bottom:6px">Step 2 — When to collect</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.5;margin-bottom:12px">Best time: morning, between 7am–10am, after an overnight fast (12h). Stay hydrated with water only. Avoid exercise, alcohol, or smoking for 24h before.</div>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button class="bo bsm" style="flex:.3" onclick="go('kit-guide-1')">←</button>
+      <button class="bg" style="flex:1" onclick="go('kit-guide-3')">Next →</button>
+    </div>
+  </div>
+`,
+
+'kit-guide-3':`
+  ${sb()}
+  ${hdr('p4','kit-guide-2','Sample Guide')}
+  <div class="sdots px" style="padding-top:8px">
+    ${[1,2,3,4,5,6].map((s,i)=>`<div class="sdot${i===2?' on':''}"></div>`).join('')}
+  </div>
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:18px">
+      <div style="font-size:2.5rem;margin-bottom:8px">💉</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#F8F4EC;margin-bottom:6px">Step 3 — Collect your sample</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.5;margin-bottom:12px">Wash hands with warm water for 30 seconds. Use the lancet on your ring finger. Fill the tube to the marked line. Gently invert the tube 5 times.</div>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button class="bo bsm" style="flex:.3" onclick="go('kit-guide-2')">←</button>
+      <button class="bg" style="flex:1" onclick="go('kit-guide-4')">Next →</button>
+    </div>
+  </div>
+`,
+
+'kit-guide-4':`
+  ${sb()}
+  ${hdr('p4','kit-guide-3','Sample Guide')}
+  <div class="sdots px" style="padding-top:8px">
+    ${[1,2,3,4,5,6].map((s,i)=>`<div class="sdot${i===3?' on':''}"></div>`).join('')}
+  </div>
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:18px">
+      <div style="font-size:2.5rem;margin-bottom:8px">🔒</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#F8F4EC;margin-bottom:6px">Step 4 — Seal & label</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.5;margin-bottom:12px">Cap the tube securely. Place in the biohazard bag. Write your full name and order reference number on the label provided. Do not refrigerate.</div>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button class="bo bsm" style="flex:.3" onclick="go('kit-guide-3')">←</button>
+      <button class="bg" style="flex:1" onclick="go('kit-guide-5')">Next →</button>
+    </div>
+  </div>
+`,
+
+'kit-guide-5':`
+  ${sb()}
+  ${hdr('p4','kit-guide-4','Sample Guide')}
+  <div class="sdots px" style="padding-top:8px">
+    ${[1,2,3,4,5,6].map((s,i)=>`<div class="sdot${i===4?' on':''}"></div>`).join('')}
+  </div>
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:18px">
+      <div style="font-size:2.5rem;margin-bottom:8px">📮</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#F8F4EC;margin-bottom:6px">Step 5 — Return your kit</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.5;margin-bottom:12px">Place sealed biohazard bag in the prepaid return envelope. Drop at any PostItalia or DHL service point within 24 hours of collection.</div>
+    </div>
+    <button class="bg" style="background:linear-gradient(135deg,#1B5E20,#4CAF50);color:#fff;margin-bottom:7px" onclick="toast('Status updated: Sample Sent to Lab ✓');go('home-s4')">✓ Mark as Sent to Lab</button>
+    <div style="display:flex;gap:7px">
+      <button class="bo bsm" style="flex:.3" onclick="go('kit-guide-4')">←</button>
+      <button class="bg bsm" style="flex:1" onclick="go('kit-guide-6')">Next →</button>
+    </div>
+  </div>
+`,
+
+'kit-guide-6':`
+  ${sb()}
+  ${hdr('p4','kit-guide-5','Sample Guide')}
+  <div class="sdots px" style="padding-top:8px">
+    ${[1,2,3,4,5,6].map((s,i)=>`<div class="sdot${i===5?' on':''}"></div>`).join('')}
+  </div>
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:18px">
+      <div style="font-size:2.5rem;margin-bottom:8px">🔬</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#F8F4EC;margin-bottom:6px">Step 6 — What happens next</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.5;margin-bottom:12px">Your sample arrives at the partner lab within 1 day. Results are processed in 3–4 days. Your OLMA medical team reviews and clears your results. You will receive a push notification when your results are ready.</div>
+    </div>
+    <button class="bg" onclick="go('home-s4')">Back to Dashboard</button>
+  </div>
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 5: M09 Partner Labs + M10 Lab Results + M11 Protocol
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p5: {
+  first:'partner-labs',
+  label:'M09–M11 · Labs, Results & Protocol',
+  screens:{
+
+'partner-labs':`
+  ${sb()}
+  ${hdr('p5','..home-s3','Partner Labs')}
+  <div class="cnt px pb">
+    <div style="font-size:.68rem;color:#888;margin-bottom:10px;line-height:1.5">Visit a partner lab near you. Generate a test referral document and get tested. Your results will be uploaded by our medical team.</div>
+    <div style="display:flex;gap:7px;margin-bottom:10px">
+      <select class="inp" style="margin-bottom:0;flex:1;font-size:.72rem;padding:10px 12px"><option>Italy</option><option>Germany</option><option>France</option><option>Spain</option></select>
+      <button class="bg bsm" style="width:auto;padding:10px 14px" onclick="toast('Showing labs in Italy')">Search</button>
+    </div>
+    <div class="labcard" onclick="go('lab-detail')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:.82rem;font-weight:600;color:#F8F4EC">Synlab Milano Centro</div>
+          <div style="font-size:.65rem;color:#888;margin-top:2px">Via Solferino 12, Milan · 0.8km</div>
+          <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap">
+            <div class="bdg bg-g" style="font-size:.5rem">Walk-in ✓</div>
+            <div class="bdg bg-gold" style="font-size:.5rem">Home kit return ✓</div>
+          </div>
+        </div>
+        <div style="color:#C9A84C;font-size:.85rem">›</div>
+      </div>
+    </div>
+    <div class="labcard" onclick="go('lab-detail')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:.82rem;font-weight:600;color:#F8F4EC">CDM Brera Lab</div>
+          <div style="font-size:.65rem;color:#888;margin-top:2px">Corso Garibaldi 89, Milan · 1.4km</div>
+          <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap">
+            <div class="bdg bg-a" style="font-size:.5rem">Appointment required</div>
+          </div>
+        </div>
+        <div style="color:#C9A84C;font-size:.85rem">›</div>
+      </div>
+    </div>
+    <div class="labcard" onclick="go('lab-detail')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:.82rem;font-weight:600;color:#F8F4EC">Laboratorio Medico Cerba</div>
+          <div style="font-size:.65rem;color:#888;margin-top:2px">Via Monte Rosa 91, Milan · 2.1km</div>
+          <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap">
+            <div class="bdg bg-g" style="font-size:.5rem">Walk-in ✓</div>
+          </div>
+        </div>
+        <div style="color:#C9A84C;font-size:.85rem">›</div>
+      </div>
+    </div>
+    <button class="bg bsm" onclick="go('test-referral')">Generate Test Referral Document →</button>
+  </div>
+`,
+
+'lab-detail':`
+  ${sb()}
+  ${hdr('p5','partner-labs','Lab Details')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="padding:14px">
+      <div style="font-size:1rem;font-weight:600;color:#F8F4EC;margin-bottom:4px">Synlab Milano Centro</div>
+      <div style="font-size:.65rem;color:#888;margin-bottom:10px">Via Solferino 12 · Milan 20121 · +39 02 0066 0600</div>
+      ${[['Walk-in available','✓','green'],['Appointment required','No','green'],['Home kit return accepted','✓','green'],['Supported tests','Full OLMA panel','gold']].map(([k,v,c])=>`
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e1e1e">
+          <span style="font-size:.68rem;color:#888">${k}</span>
+          <span style="font-size:.7rem;color:${c==='green'?'#81C784':c==='gold'?'#C9A84C':'#F8F4EC'}">${v}</span>
+        </div>`).join('')}
+      <div style="height:8px"></div>
+      <a href="#" style="font-size:.68rem;color:#C9A84C;text-decoration:underline" onclick="toast('Opening synlab.it in browser')">synlab.it →</a>
+    </div>
+    <button class="bg" onclick="go('test-referral')">Get My Test Request Document</button>
+  </div>
+`,
+
+'test-referral':`
+  ${sb()}
+  ${hdr('p5','partner-labs','Test Referral')}
+  <div class="cnt px pb">
+    <div style="background:var(--dk3);border:1px solid #2a2a2a;border-radius:var(--r);padding:14px;margin-bottom:12px">
+      <div style="text-align:center;padding:8px 0;border-bottom:1px solid #222;margin-bottom:10px">
+        <div style="font-size:.6rem;color:#C9A84C;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px">OLMA Longevity Platform</div>
+        <div style="font-size:.8rem;font-weight:600;color:#F8F4EC">Lab Test Request</div>
+        <div style="font-size:.6rem;color:#888">Sofia Ricci · 13 Jun 2026 · OLM-0847</div>
+      </div>
+      <div class="st">Requested Biomarkers</div>
+      ${[['Fasting Glucose','Metabolic'],['HbA1c','Metabolic'],['hs-CRP','Inflammation'],['Vitamin D (25-OH)','Nutritional'],['Ferritin','Nutritional'],['Vitamin B12','Nutritional']].map(([n,c])=>`
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.62rem;border-bottom:1px solid #1a1a1a">
+          <span style="color:#888">${n}</span><span style="color:#555">${c}</span>
+        </div>`).join('')}
+      <div style="font-size:.58rem;color:#555;margin-top:8px;line-height:1.4;font-style:italic">Please provide standard fasting blood draw. OLMA longevity optimal ranges may differ from standard lab reference ranges. For queries: medical@olma.health</div>
+    </div>
+    <button class="bg" onclick="toast('PDF saved to My Documents ✓')">Download PDF</button>
+    <div style="height:7px"></div>
+    <button class="bo bsm" onclick="toast('PDF copied to clipboard')">Copy to Clipboard</button>
+  </div>
+`,
+
+'results-pending':`
+  ${sb()}
+  ${hdr('p5','..home-s4','Your Results')}
+  <div class="cnt px pb">
+    <div class="card card-b" style="text-align:center;padding:18px;margin-bottom:12px">
+      <div style="font-size:2.2rem;margin-bottom:8px">🔬</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#90CAF9;margin-bottom:6px">Results Ready</div>
+      <div style="font-size:.68rem;color:#888;line-height:1.5">Your lab results have been received and reviewed by our medical team. Your gate check has cleared.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:.6rem;color:#888;margin-bottom:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase">Patient Overview</div>
+      ${[['Chronological Age','47 years'],['Longevity Score','74 / 100 · Lab-Adjusted'],['Healthspan Score','78 / 100'],['Cardiometabolic Risk','Low']].map(([k,v])=>`
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e1e1e;font-size:.7rem">
+          <span style="color:#888">${k}</span><span style="color:${k.includes('Score')?'#C9A84C':'#F8F4EC'}">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="st" style="margin-top:4px">Metabolic Health</div>
+    <div class="card">
+      <div style="font-size:.65rem;color:#888;margin-bottom:8px;line-height:1.4">This group shows how efficiently your body handles energy and blood sugar.</div>
+      ${[['HbA1c','5.2%','< 5.4%','green','Optimal'],['Fasting Glucose','92 mg/dL','70–99','green','Optimal'],['Fasting Insulin','11 μIU/mL','2–25','amber','Borderline']].map(([n,v,r,c,l])=>`
+        <div class="bior">
+          <span class="bionm">${n}</span>
+          <span style="font-size:.6rem;color:#555;flex:1;text-align:right;margin-right:8px">${r}</span>
+          <span class="bioval" style="color:${c==='green'?'#81C784':'#FFB74D'}">${v}</span>
+          <div class="bdg ${c==='green'?'bg-g':'bg-a'}" style="font-size:.48rem;margin-left:4px">${l}</div>
+        </div>`).join('')}
+      <button style="width:100%;background:transparent;border:none;color:#C9A84C;font-size:.65rem;cursor:pointer;padding:6px;text-align:left" onclick="toast('Opening Vita chat about this result')">💬 Talk to Vita about this result</button>
+    </div>
+    <div class="st">Inflammation</div>
+    <div class="card">
+      ${[['hs-CRP','1.2 mg/L','< 1 mg/L','amber','Borderline']].map(([n,v,r,c,l])=>`
+        <div class="bior">
+          <span class="bionm">${n}</span>
+          <span style="font-size:.6rem;color:#555;flex:1;text-align:right;margin-right:8px">${r}</span>
+          <span class="bioval" style="color:#FFB74D">${v}</span>
+          <div class="bdg bg-a" style="font-size:.48rem;margin-left:4px">${l}</div>
+        </div>`).join('')}
+      <div style="font-size:.62rem;color:#888;padding:6px 0;line-height:1.4">Slightly elevated — improve sleep quality and increase physical activity.</div>
+    </div>
+    <div style="padding:8px;background:var(--dk4);border-radius:8px;font-size:.6rem;color:#888;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+      <span style="color:#C9A84C">✓</span> Medically reviewed by OLMA Medical Team
+    </div>
+    <button class="bg bsm" onclick="toast('PDF downloaded ✓')">Download Full Report PDF</button>
+    <div style="height:7px"></div>
+    <button class="bg" onclick="go('protocol-info')">View Your Protocol & Plan →</button>
+  </div>
+`,
+
+'protocol-info':`
+  ${sb()}
+  ${hdr('p5','results-pending','Your Protocol')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <div style="font-size:.58rem;color:#C9A84C;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Auto-Assigned Protocol</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:#F8F4EC;font-weight:500">OLMA International<br>Longevity Standard</div>
+        </div>
+        <div class="bdg bg-g">Active</div>
+      </div>
+      <div style="font-size:.68rem;color:#888;line-height:1.6;margin-bottom:10px">A science-backed approach to longevity built on Mediterranean nutrition, structured movement, targeted supplementation, and regular biomarker monitoring. Clinically validated and regularly updated by our medical team.</div>
+      <div style="font-size:.62rem;color:#C9A84C;margin-bottom:4px;font-weight:600">Medical Lead</div>
+      <div style="font-size:.68rem;color:#888">Prof. Ilaria Tresoldi MD, PhD · Longevity Medicine</div>
+    </div>
+    <div class="card" style="padding:13px">
+      <div class="st">What happens next</div>
+      ${[['🥗','Personalised nutrition plan','Based on your biomarker results'],['💊','Supplement recommendations','Tailored to your deficiencies'],['🚶','Movement protocol','30–45 min daily walking plan'],['📅','Consultation booking','Review your plan with a doctor']].map(([ic,t,d])=>`
+        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #1e1e1e;align-items:flex-start">
+          <span style="font-size:1.1rem">${ic}</span>
+          <div><div style="font-size:.75rem;color:#F8F4EC;font-weight:500">${t}</div><div style="font-size:.62rem;color:#888;margin-top:2px">${d}</div></div>
+        </div>`).join('')}
+    </div>
+    <button class="bg" onclick="go('home-s7');toast('Welcome to your Active Treatment journey! ✓')">Begin My Journey →</button>
+  </div>
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 6: M14 Journey & Store + M12 Credits
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p6: {
+  first:'journey',
+  label:'M12–M14 · Credits, Journey & Store',
+  screens:{
+
+'credits-home':`
+  ${sb()}
+  ${hdr('p6','..vita-home','Emotional Support Credits')}
+  <div class="cnt px pb">
+    <div class="card" style="background:linear-gradient(135deg,rgba(156,39,176,.12),rgba(156,39,176,.04));border-color:rgba(156,39,176,.25);text-align:center;padding:16px">
+      <div style="font-size:.58rem;color:#9C27B0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Your Credit Balance</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:#CE93D8;font-weight:500">2</div>
+      <div style="font-size:.62rem;color:#888">credits remaining · Expires Jan 2026</div>
+    </div>
+    <div style="font-size:.7rem;color:#888;line-height:1.5;margin-bottom:12px;text-align:center">Each credit gives you one emotional support session with Vita, regardless of session length.</div>
+    <div class="st">Purchase Credits</div>
+    ${[['Pack of 3','€9','€3/credit'],['Pack of 5','€13','€2.60/credit'],['Pack of 10','€22','€2.20/credit · Best value']].map((p,i)=>`
+      <div class="cred${i===1?' sel':''}" onclick="document.querySelectorAll('.cred').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-size:.82rem;font-weight:600;color:#F8F4EC">${p[0]}</div><div style="font-size:.62rem;color:#888;margin-top:1px">${p[2]}</div></div>
+          <div style="font-size:1rem;font-weight:700;color:#CE93D8">${p[1]}</div>
+        </div>
+      </div>`).join('')}
+    <div style="font-size:.62rem;color:#888;margin:8px 0;line-height:1.4">Payment via Apple IAP (iOS) or Google IAP (Android). By purchasing you acknowledge immediate delivery and forfeiture of 14-day withdrawal right upon first use.</div>
+    <button class="bg" style="background:linear-gradient(135deg,#6A1B9A,#9C27B0);color:#fff" onclick="toast('Pack of 5 credits purchased ✓')">Purchase Pack of 5 — €13</button>
+  </div>
+`,
+
+'journey':`
+  ${sb()}
+  <div class="hdr"><div class="htitle" style="font-family:'Cormorant Garamond',serif;font-size:1rem">Today's Journey</div><div class="hact" style="font-size:.68rem;color:#C9A84C" onclick="toast('You took 2 of 3 supplements today')">2/3 ✓</div></div>
+  <div class="cnt px pb">
+    <div style="font-size:.62rem;color:#888;margin-bottom:10px">Saturday, 13 June 2026 · Day 14 🔥</div>
+    <div class="st">💊 Supplements</div>
+    <div class="suppc">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="suppn">Vitamin D3 + K2</div>
+          <div class="suppdose">2000 IU D3 · 100mcg K2 · Morning · With breakfast</div>
+          <div class="suppwhy" onclick="toast('Vitamin D was 38 ng/mL — Borderline. Supplementation recommended to reach 40–60 ng/mL optimal range.')">Why am I taking this? →</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <div class="bdg bg-g">Taken ✓</div>
+          <div style="font-size:.58rem;color:#888;cursor:pointer" onclick="toast('Reminder set for 8:00 AM ✓')">⏰ Reminder</div>
+        </div>
+      </div>
+    </div>
+    <div class="suppc">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="suppn">Omega-3 EPA/DHA</div>
+          <div class="suppdose">2g total · EPA 1.2g + DHA 0.8g · Evening · With dinner</div>
+          <div class="suppwhy" onclick="toast('hs-CRP 1.2 mg/L — anti-inflammatory protocol. Omega-3 supports cardiovascular health and reduces inflammation.')">Why am I taking this? →</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <div class="bdg bg-a">Due 7pm</div>
+          <div style="font-size:.58rem;color:#888;cursor:pointer" onclick="toast('Reminder set for 7:00 PM ✓')">⏰ Reminder</div>
+        </div>
+      </div>
+    </div>
+    <div class="suppc">
+      <div style="font-size:.65rem;color:#888;margin-bottom:5px">Not yet purchased:</div>
+      <div class="suppn">Magnesium Glycinate</div>
+      <div class="suppdose">400mg · Bedtime</div>
+      <div style="font-size:.68rem;color:#C9A84C;margin-top:6px;cursor:pointer" onclick="go('store')">Order Now in Store →</div>
+    </div>
+    <div class="st" style="margin-top:6px">🥗 Today's Nutrition</div>
+    <div class="card card-g" style="padding:12px">
+      <div style="font-size:.72rem;color:#C9A84C;font-weight:600;margin-bottom:5px">⭐ Focus food today: Sardines</div>
+      <div style="font-size:.65rem;color:#888;margin-bottom:8px">Rich in Omega-3 EPA/DHA and Vitamin D. Supports your cardiovascular protocol.</div>
+      <div style="font-size:.65rem;color:#888;font-weight:600;margin-bottom:3px">Eat more of:</div>
+      <div style="font-size:.64rem;color:#888;margin-bottom:7px">Extra-virgin olive oil · Legumes · Leafy greens · Walnuts · Berries</div>
+      <div style="font-size:.65rem;color:#888;font-weight:600;margin-bottom:3px">Eat less of:</div>
+      <div style="font-size:.64rem;color:#888;">Refined sugars · Processed meats · Trans fats</div>
+    </div>
+    <div class="st">🚶 Movement</div>
+    <div class="task dn" onclick="this.classList.toggle('dn')">
+      <div class="tchk">✓</div>
+      <div>
+        <div class="ttxt">30–45 min brisk walk</div>
+        <div class="tsub">6,240 steps recorded · Goal: 8,000 · Auto-completed from Apple Watch ⌚</div>
+      </div>
+    </div>
+  </div>
+  ${bnav('p6','Home')}
+`,
+
+'store':`
+  ${sb()}
+  ${hdr('p6','journey','Supplement Store','🔍')}
+  <div class="cnt px pb">
+    <div style="font-size:.62rem;color:#888;padding:6px 10px;background:var(--dk3);border-radius:8px;margin-bottom:10px;border:1px solid #222">ℹ️ Phase 1: Browse and purchase directly from the supplier. No in-app checkout.</div>
+    <div class="st">Recommended for You</div>
+    ${[
+      ['Vitamin D3 + K2','Based on your Vitamin D: 38 ng/mL · Borderline','2000 IU D3 + 100mcg K2 · Immune support, bone health','Eurosup Italia','€34'],
+      ['Omega-3 EPA/DHA','Anti-inflammatory protocol · hs-CRP support','2g EPA + DHA daily · Cardiovascular, cognitive, joint support','Nordic Naturals EU','€42'],
+    ].map(([n,why,desc,sup,pr])=>`
+      <div class="card" style="padding:13px;margin-bottom:9px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+          <div class="suppn" style="flex:1">${n}</div>
+          <div style="font-size:.95rem;font-weight:700;color:#C9A84C">${pr}</div>
+        </div>
+        <div style="font-size:.62rem;color:#C9A84C;margin-bottom:3px;font-style:italic">${why}</div>
+        <div style="font-size:.64rem;color:#888;margin-bottom:5px;line-height:1.4">${desc}</div>
+        <div style="font-size:.6rem;color:#555;margin-bottom:8px">Supplier: ${sup}</div>
+        <button class="bo bsm" style="font-size:.65rem" onclick="toast('Redirecting to supplier website for purchase')">View Supplier → Purchase Directly</button>
+      </div>`).join('')}
+    <div class="st" style="margin-top:4px">Full Catalogue</div>
+    ${[['Magnesium Glycinate','€28','Sleep & muscle recovery'],['Curcumin + BioPerine','€32','Anti-inflammatory'],['Berberine HCl','€38','Metabolic support'],['CoQ10 Ubiquinol','€45','Cellular energy']].map(([n,pr,d])=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1e1e1e;cursor:pointer" onclick="toast('Viewing '+n)">
+        <div><div style="font-size:.76rem;color:#F8F4EC">${n}</div><div style="font-size:.62rem;color:#888;margin-top:1px">${d}</div></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.8rem;color:#C9A84C;font-weight:600">${pr}</span><span style="color:#555;font-size:.85rem">›</span></div>
+      </div>`).join('')}
+  </div>
+  ${bnav('p6','Store')}
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 7: M13 Vita AI Sessions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p7: {
+  first:'vita-home',
+  label:'M13 · AI Avatar: Vita',
+  screens:{
+
+'vita-home':`
+  ${sb()}
+  <div class="hdr">
+    <div class="hback" onclick="go('home-s7')">←</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="vav">👩</div>
+      <div><div style="font-size:.85rem;font-weight:600">Vita</div><div style="font-size:.58rem;color:#4CAF50">● Online</div></div>
+    </div>
+    <div class="hact" onclick="go('vita-history')">📋</div>
+  </div>
+  <div class="cnt px pb">
+    <div style="display:flex;gap:4px;margin-bottom:12px">
+      <div style="flex:1;padding:9px 6px;border-radius:9px;border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.08);cursor:pointer;text-align:center;font-size:.65rem;color:#C9A84C;font-weight:600" onclick="go('vita-chat-health')">🩺 Health Guidance</div>
+      <div style="flex:1;padding:9px 6px;border-radius:9px;border:1px solid #2a2a2a;cursor:pointer;text-align:center;font-size:.65rem;color:#888" onclick="go('vita-chat-supplement')">💊 Supplements</div>
+      <div style="flex:1;padding:9px 6px;border-radius:9px;border:1px solid rgba(156,39,176,.3);background:rgba(156,39,176,.06);cursor:pointer;text-align:center;font-size:.65rem;color:#CE93D8" onclick="go('vita-chat-emotional')">💜 Wellbeing</div>
+    </div>
+    <div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:10px">
+      <div class="vav">👩</div>
+      <div class="vbub" style="flex:1">
+        <div class="vname">Vita</div>
+        Good morning, Sofia 🌿 Your Vitamin D is responding well to supplementation. How are you feeling today?
+      </div>
+    </div>
+    <div style="font-size:.58rem;color:#888;text-align:center;margin-bottom:8px">AI responses are informational, not medical advice · Medically reviewed by OLMA Team</div>
+    ${[['How is my biomarker score trending?'],['Tell me about my Vitamin D result'],['What should I eat today?']].map(s=>`
+      <div style="padding:8px 12px;border:1px solid #2a2a2a;border-radius:9px;font-size:.7rem;color:#888;cursor:pointer;margin-bottom:6px;transition:all .2s" onclick="go('vita-chat-health')">${s[0]} →</div>`).join('')}
+  </div>
+  <div class="cinw">
+    <div class="cmic">🎤</div>
+    <input class="cinp" placeholder="Ask Vita anything...">
+    <button class="csend" onclick="go('vita-chat-health')">→</button>
+  </div>
+`,
+
+'vita-chat-health':`
+  ${sb()}
+  <div class="hdr">
+    <div class="hback" onclick="go('vita-home')">←</div>
+    <div style="display:flex;align-items:center;gap:8px"><div class="vav">👩</div><div><div style="font-size:.82rem;font-weight:600">Vita · Health Guidance</div><div style="font-size:.58rem;color:#4CAF50">● Active session</div></div></div>
+    <div class="hact" style="font-size:.65rem;color:#888">⋮</div>
+  </div>
+  <div class="cnt px pb">
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:9px">
+      <div class="vav" style="flex-shrink:0">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>Your HbA1c is now at 5.2% — that's in the Optimal range! Down from your baseline. Your consistent Mediterranean diet is working. 🎯 <span style="color:#C9A84C;font-size:.6rem">Medically reviewed by OLMA Team ✓</span></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:9px">
+      <div style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2);border-radius:16px 16px 3px 16px;padding:9px 12px;font-size:.72rem;color:#F8F4EC;max-width:80%">What about my Vitamin D?</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:9px">
+      <div class="vav" style="flex-shrink:0">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>Your Vitamin D is at 38 ng/mL — that's Borderline. We need to get you to 40–60 ng/mL. Your D3 + K2 supplement (2000 IU daily) should help. I recommend also increasing morning sunlight exposure — even 15 minutes helps significantly. <span style="color:#C9A84C;font-size:.6rem">Medically reviewed by OLMA Team ✓</span></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:9px">
+      <div style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2);border-radius:16px 16px 3px 16px;padding:9px 12px;font-size:.72rem;color:#F8F4EC;max-width:80%">Should I increase the dose?</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">
+      <div class="vav" style="flex-shrink:0">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>A qualified doctor can review your full situation and confirm the right dose for you. I'd recommend discussing this at your next consultation. I can help you book one now — would you like to?</div>
+    </div>
+    <div class="div"></div>
+    <div style="font-size:.6rem;color:#444;text-align:center">AI information · Not a substitute for medical advice</div>
+  </div>
+  <div class="cinw">
+    <div class="cmic">🎤</div>
+    <input class="cinp" placeholder="Continue the conversation...">
+    <button class="csend">→</button>
+  </div>
+`,
+
+'vita-chat-supplement':`
+  ${sb()}
+  <div class="hdr">
+    <div class="hback" onclick="go('vita-home')">←</div>
+    <div style="display:flex;align-items:center;gap:8px"><div class="vav">👩</div><div><div style="font-size:.82rem;font-weight:600">Vita · Supplement Guidance</div><div style="font-size:.58rem;color:#4CAF50">● Active session</div></div></div>
+    <div class="hact">⋮</div>
+  </div>
+  <div class="cnt px pb">
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:9px">
+      <div class="vav" style="flex-shrink:0">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>Your current supplement protocol is based on your biomarker results. Here's what I recommend:<br><br><strong style="color:#C9A84C">Priority 1:</strong> Vitamin D3 + K2 (2000 IU) — for your Borderline Vitamin D level<br><strong style="color:#C9A84C">Priority 2:</strong> Omega-3 EPA/DHA (2g) — to support your hs-CRP reduction<br><strong style="color:#C9A84C">Priority 3:</strong> Magnesium Glycinate (400mg) — for sleep quality and stress<br><br><span style="color:#C9A84C;font-size:.6rem">Medically reviewed by OLMA Team ✓</span></div>
+    </div>
+    <div style="font-size:.62rem;color:#888;padding:8px 10px;background:var(--dk4);border-radius:8px;margin-bottom:8px;line-height:1.5">A qualified doctor can review your full situation and confirm these recommendations are right for you.</div>
+  </div>
+  <div class="cinw">
+    <div class="cmic">🎤</div>
+    <input class="cinp" placeholder="Ask about your supplements...">
+    <button class="csend">→</button>
+  </div>
+`,
+
+'vita-chat-emotional':`
+  ${sb()}
+  <div class="hdr">
+    <div class="hback" onclick="go('vita-home')">←</div>
+    <div style="display:flex;align-items:center;gap:8px"><div class="vav">👩</div><div><div style="font-size:.82rem;font-weight:600">Vita · Wellbeing</div><div style="font-size:.58rem;color:#CE93D8">💜 1 credit · Private session</div></div></div>
+    <div class="hact">⋮</div>
+  </div>
+  <div class="cnt px pb">
+    <div style="background:rgba(156,39,176,.08);border:1px solid rgba(156,39,176,.2);border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:.65rem;color:#CE93D8;line-height:1.5">
+      I am here to support you with feelings, daily wellbeing, and life purpose. I am not a substitute for a mental health professional.
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:9px">
+      <div class="vav" style="flex-shrink:0">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>I'm here for you, Sofia. This is a safe, private space. How are you feeling today? What's on your mind?</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:9px">
+      <div style="background:rgba(156,39,176,.12);border:1px solid rgba(156,39,176,.2);border-radius:16px 16px 3px 16px;padding:9px 12px;font-size:.72rem;color:#F8F4EC;max-width:80%">I've been feeling a bit low on motivation lately with the health journey.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">
+      <div class="vav" style="flex-shrink:0">👩</div>
+      <div class="vbub" style="flex:1"><div class="vname">Vita</div>That's very natural — sustaining lifestyle changes over time takes real effort, and it's okay to have days where motivation dips. What you're doing is genuinely meaningful. Can you tell me more about what feels hardest right now?</div>
+    </div>
+    <div class="div"></div>
+    <div style="font-size:.58rem;color:#444;text-align:center">Session content is private and never stored · 1 credit will be deducted on session end</div>
+  </div>
+  <div class="cinw">
+    <div class="cmic">🎤</div>
+    <input class="cinp" placeholder="Share how you're feeling...">
+    <button class="csend" style="background:linear-gradient(135deg,#6A1B9A,#9C27B0)">→</button>
+  </div>
+`,
+
+'vita-history':`
+  ${sb()}
+  ${hdr('p7','vita-home','Session History')}
+  <div class="cnt px pb">
+    <div class="st">Today</div>
+    ${[['🩺 Health Guidance','13 Jun · 18 min','3 key points discussed'],['💊 Supplement Guidance','13 Jun · 12 min','Vitamin D & Omega-3 review'],['💜 Wellbeing Session','13 Jun · 8 min','Private session'],].map(([t,dt,sub])=>`
+      <div class="sessrow" onclick="${t.includes('Wellbeing')?`toast('Session content is private and not stored.')`:t.includes('Health')?`go('session-detail')`:``}">
+        <div style="font-size:1.2rem">${t.split(' ')[0]}</div>
+        <div style="flex:1"><div style="font-size:.76rem;color:#F8F4EC;font-weight:500">${t.substring(2)}</div><div style="font-size:.62rem;color:#888;margin-top:1px">${dt} · ${sub}</div></div>
+        <div style="color:#555;font-size:.85rem">›</div>
+      </div>`).join('')}
+    <div class="st" style="margin-top:8px">This Week</div>
+    ${[['🩺 Health Guidance','10 Jun · 22 min'],['💊 Supplement Guidance','09 Jun · 14 min'],['🩺 Health Guidance','07 Jun · 20 min']].map(([t,dt])=>`
+      <div class="sessrow" onclick="go('session-detail')">
+        <div style="font-size:1.2rem">${t.split(' ')[0]}</div>
+        <div style="flex:1"><div style="font-size:.76rem;color:#F8F4EC;font-weight:500">${t.substring(2)}</div><div style="font-size:.62rem;color:#888;margin-top:1px">${dt}</div></div>
+        <div style="color:#555;font-size:.85rem">›</div>
+      </div>`).join('')}
+  </div>
+`,
+
+'session-detail':`
+  ${sb()}
+  ${hdr('p7','vita-history','Session Summary')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="padding:12px;margin-bottom:10px">
+      <div style="font-size:.58rem;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em">Health Guidance · 13 Jun 2026 · 18 min</div>
+      <div class="st" style="margin-bottom:7px">Key Points Discussed</div>
+      ${['HbA1c now at 5.2% — Optimal range achieved ✓','Vitamin D at 38 ng/mL — Borderline, supplementation ongoing','hs-CRP 1.2 mg/L — improving, continue anti-inflammatory diet','Sleep quality improving based on wearable data (7.2h average)','Mediterranean diet adherence confirmed — energy improvement noted'].map((p,i)=>`
+        <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #1e1e1e">
+          <span style="color:#C9A84C;font-size:.68rem;font-weight:700;flex-shrink:0">${i+1}.</span>
+          <span style="font-size:.7rem;color:#888;line-height:1.4">${p}</span>
+        </div>`).join('')}
+      <div class="div" style="margin:9px 0"></div>
+      <div style="font-size:.62rem;color:#C9A84C;font-weight:600;margin-bottom:5px">Recommended Action</div>
+      <div style="font-size:.7rem;color:#888;line-height:1.4">Book a consultation to discuss increasing Vitamin D dosage. Maintain current supplement routine. Continue morning walk protocol.</div>
+    </div>
+    <button class="bg bsm" onclick="go('vita-home')">Talk to Vita Again</button>
+  </div>
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 8: M08 Doctor Consultation + M15 Progress + M16 Wearables
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p8: {
+  first:'consult-list',
+  label:'M08–M16 · Consultation, Progress & Wearables',
+  screens:{
+
+'consult-list':`
+  ${sb()}
+  ${hdr('p8','..home-s7','Book Consultation')}
+  <div class="cnt px pb">
+    <div style="font-size:.68rem;color:#888;margin-bottom:11px">Select a doctor and consultation tier. Processed via Stripe.</div>
+    ${[
+      ['👩‍⚕️','Prof. Ilaria Tresoldi MD, PhD','Longevity Medicine · 22 years','Junior · €99 / 30 min','Available today','green','consult-booking'],
+      ['👨‍⚕️','Dr. Marco Benedetti','Functional Medicine · 15 years','Senior · €199 / 45 min','Tomorrow 2pm','green','consult-booking'],
+      ['👨‍⚕️','Prof. Andreas Müller','Preventive Medicine · 28 years','Professor · €349 / 60 min','Next week','amber','consult-booking'],
+    ].map(([av,n,spec,tier,avail,c,sid])=>`
+      <div class="docc" onclick="go('${sid}')">
+        <div class="docav">${av}</div>
+        <div>
+          <div style="font-size:.82rem;font-weight:600;color:#F8F4EC">${n}</div>
+          <div style="font-size:.62rem;color:#888;margin-top:1px">${spec}</div>
+          <div style="font-size:.65rem;color:#C9A84C;margin-top:3px">${tier}</div>
+          <div style="font-size:.6rem;color:${c==='green'?'#81C784':'#FFB74D'};margin-top:1px">● ${avail}</div>
+        </div>
+        <div style="color:#555;margin-left:auto;font-size:.9rem">›</div>
+      </div>`).join('')}
+  </div>
+`,
+
+'consult-booking':`
+  ${sb()}
+  ${hdr('p8','consult-list','Confirm Booking')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="padding:14px;margin-bottom:12px">
+      <div style="font-size:.6rem;color:#888;margin-bottom:7px;letter-spacing:.07em;text-transform:uppercase">Booking Summary</div>
+      <div style="font-size:.9rem;font-weight:600;color:#F8F4EC">Prof. Ilaria Tresoldi MD, PhD</div>
+      <div style="font-size:.68rem;color:#888;margin-top:1px">Junior Consultation · 30 minutes</div>
+      <div class="div" style="margin:9px 0"></div>
+      ${[['Date & Time','Today, 3:30 PM'],['Consultation Fee','€99'],['VAT (22%)','€21.78'],['Total','€120.78']].map(([k,v])=>`
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:.68rem;color:#888">${k}</span>
+          <span style="font-size:${k==='Total'?'.85rem':'.72rem'};color:${k==='Total'?'#C9A84C':'#F8F4EC'};${k==='Total'?'font-weight:700':''}">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="card" style="padding:11px;margin-bottom:11px">
+      <div style="font-size:.6rem;color:#888;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em">What your doctor will see</div>
+      <div style="font-size:.65rem;color:#888;line-height:1.5">Longevity score 82 · Key biomarker flags · Wearable data (7-day) · OLMA protocol · Vita session topics (last 3)</div>
+    </div>
+    <div style="font-size:.62rem;color:#888;margin-bottom:11px;line-height:1.5">Cancellation policy: full refund if cancelled more than 24h before the session. Paid via Stripe (exempt from Apple/Google IAP).</div>
+    <button class="bg" onclick="toast('Consultation booked! Confirmation email sent ✓');go('consult-prep')">Confirm & Pay €99</button>
+    <div style="text-align:center;margin-top:7px"><button class="bgh">Cancel</button></div>
+  </div>
+`,
+
+'consult-prep':`
+  ${sb()}
+  ${hdr('p8','consult-list','Consultation Prep')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:14px;margin-bottom:10px">
+      <div style="font-size:.58rem;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Your consultation in</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#C9A84C;font-weight:500">2h 14m</div>
+      <div style="font-size:.65rem;color:#888">Prof. Tresoldi · Today 3:30 PM</div>
+    </div>
+    <div class="card" style="padding:12px;margin-bottom:9px">
+      <div class="st">What your doctor will see</div>
+      ${[['Longevity Score','82 / 100 · Lab-Adjusted ↑14'],['Key biomarkers','Vitamin D Borderline, hs-CRP Borderline'],['Wearable (7-day)','HR 72bpm · Sleep 7.2h · Steps 7,840/day'],['Protocol','OLMA International Standard'],['Vita session topics','Vitamin D, carb reduction, sleep']].map(([k,v])=>`
+        <div style="display:flex;gap:6px;padding:6px 0;border-bottom:1px solid #1e1e1e">
+          <span style="font-size:.62rem;color:#888;width:100px;flex-shrink:0">${k}</span>
+          <span style="font-size:.68rem;color:#888;flex:1;line-height:1.4">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="card" style="padding:11px;margin-bottom:9px">
+      <div class="st">How to prepare</div>
+      ${['Test your video and microphone before the session','Note any changes in energy, sleep, or digestion since your last test','Have your questions ready — ask about your Vitamin D dose','Ensure good lighting and a quiet environment'].map((t,i)=>`
+        <div style="display:flex;gap:7px;padding:6px 0;border-bottom:1px solid #1e1e1e">
+          <span style="color:#C9A84C;font-weight:700;font-size:.65rem;flex-shrink:0;width:14px">${i+1}.</span>
+          <span style="font-size:.68rem;color:#888;line-height:1.4">${t}</span>
+        </div>`).join('')}
+    </div>
+    <button class="bg" style="opacity:.5" onclick="toast('Join button activates 15 minutes before session')">Join Consultation (activates at 3:15 PM)</button>
+    <div style="height:7px"></div>
+    <button class="bg" onclick="toast('Opening video call via Zoom ✓')">🎥 Join Now (demo)</button>
+  </div>
+`,
+
+'progress':`
+  ${sb()}
+  ${hdr('p8','..home-s7','Progress')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="padding:12px">
+      <div class="st">Score History</div>
+      <div class="chart-bars" style="height:55px;gap:6px;margin-bottom:4px">
+        ${[[68,'Start'],[70,'Wk 2'],[74,'Lab'],[78,'Wk 4'],[82,'Now']].map(([v,l])=>`
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px">
+            <div style="font-size:.55rem;color:#C9A84C">${v}</div>
+            <div class="cbar" style="width:100%;height:${(v/100)*45}px" title="Score: ${v} · ${l}"></div>
+            <div style="font-size:.5rem;color:#555">${l}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="st">5-Pillar Trends</div>
+    <div class="card">
+      ${[['❤️','Happiness',78,'↑ Improving'],['💪','Fitness',65,'→ Stable'],['🎯','Purpose',82,'↑ Improving'],['🌿','Spirituality',70,'→ Stable'],['🥗','Nutrition',74,'↑ Improving']].map(([ic,nm,v,tr])=>`
+        <div class="pr">
+          <span class="pico">${ic}</span><span class="pnm">${nm}</span>
+          <div class="pbar"><div class="pfill" style="width:${v}%"></div></div>
+          <span class="pval">${v}</span>
+          <span style="font-size:.58rem;color:${tr.includes('↑')?'#81C784':'#888'};width:68px;text-align:right">${tr}</span>
+        </div>`).join('')}
+    </div>
+    <div class="st">Weekly Habits</div>
+    <div class="card" style="padding:12px">
+      ${[['Movement','5/7 days','71%'],['Nutrition','6/7 days','86%'],['Supplements','7/7 days','100%']].map(([c,d,p])=>`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+          <span style="font-size:.72rem;color:#F8F4EC;width:90px">${c}</span>
+          <span style="font-size:.62rem;color:#888;width:50px">${d}</span>
+          <div class="pbw" style="flex:1"><div class="pbf" style="width:${p}"></div></div>
+          <span style="font-size:.65rem;color:#C9A84C;width:30px;text-align:right">${p}</span>
+        </div>`).join('')}
+    </div>
+    <div class="st">Consultations</div>
+    <div class="card">
+      ${[['13 Jun 2026','Prof. Tresoldi','Post-consult notes ready'],['01 Jun 2026','Prof. Tresoldi','Post-consult notes ready']].map(([d,doc,n])=>`
+        <div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #1e1e1e;gap:9px;cursor:pointer" onclick="toast('Viewing post-consultation notes')">
+          <div style="font-size:.68rem;color:#888;width:70px;flex-shrink:0">${d}</div>
+          <div style="flex:1"><div style="font-size:.74rem;color:#F8F4EC">${doc}</div><div style="font-size:.6rem;color:#C9A84C;margin-top:1px">${n}</div></div>
+          <div style="color:#555;font-size:.85rem">›</div>
+        </div>`).join('')}
+    </div>
+    <button class="bo bsm" onclick="go('kit-select')">📦 Order Re-test Kit</button>
+  </div>
+  ${bnav('p8','Progress')}
+`,
+
+  }
+},
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PHONE 9: M16 Wearables + M17 Profile + M18 Notifications
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+p9: {
+  first:'wearable-dash',
+  label:'M16–M18 · Wearables, Profile & Notifications',
+  screens:{
+
+'wearable-dash':`
+  ${sb()}
+  ${hdr('p9','..home-s7','Daily Health','⌚')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="text-align:center;padding:12px;margin-bottom:10px">
+      <div style="font-size:.58rem;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Today's Readiness</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:#C9A84C;font-weight:500;line-height:1">88</div>
+      <div style="font-size:.62rem;color:#888">Excellent · Apple Watch synced 2h ago</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      ${[['❤️','72 bpm','Resting Heart Rate','< 80 goal'],['📊','Normal','ECG Status','CE-certified ✓'],['👣','6,240','Daily Steps','8,000 goal'],['🌙','7.2 h','Sleep Duration','7–9h goal'],['🔥','420 kcal','Active Calories','500 goal']].map(([ic,v,l,g])=>`
+        <div class="wm">
+          <div class="wmico">${ic}</div>
+          <div class="wmval">${v}</div>
+          <div class="wmlbl">${l}</div>
+          <div style="font-size:.5rem;color:#555;margin-top:2px">${g}</div>
+        </div>`).join('')}
+    </div>
+    <div class="st">7-Day Trends</div>
+    <div class="card" style="padding:11px">
+      ${[['Heart Rate','72→68→70→72→71→73→72','Stable'],['Sleep','6.8→7.0→7.2→7.1→7.3→7.0→7.2 h','Improving ↑'],['Steps','5200→7100→6800→8200→6100→7400→6240','Consistent']].map(([m,t,tr])=>`
+        <div style="padding:7px 0;border-bottom:1px solid #1e1e1e">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:.72rem;color:#F8F4EC">${m}</span>
+            <span style="font-size:.6rem;color:${tr.includes('↑')?'#81C784':'#888'}">${tr}</span>
+          </div>
+          <div style="font-size:.58rem;color:#555;margin-top:1px">${t}</div>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:.62rem;color:#888;padding:7px 10px;background:var(--dk4);border-radius:7px;margin-bottom:9px">CE-certified ECG reading (Class IIa medical device) · Normal Sinus Rhythm · No abnormality detected</div>
+    <button class="bo bsm" onclick="go('wearable-connect')">Manage Connected Devices</button>
+  </div>
+`,
+
+'wearable-connect':`
+  ${sb()}
+  ${hdr('p9','wearable-dash','Connect Devices')}
+  <div class="cnt px pb">
+    <div class="card card-g" style="padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.82rem;font-weight:600;color:#F8F4EC">⌚ Apple Watch</div>
+          <div style="font-size:.62rem;color:#4CAF50;margin-top:2px">● Connected via HealthKit</div>
+          <div style="font-size:.6rem;color:#888;margin-top:1px">Last sync: 2 hours ago</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <button class="bo bsm" style="font-size:.62rem;padding:6px 10px" onclick="toast('Syncing... ✓')">Sync Now</button>
+          <button class="bgh" style="font-size:.58rem;text-align:center" onclick="toast('Disconnected. Historical data retained.')">Disconnect</button>
+        </div>
+      </div>
+    </div>
+    <div class="st">Data We Read</div>
+    <div class="card" style="padding:11px">
+      ${['Heart rate (continuous)','ECG readings (CE-certified, Class IIa)','Daily step count','Sleep stages & duration','Active calories burned'].map(d=>`
+        <div style="display:flex;gap:7px;padding:5px 0;border-bottom:1px solid #1e1e1e;font-size:.68rem;color:#888"><span style="color:#C9A84C">✓</span>${d}</div>`).join('')}
+    </div>
+    <div class="st" style="margin-top:4px">Android — Google Health Connect</div>
+    <div class="card" style="padding:12px">
+      <div style="font-size:.7rem;color:#888;margin-bottom:8px;line-height:1.5">Android users connect via Google Health Connect. Device → Companion App → Health Connect → OLMA.</div>
+      <div class="st" style="margin-bottom:5px">Supported devices</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${['Samsung Galaxy Watch','Fitbit','Pixel Watch','Oura','WHOOP','Polar','Suunto','Withings','Xiaomi/Amazfit'].map(d=>`
+          <div class="bdg bg-gold" style="font-size:.52rem">${d}</div>`).join('')}
+      </div>
+      <div style="font-size:.58rem;color:#555;margin-top:8px">Note: ECG not available via Health Connect in Phase 1 (Android only)</div>
+    </div>
+  </div>
+`,
+
+'profile':`
+  ${sb()}
+  ${hdr('p9','..home-s7','Profile & Settings')}
+  <div class="cnt px pb">
+    <div style="text-align:center;padding:12px 0 8px">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#8B6914,#C9A84C);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:#000">SR</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:#F8F4EC">Sofia Ricci</div>
+      <div class="bdg bg-gold" style="margin-top:4px">Vitality</div>
+    </div>
+    ${[
+      ['Personal Profile','Name, DOB, Country','👤',()=>'toast("Editing profile")'],
+      ['Subscription','€49/mo · Renews Jul 14 · Next: €49','💳',()=>`go('upgrade')`],
+      ['Health Profile','Last updated today · Stage 2 complete','📋',()=>`go('retake-prompt')`],
+      ['Retake Health Profile','Update your profiling data','🔄',()=>`go('retake-prompt')`],
+      ['Vita Memory','Manage what Vita knows about you','🧠',()=>'toast("Vita memory: Profile, Recommendations, Session Notes")'],
+      ['Connected Devices','Apple Watch connected','⌚',()=>`go('wearable-connect')`],
+      ['Notifications','All categories enabled','🔔',()=>`go('notifications')`],
+      ['Language','English (EN)','🌐',()=>'toast("Language selection")'],
+      ['Emotional Support Credits','2 credits remaining','💜',()=>`go('credits-home')`],
+      ['About OLMA','Doctor credentials & mission','ℹ️',()=>'toast("About OLMA")'],
+      ['Delete Account','GDPR erasure request · 30-day process','⚠️',()=>'toast("2-step confirmation required for account deletion")'],
+    ].map(([t,s,ic,action])=>`
+      <div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1e1e1e;cursor:pointer" onclick="${action().replace(/"/g,"'")}">
+        <div style="width:34px;height:34px;border-radius:9px;background:var(--dk3);display:flex;align-items:center;justify-content:center;font-size:.95rem;margin-right:11px;flex-shrink:0">${ic}</div>
+        <div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC">${t}</div><div style="font-size:.6rem;color:#888;margin-top:1px">${s}</div></div>
+        <div style="color:#444;font-size:.85rem">›</div>
+      </div>`).join('')}
+    <div style="height:10px"></div>
+    <button class="bo bsm" onclick="toast('Logged out. Session cleared.')">Log Out</button>
+  </div>
+  ${bnav('p9','Profile')}
+`,
+
+'notifications':`
+  ${sb()}
+  ${hdr('p9','profile','Notifications','⚙')}
+  <div class="cnt px pb">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+      <button style="background:transparent;border:none;font-size:.65rem;color:#C9A84C;cursor:pointer" onclick="toast('All notifications marked as read ✓')">Mark all as read</button>
+    </div>
+    <div style="font-size:.58rem;color:#888;margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase">Today</div>
+    <div class="notif" onclick="go('results-pending')">
+      <div style="width:3px;background:#FFB74D;border-radius:2px;flex-shrink:0;self-align:stretch;min-height:40px"></div>
+      <div class="notif-dot"></div>
+      <div style="flex:1">
+        <div class="notif-title">🔬 Lab Results Ready</div>
+        <div class="notif-desc">Your OLMA Basic Kit results have been reviewed. Your personalised plan is ready.</div>
+        <div class="notif-time">2 hours ago</div>
+      </div>
+    </div>
+    <div class="notif" onclick="go('consult-prep')">
+      <div style="width:3px;background:#C9A84C;border-radius:2px;flex-shrink:0;min-height:40px"></div>
+      <div class="notif-dot"></div>
+      <div style="flex:1">
+        <div class="notif-title">📅 Consultation Reminder</div>
+        <div class="notif-desc">Your consultation with Prof. Tresoldi is in 2 hours. Tap to prepare.</div>
+        <div class="notif-time">1 hour ago</div>
+      </div>
+    </div>
+    <div class="notif" onclick="go('vita-home')">
+      <div style="width:3px;background:#2a2a2a;border-radius:2px;flex-shrink:0;min-height:40px"></div>
+      <div class="notif-dot read"></div>
+      <div style="flex:1">
+        <div class="notif-title" style="color:#888;font-weight:400">👩 Vita Check-in</div>
+        <div class="notif-desc">Vita wants to check how your nutrition plan is going.</div>
+        <div class="notif-time">3 hours ago</div>
+      </div>
+    </div>
+    <div style="font-size:.58rem;color:#888;margin:10px 0 6px;letter-spacing:.08em;text-transform:uppercase">Yesterday</div>
+    <div class="notif" onclick="go('journey')">
+      <div style="width:3px;background:#2a2a2a;border-radius:2px;flex-shrink:0;min-height:40px"></div>
+      <div class="notif-dot read"></div>
+      <div style="flex:1">
+        <div class="notif-title" style="color:#888;font-weight:400">💊 Time to take Omega-3</div>
+        <div class="notif-desc">Time to take your Omega-3 EPA/DHA supplement.</div>
+        <div class="notif-time">Yesterday, 7:00 PM</div>
+      </div>
+    </div>
+    <div class="notif" onclick="go('vita-history')">
+      <div style="width:3px;background:#2a2a2a;border-radius:2px;flex-shrink:0;min-height:40px"></div>
+      <div class="notif-dot read"></div>
+      <div style="flex:1">
+        <div class="notif-title" style="color:#888;font-weight:400">📋 Session Summary Ready</div>
+        <div class="notif-desc">Your Vita health guidance session summary is ready to review.</div>
+        <div class="notif-time">Yesterday, 4:15 PM</div>
+      </div>
+    </div>
+    <div style="font-size:.58rem;color:#888;margin:10px 0 6px;letter-spacing:.08em;text-transform:uppercase">Notification Preferences</div>
+    <div class="card" style="padding:12px">
+      ${[['Kit & Results','Priority — always on','on'],['Consultations','Reminders & booking updates','on'],['Supplement Reminders','Daily supplement nudges','on'],['Vita Check-In','Periodic follow-ups','on'],['Journey Updates','Daily plan changes','on'],['Promotional','Platform updates & tips','on']].map(([c,d,s])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e">
+          <div><div style="font-size:.74rem;color:#F8F4EC">${c}</div><div style="font-size:.6rem;color:#888;margin-top:1px">${d}</div></div>
+          <div style="background:${s==='on'?'rgba(201,168,76,.15)':'#222'};border:1px solid ${s==='on'?'rgba(201,168,76,.35)':'#333'};border-radius:20px;padding:3px 11px;font-size:.58rem;color:${s==='on'?'#C9A84C':'#555'};cursor:pointer" onclick="toast('Preference updated')">${s==='on'?'On':'Off'}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+`,
+
+  }
+},
+
+}; // end phones
+
+// ═══════════════════════════════════════════════════
+// BUILD AND INJECT
+// ═══════════════════════════════════════════════════
+
+// Cross-phone navigation patch — handle '..' prefixed screen IDs
+function goInternal(phoneId, sid){
+  if(sid.startsWith('..')){
+    const target = sid.substring(2);
+    // Route to the right phone based on screen name
+    const phoneMap = {
+      'home-s7':'p3','home-s4':'p3','home-s3':'p3','home-s2':'p3',
+      'vita-home':'p7','kit-select':'p4','partner-labs':'p5',
+    };
+    const destPhone = phoneMap[target];
+    if(destPhone){
+      // We need to activate that phone's screen
+      go(destPhone, target);
+      return;
+    }
+  }
+  go(phoneId, sid);
+}
+
+// Override go to handle cross-phone
+
+
+
+var extraScreens = {};
+  extraScreens["upgrade-payment"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"hdr\"><div class=\"hback\" onclick=\"go('upgrade')\">&#8592;</div><div class=\"htitle\">Secure Payment</div><div class=\"hact\"></div></div><div class=\"cnt px pb\"><div class=\"card card-g\" style=\"padding:11px 13px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center\"><div><div id=\"pay-plan-name\" style=\"font-family:'Cormorant Garamond',serif;font-size:1rem;color:#F8F4EC;font-weight:500\">Vitality</div><div style=\"font-size:.6rem;color:#888;margin-top:1px\">Monthly \u00b7 renews automatically</div></div><div id=\"pay-plan-price\" style=\"font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#C9A84C;font-weight:600\">&#8364;49</div></div><div class=\"st\">Card Details</div><div style=\"background:#1a1a1a;border:1px solid #2a2a2a;border-radius:11px;padding:12px 13px;margin-bottom:9px\"><label class=\"lbl\">Card Number</label><div style=\"display:flex;align-items:center;gap:8px;background:var(--dk3);border:1px solid #333;border-radius:8px;padding:9px 12px;margin-bottom:8px\"><span style=\"font-size:.85rem\">&#128179;</span><input type=\"text\" placeholder=\"1234  5678  9012  3456\" maxlength=\"19\" style=\"flex:1;background:none;border:none;outline:none;color:#F8F4EC;font-size:.74rem;font-family:Inter,sans-serif\"></div><div style=\"display:flex;gap:9px\"><div style=\"flex:1\"><label class=\"lbl\">Expiry</label><input type=\"text\" placeholder=\"MM / YY\" maxlength=\"7\" class=\"inp\" style=\"margin-bottom:0\"></div><div style=\"flex:1\"><label class=\"lbl\">CVV</label><input type=\"text\" placeholder=\"&#8226;&#8226;&#8226;\" maxlength=\"4\" class=\"inp\" style=\"margin-bottom:0\"></div></div></div><label class=\"lbl\">Name on Card</label><input type=\"text\" placeholder=\"Sofia Ricci\" value=\"Sofia Ricci\" class=\"inp\"><div class=\"st\">Billing Address</div><input type=\"text\" placeholder=\"Address\" value=\"Via Roma 42, Milan 20121\" class=\"inp\"><select class=\"inp\" style=\"margin-bottom:11px\"><option>Italy</option><option>Germany</option><option>France</option><option>United Kingdom</option></select><div style=\"background:var(--dk3);border-radius:9px;padding:10px 12px;margin-bottom:11px;border:1px solid #252525\"><div style=\"display:flex;justify-content:space-between;font-size:.64rem;color:#888;margin-bottom:4px\"><span>Subtotal</span><span id=\"pay-subtotal\">&#8364;49.00</span></div><div style=\"display:flex;justify-content:space-between;font-size:.64rem;color:#888;margin-bottom:6px\"><span>VAT (22%)</span><span id=\"pay-vat\">&#8364;10.78</span></div><div style=\"height:1px;background:#333;margin-bottom:6px\"></div><div style=\"display:flex;justify-content:space-between;font-size:.76rem;color:#F8F4EC;font-weight:600\"><span>Total today</span><span id=\"pay-total\" style=\"color:#C9A84C\">&#8364;59.78</span></div></div><div style=\"display:flex;gap:6px;align-items:center;font-size:.58rem;color:#555;margin-bottom:11px;justify-content:center\"><span>&#128274;</span><span>Secured by Stripe &middot; PCI DSS compliant</span></div><button class=\"bg\" onclick=\"go('upgrade-confirm');toast('Payment successful \u2713')\">Pay Now</button><div style=\"text-align:center;margin-top:7px\"><button class=\"bgh\" onclick=\"go('upgrade')\">&#8592; Back to Plans</button></div></div>";
+  extraScreens["upgrade-confirm"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"cnt px\" style=\"align-items:center;justify-content:center;text-align:center\"><div style=\"width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#1a3a1a,#2a5a2a);border:2px solid #4CAF50;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:14px;box-shadow:0 0 20px rgba(76,175,80,.18)\">&#10003;</div><div style=\"font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:#F8F4EC;margin-bottom:5px\">Subscription Active</div><div id=\"conf-plan-name\" style=\"color:#C9A84C;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px\">VITALITY</div><div style=\"font-size:.65rem;color:#888;line-height:1.7;margin-bottom:14px\">Your plan is now active. A confirmation<br>email has been sent to sofia@example.com</div><div style=\"width:100%;background:var(--dk3);border-radius:11px;padding:12px 14px;margin-bottom:12px;border:1px solid rgba(201,168,76,.18);text-align:left\"><div style=\"font-size:.56rem;color:#C9A84C;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:8px\">What's unlocked</div><div style=\"display:flex;gap:7px;align-items:center;padding:4px 0;border-bottom:1px solid #252525;font-size:.65rem;color:#888\"><span style=\"color:#4CAF50\">&#10003;</span>&#x1F52C; Lab kit ordering &amp; biomarker results</div><div style=\"display:flex;gap:7px;align-items:center;padding:4px 0;border-bottom:1px solid #252525;font-size:.65rem;color:#888\"><span style=\"color:#4CAF50\">&#10003;</span>&#x1F916; Unlimited Vita AI sessions</div><div style=\"display:flex;gap:7px;align-items:center;padding:4px 0;border-bottom:1px solid #252525;font-size:.65rem;color:#888\"><span style=\"color:#4CAF50\">&#10003;</span>&#x1F4C5; Personalised daily journey plan</div><div style=\"display:flex;gap:7px;align-items:center;padding:4px 0;border-bottom:1px solid #252525;font-size:.65rem;color:#888\"><span style=\"color:#4CAF50\">&#10003;</span>&#x1F469;&#x200D;&#x2695;&#xFE0F; Junior doctor consultations</div><div style=\"display:flex;gap:7px;align-items:center;padding:4px 0;border-bottom:1px solid #252525;font-size:.65rem;color:#888\"><span style=\"color:#4CAF50\">&#10003;</span>&#x1F4C8; Wearable health integration</div></div><div style=\"width:100%;text-align:left;margin-bottom:13px\"><div style=\"font-size:.56rem;color:#C9A84C;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:7px\">Recommended next steps</div><div style=\"display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;cursor:pointer\" onclick=\"go('kit-select')\"><div style=\"font-size:1.1rem;width:26px;text-align:center\">&#x1F9EA;</div><div style=\"flex:1\"><div style=\"font-size:.7rem;color:#F8F4EC;font-weight:500\">Order a lab kit</div><div style=\"font-size:.6rem;color:#888;margin-top:1px\">Get your precise biomarker score</div></div><div style=\"color:#555;font-size:.85rem\">&#8250;</div></div><div style=\"display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;cursor:pointer\" onclick=\"go('consult-list')\"><div style=\"font-size:1.1rem;width:26px;text-align:center\">&#x1F4C5;</div><div style=\"flex:1\"><div style=\"font-size:.7rem;color:#F8F4EC;font-weight:500\">Book a consultation</div><div style=\"font-size:.6rem;color:#888;margin-top:1px\">Review your profile with a doctor</div></div><div style=\"color:#555;font-size:.85rem\">&#8250;</div></div><div style=\"display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;cursor:pointer\" onclick=\"go('profiling-s2-1')\"><div style=\"font-size:1.1rem;width:26px;text-align:center\">&#x1F9D9;</div><div style=\"flex:1\"><div style=\"font-size:.7rem;color:#F8F4EC;font-weight:500\">Complete Stage 2 Profile</div><div style=\"font-size:.6rem;color:#888;margin-top:1px\">Unlock your personalised protocol</div></div><div style=\"color:#555;font-size:.85rem\">&#8250;</div></div></div><button class=\"bg\" style=\"width:100%\" onclick=\"go('profiling-s2-1')\">Complete Stage 2 Profile &#8594;</button><div style=\"margin-top:8px;width:100%\"><button class=\"bo\" onclick=\"go('home-s3')\">Skip for now &mdash; Go to Dashboard</button></div></div>";
+  extraScreens["profiling-s2-1"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"sdots px\" style=\"padding-top:9px\"><div class=\"sdot on\"></div><div class=\"sdot\"></div><div class=\"sdot\"></div><div class=\"sdot\"></div><div class=\"sdot\"></div></div><div class=\"cnt px pb\"><div style=\"display:flex;gap:8px;align-items:flex-start;margin:8px 0 11px\"><div class=\"vav\">&#x1F469;</div><div class=\"vbub\" style=\"flex:1\"><div class=\"vname\">Vita &middot; Stage 2 Profile</div>Do you have any current or past diagnosed medical conditions?</div></div><div class=\"card card-g\" style=\"padding:11px\"><div style=\"font-size:.55rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600\">Question 1 of 5 &middot; Medical History</div><div id=\"optss2q1\"><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q1');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>None &mdash; no known conditions</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q1');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Metabolic (pre-diabetes, insulin resistance)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q1');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Cardiovascular (hypertension, high cholesterol)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q1');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Thyroid disorder (hypo- or hyperthyroid)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q1');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Autoimmune condition</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q1');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Other &mdash; I will share at consultation</div></div></div><div style=\"display:flex;gap:7px;margin-top:5px\"><button class=\"bo bsm\" style=\"flex:.28\" onclick=\"go('upgrade-confirm')\">&#8592;</button><button class=\"bg\" style=\"flex:1\" onclick=\"go('profiling-s2-2')\">Next &#8594;</button></div></div>";
+  extraScreens["profiling-s2-2"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"sdots px\" style=\"padding-top:9px\"><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot\"></div><div class=\"sdot\"></div><div class=\"sdot\"></div></div><div class=\"cnt px pb\"><div style=\"display:flex;gap:8px;align-items:flex-start;margin:8px 0 11px\"><div class=\"vav\">&#x1F469;</div><div class=\"vbub\" style=\"flex:1\"><div class=\"vname\">Vita &middot; Stage 2 Profile</div>Are you currently taking any prescription medications?</div></div><div class=\"card card-g\" style=\"padding:11px\"><div style=\"font-size:.55rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600\">Question 2 of 5 &middot; Current Medications</div><div id=\"optss2q2\"><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q2');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>No prescription medications</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q2');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Blood pressure medication</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q2');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Statin / cholesterol medication</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q2');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Thyroid medication (e.g. levothyroxine)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q2');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Diabetes medication (e.g. metformin)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q2');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Other &mdash; I will share at consultation</div></div></div><div style=\"display:flex;gap:7px;margin-top:5px\"><button class=\"bo bsm\" style=\"flex:.28\" onclick=\"go('profiling-s2-1')\">&#8592;</button><button class=\"bg\" style=\"flex:1\" onclick=\"go('profiling-s2-3')\">Next &#8594;</button></div></div>";
+  extraScreens["profiling-s2-3"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"sdots px\" style=\"padding-top:9px\"><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot\"></div><div class=\"sdot\"></div></div><div class=\"cnt px pb\"><div style=\"display:flex;gap:8px;align-items:flex-start;margin:8px 0 11px\"><div class=\"vav\">&#x1F469;</div><div class=\"vbub\" style=\"flex:1\"><div class=\"vname\">Vita &middot; Stage 2 Profile</div>What is your most important health goal right now?</div></div><div class=\"card card-g\" style=\"padding:11px\"><div style=\"font-size:.55rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600\">Question 3 of 5 &middot; Primary Health Goal</div><div id=\"optss2q3\"><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q3');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Extend healthy lifespan &amp; longevity</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q3');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Optimise energy &amp; daily vitality</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q3');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Improve body composition &amp; weight</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q3');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Enhance cognitive performance &amp; focus</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q3');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Balance hormones &amp; metabolic health</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q3');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Recover from illness or chronic condition</div></div></div><div style=\"display:flex;gap:7px;margin-top:5px\"><button class=\"bo bsm\" style=\"flex:.28\" onclick=\"go('profiling-s2-2')\">&#8592;</button><button class=\"bg\" style=\"flex:1\" onclick=\"go('profiling-s2-4')\">Next &#8594;</button></div></div>";
+  extraScreens["profiling-s2-4"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"sdots px\" style=\"padding-top:9px\"><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot\"></div></div><div class=\"cnt px pb\"><div style=\"display:flex;gap:8px;align-items:flex-start;margin:8px 0 11px\"><div class=\"vav\">&#x1F469;</div><div class=\"vbub\" style=\"flex:1\"><div class=\"vname\">Vita &middot; Stage 2 Profile</div>How would you describe your weekly alcohol consumption?</div></div><div class=\"card card-g\" style=\"padding:11px\"><div style=\"font-size:.55rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600\">Question 4 of 5 &middot; Alcohol &amp; Lifestyle</div><div id=\"optss2q4\"><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q4');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>None &mdash; I do not drink</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q4');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Rarely (1&ndash;2 drinks per month)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q4');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Moderate (1&ndash;2 drinks per week)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q4');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Regular (3&ndash;7 drinks per week)</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q4');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>High (more than 7 drinks per week)</div></div></div><div style=\"display:flex;gap:7px;margin-top:5px\"><button class=\"bo bsm\" style=\"flex:.28\" onclick=\"go('profiling-s2-3')\">&#8592;</button><button class=\"bg\" style=\"flex:1\" onclick=\"go('profiling-s2-5')\">Next &#8594;</button></div></div>";
+  extraScreens["profiling-s2-5"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"sdots px\" style=\"padding-top:9px\"><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot on\"></div><div class=\"sdot on\"></div></div><div class=\"cnt px pb\"><div style=\"display:flex;gap:8px;align-items:flex-start;margin:8px 0 11px\"><div class=\"vav\">&#x1F469;</div><div class=\"vbub\" style=\"flex:1\"><div class=\"vname\">Vita &middot; Stage 2 Profile</div>What is your current smoking status?</div></div><div class=\"card card-g\" style=\"padding:11px\"><div style=\"font-size:.55rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600\">Question 5 of 5 &middot; Smoking Status</div><div id=\"optss2q5\"><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q5');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Never smoked</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q5');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Former smoker &mdash; quit more than 1 year ago</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q5');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Former smoker &mdash; quit within the last year</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q5');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Currently smoke occasionally</div><div style=\"padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:var(--dk2);margin-bottom:5px;font-size:.69rem;cursor:pointer;color:#666;transition:all .2s;display:flex;align-items:center;gap:8px\" onclick=\"var p=this.closest('#optss2q5');p.querySelectorAll('[data-q]').forEach(function(e){e.style.borderColor='#2a2a2a';e.style.color='#666';e.style.background='var(--dk2)';e.querySelector('.chk').style.borderColor='#444';e.querySelector('.chk').textContent='';});this.style.borderColor='#C9A84C';this.style.color='#F8F4EC';this.style.background='rgba(201,168,76,.09)';this.querySelector('.chk').style.borderColor='#C9A84C';this.querySelector('.chk').textContent='&#10003;';\" data-q><div class=\"chk\" style=\"width:16px;height:16px;border-radius:4px;border:1.5px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.52rem;color:#C9A84C;font-weight:700\"></div>Currently smoke daily</div></div></div><div style=\"display:flex;gap:7px;margin-top:5px\"><button class=\"bo bsm\" style=\"flex:.28\" onclick=\"go('profiling-s2-4')\">&#8592;</button><button class=\"bg\" style=\"flex:1\" onclick=\"go('profiling-s2-done')\">Complete Profile &#8594;</button></div></div>";
+  extraScreens["profiling-s2-done"] = "<div class=\"sb2\"><span>9:41</span><span style=\"color:#888;font-size:.62rem\">&#9679;&#9679;&#9679; &#9650; &#11035;</span></div><div class=\"cnt px\" style=\"align-items:center;justify-content:center;text-align:center\"><div style=\"font-size:2.4rem;margin-bottom:10px\">&#x1F33F;</div><div style=\"font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#F8F4EC;margin-bottom:4px\">Profile Complete</div><div style=\"font-size:.62rem;color:#C9A84C;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:9px\">Stage 2 Unlocked</div><div style=\"font-size:.65rem;color:#888;line-height:1.7;margin-bottom:14px;text-align:center\">Your Stage 2 health profile is complete. Combined with your lab results, this will generate your personalised longevity protocol.</div><div style=\"width:100%;background:var(--dk3);border-radius:11px;padding:12px 13px;margin-bottom:12px;border:1px solid rgba(201,168,76,.18)\"><div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:9px\"><div style=\"font-size:.68rem;color:#F8F4EC;font-weight:600\">Updated Longevity Score</div><div class=\"bdg bg-gold\">Stage 2</div></div><div style=\"display:flex;justify-content:center;margin-bottom:5px\"><div class=\"sring\" style=\"width:90px;height:90px\"><svg width=\"90\" height=\"90\" viewBox=\"0 0 90 90\"><circle cx=\"45.0\" cy=\"45.0\" r=\"36.0\" fill=\"none\" stroke=\"#1e1e1e\" stroke-width=\"7\"/><circle cx=\"45.0\" cy=\"45.0\" r=\"36.0\" fill=\"none\" stroke=\"#C9A84C\" stroke-width=\"7\" stroke-dasharray=\"226.2\" stroke-dashoffset=\"63.3\" stroke-linecap=\"round\" style=\"transform:rotate(-90deg);transform-origin:45.0px 45.0px\"/></svg><div class=\"sctr\"><div class=\"snum\" style=\"font-size:1.4rem\">72</div><div class=\"slbl\">Stage 2</div></div></div></div><div style=\"font-size:.62rem;color:#888;text-align:center\">&#8593; Refined from preliminary &middot; Awaiting lab data</div></div><div style=\"width:100%;text-align:left;margin-bottom:13px\"><div style=\"font-size:.56rem;color:#C9A84C;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:7px\">Your next steps</div><div style=\"display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;cursor:pointer\" onclick=\"go('kit-select')\"><div style=\"font-size:1.1rem;width:26px;text-align:center\">&#x1F52C;</div><div style=\"flex:1\"><div style=\"font-size:.7rem;color:#F8F4EC;font-weight:500\">Order a Lab Kit</div><div style=\"font-size:.6rem;color:#888;margin-top:1px\">Get your precise biomarker-driven score</div></div><div style=\"color:#555;font-size:.85rem\">&#8250;</div></div><div style=\"display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;cursor:pointer\" onclick=\"go('consult-list')\"><div style=\"font-size:1.1rem;width:26px;text-align:center\">&#x1F4C5;</div><div style=\"flex:1\"><div style=\"font-size:.7rem;color:#F8F4EC;font-weight:500\">Book a Consultation</div><div style=\"font-size:.6rem;color:#888;margin-top:1px\">Review your profile with a doctor</div></div><div style=\"color:#555;font-size:.85rem\">&#8250;</div></div><div style=\"display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;cursor:pointer\" onclick=\"go('vita-home')\"><div style=\"font-size:1.1rem;width:26px;text-align:center\">&#x1F9D9;</div><div style=\"flex:1\"><div style=\"font-size:.7rem;color:#F8F4EC;font-weight:500\">Talk to Vita</div><div style=\"font-size:.6rem;color:#888;margin-top:1px\">Get personalised guidance now</div></div><div style=\"color:#555;font-size:.85rem\">&#8250;</div></div></div><button class=\"bg\" style=\"width:100%\" onclick=\"go('home-s3')\">Go to My Dashboard &#8594;</button></div>";
+
+const NAV_GROUPS=[
+  {label:'🚀 Onboarding & Auth',items:[['splash','Splash Screen'],['onboarding','Doctor Cards & Auth'],['guest-preview','Guest Preview'],['register','Registration Form'],['otp','OTP Verification'],['avatar-select','Companion Selection'],['login','Login']]},
+  {label:'📊 Health Profiling',items:[['profiling-1','S1 · Q1 Sleep Quality'],['profiling-2','S1 · Q2 Stress Level'],['profiling-3','S1 · Q3 Eating Habits'],['profiling-4','S1 · Q4 Exercise'],['score-prelim','Preliminary Score'],['profiling-s2-1','S2 · Q1 Medical History'],['profiling-s2-2','S2 · Q2 Medications'],['profiling-s2-3','S2 · Q3 Health Goal'],['profiling-s2-4','S2 · Q4 Alcohol & Lifestyle'],['profiling-s2-5','S2 · Q5 Smoking Status'],['profiling-s2-done','S2 · Profile Complete']]},
+  {label:'💳 Subscription',items:[['upgrade','Choose Your Plan'],['upgrade-payment','Payment Form'],['upgrade-confirm','Subscription Confirmed']]},
+  {label:'🏠 Home Dashboard',items:[['home-s2','Home S2 · Free Explorer'],['home-s3','Home S3 · Kit Not Ordered'],['home-s4','Home S4 · Kit Dispatched'],['home-s5','Home S5 · Gate Triggered'],['home-s6','Home S6 · Pending Plan'],['home-s7','Home S7 · Active Treatment'],['retake-prompt','Retake Health Profile']]},
+  {label:'🧪 Lab Kit',items:[['kit-select','Kit Selection'],['kit-compare','Kit Comparison'],['kit-checkout','Checkout'],['kit-guide-1','Sample Guide Step 1'],['kit-guide-2','Sample Guide Step 2'],['kit-guide-3','Sample Guide Step 3'],['kit-guide-4','Sample Guide Step 4'],['kit-guide-5','Sample Guide Step 5'],['kit-guide-6','Sample Guide Step 6']]},
+  {label:'🔬 Results & Protocol',items:[['partner-labs','Partner Lab Finder'],['lab-detail','Lab Detail'],['test-referral','Test Referral Doc'],['results-pending','Biomarker Results'],['protocol-info','Your Protocol']]},
+  {label:'💜 Credits',items:[['credits-home','Emotional Support Credits']]},
+  {label:'📅 Daily Journey',items:[['journey',"Today's Journey"],['store','Supplement Store']]},
+  {label:'👩 Vita AI Sessions',items:[['vita-home','Vita Home'],['vita-chat-health','Health Guidance'],['vita-chat-supplement','Supplement Guidance'],['vita-chat-emotional','Wellbeing Session'],['vita-history','Session History'],['session-detail','Session Summary']]},
+  {label:'📅 Consultations',items:[['consult-list','Doctor Selection'],['consult-booking','Confirm Booking'],['consult-prep','Pre-Consult Prep']]},
+  {label:'📈 Progress & Wearables',items:[['progress','Progress Tracking'],['wearable-dash','Daily Health'],['wearable-connect','Connected Devices']]},
+  {label:'⚙️ Profile & Settings',items:[['profile','Profile & Settings'],['notifications','Notifications']]}
+];
+const FLAT_SCREENS={};
+NAV_GROUPS.forEach(function(g){g.items.forEach(function(item){FLAT_SCREENS[item[0]]=item[1];});});
+
+(function(){
+  /* Flatten all original phones into single phone */
+  var phoneEl=document.getElementById('phone');
+  Object.keys(phones).forEach(function(pid){
+    var cfg=phones[pid];
+    Object.keys(cfg.screens).forEach(function(sid){
+      var el=document.createElement('div');
+      el.className='screen'; el.id='sc-'+sid;
+      el.innerHTML=cfg.screens[sid];
+      phoneEl.appendChild(el);
+    });
+  });
+
+  /* Add extra screens */
+  Object.keys(extraScreens).forEach(function(sid){
+    var el=document.createElement('div');
+    el.className='screen'; el.id='sc-'+sid;
+    el.innerHTML=extraScreens[sid];
+    phoneEl.appendChild(el);
+  });
+
+  /* Patch upgrade plan buttons → upgrade-payment */
+  var upgEl=document.getElementById('sc-upgrade');
+  if(upgEl){
+    upgEl.querySelectorAll('button.bg').forEach(function(btn){
+      var txt=btn.textContent.trim();
+      var isVit=txt.indexOf('Vitality')>=0||txt.indexOf('Subscribe')>=0;
+      var isPro=txt.indexOf('Pro')>=0||txt.indexOf('Longevity')>=0;
+      if(isVit){
+        btn.setAttribute('onclick',
+          "document.getElementById('pay-plan-name').textContent='Vitality';"
+          +"document.getElementById('pay-plan-price').innerHTML='&#8364;49';"
+          +"document.getElementById('pay-subtotal').innerHTML='&#8364;49.00';"
+          +"document.getElementById('pay-vat').innerHTML='&#8364;10.78';"
+          +"document.getElementById('pay-total').innerHTML='&#8364;59.78';"
+          +"document.getElementById('conf-plan-name').textContent='VITALITY';"
+          +"go('upgrade-payment')");
+      } else if(isPro){
+        btn.setAttribute('onclick',
+          "document.getElementById('pay-plan-name').textContent='Longevity Pro';"
+          +"document.getElementById('pay-plan-price').innerHTML='&#8364;99';"
+          +"document.getElementById('pay-subtotal').innerHTML='&#8364;99.00';"
+          +"document.getElementById('pay-vat').innerHTML='&#8364;21.78';"
+          +"document.getElementById('pay-total').innerHTML='&#8364;120.78';"
+          +"document.getElementById('conf-plan-name').textContent='LONGEVITY PRO';"
+          +"go('upgrade-payment')");
+      }
+    });
+  }
+
+  /* Build sidebar */
+  var navList=document.getElementById('nav-list');
+  NAV_GROUPS.forEach(function(g){
+    var grp=document.createElement('div');
+    var t=document.createElement('div');
+    t.className='sb-group-title'; t.textContent=g.label; grp.appendChild(t);
+    g.items.forEach(function(item){
+      var b=document.createElement('button');
+      b.className='sb-item'; b.dataset.sid=item[0]; b.textContent=item[1];
+      b.onclick=(function(s){return function(){go(s);};})(item[0]);
+      grp.appendChild(b);
+    });
+    navList.appendChild(grp);
+  });
+
+  var total=Object.keys(FLAT_SCREENS).length;
+  var lbl=document.getElementById('sc-label');
+  if(lbl) lbl.textContent=total+' screens \xb7 click to jump';
+
+  go('splash');
+})();
+
+</script>
+</body>
+</html>

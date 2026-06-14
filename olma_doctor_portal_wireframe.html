@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OLMA Doctor Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--g:#C9A84C;--gd:#8B6914;--gl:#E8C97A;--b:#0A0A0A;--s1:#111;--s2:#161616;--s3:#1E1E1E;--s4:#252525;--s5:#2E2E2E;--t1:#F8F4EC;--t2:#C8C0B0;--t3:#888880;--t4:#444440;--grn:#4CAF50;--grn2:#81C784;--amb:#FFA726;--amb2:#FFB74D;--red:#E53935;--red2:#EF9A9A;--blu:#42A5F5;--blu2:#90CAF9;--pur:#9C27B0;--r:10px;--r2:14px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--b);font-family:'Inter',sans-serif;color:var(--t1);font-size:14px;line-height:1.5;}
+#app{display:flex;height:100vh;overflow:hidden;}
+#sidebar{width:220px;min-width:220px;background:var(--s1);border-right:1px solid var(--s4);display:flex;flex-direction:column;overflow:hidden;z-index:100;}
+.sl{padding:22px 20px 16px;border-bottom:1px solid var(--s3);}
+.sl-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;color:var(--g);letter-spacing:.18em;text-transform:uppercase;}
+.sl-sub{font-size:.52rem;color:var(--t4);letter-spacing:.28em;text-transform:uppercase;margin-top:1px;}
+.sl-role{font-size:.54rem;color:rgba(201,168,76,.55);letter-spacing:.12em;text-transform:uppercase;margin-top:7px;font-weight:600;}
+.snav{flex:1;overflow-y:auto;padding:14px 0;scrollbar-width:none;}
+.snav::-webkit-scrollbar{display:none;}
+.scat{font-size:.5rem;color:var(--t4);letter-spacing:.16em;text-transform:uppercase;padding:10px 20px 3px;font-weight:600;}
+.sitem{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:.76rem;color:var(--t3);border-left:2px solid transparent;transition:all .15s;}
+.sitem:hover{color:var(--t1);background:rgba(201,168,76,.05);}
+.sitem.on{color:var(--g);border-left-color:var(--g);background:rgba(201,168,76,.08);}
+.sico{font-size:.9rem;width:18px;text-align:center;flex-shrink:0;}
+.sbadge{margin-left:auto;background:var(--g);color:#000;border-radius:10px;padding:1px 6px;font-size:.52rem;font-weight:700;}
+.sfooter{padding:14px 20px;border-top:1px solid var(--s3);}
+.doc-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gd),var(--g));display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+.logout{font-size:.62rem;color:var(--t3);cursor:pointer;margin-top:8px;padding:3px 0;}
+.logout:hover{color:var(--g);}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#topbar{height:58px;min-height:58px;background:var(--s1);border-bottom:1px solid var(--s3);display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;}
+#tbTitle{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:400;color:var(--t1);flex:1;letter-spacing:.03em;}
+.tb-btn{padding:7px 16px;border-radius:var(--r);font-size:.7rem;font-weight:600;cursor:pointer;letter-spacing:.04em;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.tb-gold{background:linear-gradient(135deg,var(--gd),var(--gl));color:#000;}
+.tb-gold:hover{transform:translateY(-1px);}
+.tb-out{background:transparent;color:var(--g);border:1px solid rgba(201,168,76,.4);}
+.tb-out:hover{background:rgba(201,168,76,.1);}
+.tb-gh{background:transparent;color:var(--t3);border:1px solid var(--s5);}
+.tb-gh:hover{color:var(--t1);}
+.notif-wrap{position:relative;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--s3);}
+.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--s1);}
+#reminderBanner{display:none;background:rgba(255,167,38,.1);border-bottom:1px solid rgba(255,167,38,.25);padding:10px 24px;font-size:.74rem;color:var(--amb2);flex-shrink:0;align-items:center;gap:10px;}
+#reminderBanner.show{display:flex;}
+#content{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--s5) transparent;}
+#content::-webkit-scrollbar{width:4px;}
+#content::-webkit-scrollbar-thumb{background:var(--s5);border-radius:2px;}
+.page{display:none;padding:24px;}
+.page.on{display:block;}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:16px;}
+.phhead{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:400;color:var(--t1);line-height:1.2;}
+.phsub{font-size:.72rem;color:var(--t3);margin-top:4px;}
+.ph-r{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.card{background:var(--s2);border-radius:var(--r2);border:1px solid var(--s4);padding:18px;}
+.cg{background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.22);border-radius:var(--r2);padding:18px;}
+.cr{background:linear-gradient(135deg,rgba(229,57,53,.1),rgba(229,57,53,.03));border:1px solid rgba(229,57,53,.22);border-radius:var(--r2);padding:18px;}
+.cb{background:linear-gradient(135deg,rgba(66,165,245,.08),rgba(66,165,245,.02));border:1px solid rgba(66,165,245,.2);border-radius:var(--r2);padding:18px;}
+.stat{background:var(--s2);border:1px solid var(--s4);border-radius:var(--r2);padding:16px 20px;}
+.stat-lbl{font-size:.58rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:500;color:var(--g);line-height:1;}
+.stat-sub{font-size:.64rem;color:var(--t3);margin-top:4px;}
+.st{font-size:.58rem;color:var(--g);letter-spacing:.15em;text-transform:uppercase;font-weight:600;margin-bottom:10px;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:.58rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--s4);text-align:left;font-weight:600;}
+.tbl td{font-size:.78rem;padding:12px 12px;border-bottom:1px solid var(--s3);color:var(--t2);vertical-align:middle;}
+.tbl tr:hover td{background:rgba(201,168,76,.04);cursor:pointer;}
+.tbl tr:last-child td{border-bottom:none;}
+.bdg{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.57rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+.bg-g{background:rgba(76,175,80,.15);color:var(--grn2);border:1px solid rgba(76,175,80,.3);}
+.bg-a{background:rgba(255,167,38,.15);color:var(--amb2);border:1px solid rgba(255,167,38,.3);}
+.bg-r{background:rgba(229,57,53,.15);color:var(--red2);border:1px solid rgba(229,57,53,.3);}
+.bg-gold{background:rgba(201,168,76,.15);color:var(--g);border:1px solid rgba(201,168,76,.3);}
+.bg-b{background:rgba(66,165,245,.15);color:var(--blu2);border:1px solid rgba(66,165,245,.25);}
+.bg-pur{background:rgba(156,39,176,.15);color:#CE93D8;border:1px solid rgba(156,39,176,.3);}
+.dv{height:1px;background:linear-gradient(90deg,transparent,var(--s5),transparent);margin:14px 0;}
+.btn{padding:9px 18px;border-radius:var(--r);font-size:.73rem;font-weight:600;cursor:pointer;letter-spacing:.04em;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-g{background:linear-gradient(135deg,var(--gd),var(--gl));color:#000;}
+.btn-g:hover{transform:translateY(-1px);}
+.btn-o{background:transparent;color:var(--g);border:1px solid rgba(201,168,76,.4);}
+.btn-o:hover{background:rgba(201,168,76,.1);}
+.btn-gh{background:transparent;color:var(--t3);border:1px solid var(--s5);}
+.btn-gh:hover{color:var(--t1);border-color:var(--t4);}
+.btn-red{background:rgba(229,57,53,.12);color:var(--red2);border:1px solid rgba(229,57,53,.3);}
+.btn-green{background:rgba(76,175,80,.15);color:var(--grn2);border:1px solid rgba(76,175,80,.3);}
+.btn-sm{padding:6px 12px;font-size:.66rem;}
+.inp{width:100%;background:var(--s3);border:1px solid var(--s5);border-radius:var(--r);padding:10px 13px;font-size:.78rem;color:var(--t1);outline:none;font-family:'Inter',sans-serif;transition:border-color .15s;}
+.inp:focus{border-color:var(--g);}
+.inp::placeholder{color:var(--t4);}
+select.inp{appearance:none;cursor:pointer;}
+.lbl{font-size:.58rem;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;display:block;}
+.pillar{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--s3);gap:10px;}
+.pillar:last-child{border-bottom:none;}
+.p-bar{flex:1;height:4px;background:var(--s3);border-radius:2px;max-width:140px;}
+.p-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gd),var(--g));}
+.brow{display:flex;align-items:center;padding:9px 12px;border-bottom:1px solid var(--s3);gap:8px;}
+.brow:last-child{border-bottom:none;}
+.wmet{background:var(--s3);border-radius:var(--r);padding:14px;text-align:center;}
+.wmet-ico{font-size:1.2rem;margin-bottom:4px;}
+.wmet-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--g);line-height:1;}
+.wmet-lbl{font-size:.54rem;color:var(--t3);letter-spacing:.07em;text-transform:uppercase;margin-top:3px;}
+.vtopic{background:var(--s3);border-radius:var(--r);padding:9px 12px;font-size:.72rem;color:var(--t2);margin-bottom:7px;border-left:2px solid var(--g);line-height:1.5;}
+.vtopic-date{font-size:.58rem;color:var(--g);margin-bottom:3px;font-weight:600;}
+.nitem{padding:11px 14px;border-bottom:1px solid var(--s3);display:flex;gap:10px;align-items:flex-start;}
+.nitem:hover{background:rgba(201,168,76,.04);cursor:pointer;}
+.ndot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.note-ed{width:100%;background:var(--s3);border:1px solid var(--s5);border-radius:var(--r);padding:13px;font-size:.78rem;color:var(--t1);font-family:'Inter',sans-serif;resize:none;outline:none;line-height:1.65;min-height:160px;}
+.note-ed:focus{border-color:var(--g);}
+.mini-bar{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(180deg,var(--g),var(--gd));min-height:3px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-hd{font-size:.56rem;color:var(--t4);text-align:center;padding:3px 0;letter-spacing:.06em;text-transform:uppercase;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--t3);}
+.cal-day:hover{background:rgba(201,168,76,.15);color:var(--t1);}
+.cal-slot{background:rgba(76,175,80,.1);color:var(--grn2);border:1px solid rgba(76,175,80,.2);}
+.cal-booked{background:rgba(201,168,76,.15);color:var(--g);border:1px solid rgba(201,168,76,.3);}
+.cal-today{background:var(--g);color:#000;font-weight:700;}
+.tog{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--s3);}
+.tog:last-child{border-bottom:none;}
+.tog-pill{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:20px;padding:3px 12px;font-size:.58rem;color:var(--g);cursor:pointer;transition:all .15s;}
+.tog-off{background:var(--s3);border:1px solid var(--s5);color:var(--t4);}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9998;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--s2);border:1px solid var(--s4);border-radius:18px;padding:24px;width:min(440px,90vw);}
+.modal-t{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--t1);margin-bottom:6px;}
+.modal-s{font-size:.72rem;color:var(--t3);margin-bottom:18px;line-height:1.5;}
+#loginPage{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#060606,#0f0f0a);z-index:9999;flex-direction:column;align-items:center;justify-content:center;}
+#loginPage.show{display:flex;}
+#setupPage{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#060606,#0f0f0a);z-index:9999;flex-direction:column;align-items:center;justify-content:center;}
+#setupPage.show{display:flex;}
+.lbox{width:min(400px,90vw);background:var(--s1);border:1px solid var(--s4);border-radius:20px;padding:32px;}
+.ring-wrap{position:relative;flex-shrink:0;}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-val{font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--g);line-height:1;}
+.ring-lbl{font-size:.48rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s3);border:1px solid var(--g);border-radius:var(--r);padding:10px 18px;font-size:.74rem;color:var(--t1);z-index:99999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:400px;}
+.toast.show{opacity:1;}
+.tb-danger{background:rgba(229,57,53,.15);border:1px solid rgba(229,57,53,.3);color:#EF9A9A;border-radius:8px;padding:7px 16px;font-size:.7rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;}
+</style>
+</head>
+<body>
+<div id="setupPage" class="show">
+<div class="lbox">
+<div style="text-align:center;margin-bottom:24px"><div style="font-size:1.6rem;margin-bottom:6px">&#x2B21;</div>
+<div style="font-family:Cormorant Garamond,serif;font-size:1.5rem;color:#C9A84C;letter-spacing:.2em;text-transform:uppercase">OLMA</div>
+<div style="font-size:.52rem;color:#444;letter-spacing:.28em;text-transform:uppercase;margin-top:2px">DOCTOR PORTAL</div></div>
+<div style="font-size:.6rem;color:#C9A84C;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:6px;font-weight:600">Account Setup</div>
+<div style="font-size:.72rem;color:#888;text-align:center;margin-bottom:22px;line-height:1.5">Invitation from OLMA Longevity Platform.<br>Set your password to activate your doctor account.</div>
+<label class="lbl">New Password</label>
+<input class="inp" type="password" placeholder="Min 8 chars, 1 number, 1 uppercase" value="Doctor123" style="margin-bottom:12px">
+<label class="lbl">Confirm Password</label>
+<input class="inp" type="password" value="Doctor123" style="margin-bottom:14px">
+<div style="font-size:.62rem;color:#888;margin-bottom:14px;line-height:1.5;padding:8px 12px;background:rgba(201,168,76,.06);border-radius:8px;border:1px solid rgba(201,168,76,.15)">Setup link expires in <strong style="color:#C9A84C">47:32</strong>. If expired, contact your administrator to resend.</div>
+<button onclick="document.getElementById('setupPage').classList.remove('show');document.getElementById('loginPage').classList.add('show');toast('Account activated. Please log in.')" style="width:100%;background:linear-gradient(135deg,#8B6914,#E8C97A);color:#000;border:none;border-radius:50px;padding:13px;font-size:.75rem;font-weight:700;letter-spacing:.07em;cursor:pointer;text-transform:uppercase;font-family:Inter,sans-serif;margin-bottom:10px">Activate Account</button>
+<div style="text-align:center"><span onclick="document.getElementById('setupPage').classList.remove('show');document.getElementById('loginPage').classList.add('show')" style="font-size:.68rem;color:#888;cursor:pointer;text-decoration:underline">Already have an account? Log in</span></div>
+</div></div>
+<div id="loginPage">
+<div class="lbox">
+<div style="text-align:center;margin-bottom:28px">
+<div style="font-size:1.8rem;margin-bottom:7px">&#x2B21;</div>
+<div style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:#C9A84C;letter-spacing:.22em;text-transform:uppercase">OLMA</div>
+<div style="font-size:.52rem;color:#444;letter-spacing:.28em;text-transform:uppercase;margin-top:2px">DOCTOR PORTAL</div>
+<div style="height:1px;background:linear-gradient(90deg,transparent,#2a2a2a,transparent);margin:14px 0"></div>
+<div style="font-size:.68rem;color:#888">Secure clinical workspace for OLMA doctors</div>
+</div>
+<label class="lbl">Email Address</label>
+<input class="inp" type="email" value="i.tresoldi@olma.health" style="margin-bottom:12px">
+<label class="lbl">Password</label>
+<input class="inp" type="password" value="Doctor123" style="margin-bottom:6px">
+<div style="text-align:right;margin-bottom:16px"><span onclick="toast('Password reset email sent')" style="font-size:.64rem;color:#888;cursor:pointer;text-decoration:underline">Forgot password?</span></div>
+<button onclick="showMain()" style="width:100%;background:linear-gradient(135deg,#8B6914,#E8C97A);color:#000;border:none;border-radius:50px;padding:13px;font-size:.75rem;font-weight:700;letter-spacing:.07em;cursor:pointer;text-transform:uppercase;font-family:Inter,sans-serif;margin-bottom:10px">Log In to Doctor Portal</button>
+<div style="font-size:.6rem;color:#555;text-align:center;line-height:1.5;margin-bottom:14px">5 failed attempts locks account for 15 minutes. TOTP 2FA required after credentials. No biometric login in Phase 1.</div>
+<div style="height:1px;background:linear-gradient(90deg,transparent,#2a2a2a,transparent);margin:10px 0"></div>
+<div style="text-align:center"><span onclick="document.getElementById('loginPage').classList.remove('show');document.getElementById('setupPage').classList.add('show')" style="font-size:.64rem;color:#888;cursor:pointer;text-decoration:underline">New? Activate from invitation email</span></div>
+</div></div>
+<div id="app" style="display:none">
+<div id="sidebar">
+<div class="sl"><div style="font-size:1.4rem;margin-bottom:5px">&#x2B21;</div><div class="sl-name">OLMA</div><div class="sl-sub">Castello di Uviglie</div><div class="sl-role">Doctor Portal</div></div>
+<nav class="snav">
+<div class="scat">Overview</div>
+<div class="sitem on" onclick="gotoPage('dashboard')"><span class="sico">&#x229E;</span>Dashboard</div>
+<div class="sitem" onclick="gotoPage('schedule')"><span class="sico">&#128197;</span>My Schedule<span class="sbadge">3</span></div>
+<div class="scat">Patients</div>
+<div class="sitem" onclick="gotoPage('patients')"><span class="sico">&#128101;</span>My Patients</div>
+<div class="sitem" onclick="gotoPage('patient-detail')"><span class="sico">&#129656;</span>Patient Summary</div>
+<div class="scat">Consultations</div>
+<div class="sitem" onclick="gotoPage('consult-prep')"><span class="sico">&#128203;</span>Pre-Consultation</div>
+<div class="sitem" onclick="gotoPage('active-consult')"><span class="sico">&#127909;</span>Active Session</div>
+<div class="sitem" onclick="gotoPage('post-notes')"><span class="sico">&#128221;</span>Post-Consult Notes<span class="sbadge">1</span></div>
+<div class="scat">Availability</div>
+<div class="sitem" onclick="gotoPage('availability')"><span class="sico">&#128198;</span>Manage Availability</div>
+<div class="scat">Account</div>
+<div class="sitem" onclick="gotoPage('account')"><span class="sico">&#9881;</span>Account Settings</div>
+</nav>
+<div class="sfooter">
+<div style="display:flex;align-items:center;gap:10px"><div class="doc-av">&#128105;&#8205;&#9877;</div><div><div style="font-size:.74rem;font-weight:600;color:#F8F4EC">Prof. Tresoldi</div><div style="font-size:.58rem;color:#888880">Longevity Medicine</div></div></div>
+<div class="logout" onclick="confirmLogout()">&#8594; Log out</div>
+</div>
+</div>
+<div id="main">
+<div id="topbar"><div id="tbTitle">Dashboard</div>
+  <!-- Topbar action sets - shown/hidden per page -->
+  <div id="tbActions" style="display:flex;gap:8px;align-items:center">
+    <div id="tba-dashboard" class="tba-set" style="display:flex;gap:8px">
+      <button class="tb-btn tb-out" onclick="gotoPage('schedule')">View Schedule</button>
+      <button class="tb-btn tb-gold" onclick="gotoPage('consult-prep')">Next Consultation</button>
+    </div>
+    <div id="tba-schedule" class="tba-set" style="display:none">
+      <button class="tb-btn tb-out" onclick="toast('Schedule exported as CSV')">Export CSV</button>
+    </div>
+    <div id="tba-patients" class="tba-set" style="display:none">
+      <button class="tb-btn tb-out" onclick="toast('Patient list exported')">Export</button>
+    </div>
+    <div id="tba-patient-detail" class="tba-set" style="display:none">
+      <button class="tb-btn tb-out" onclick="openCommLog()">Comm Log</button>
+      <button class="tb-btn tb-gold" onclick="gotoPage('consult-prep')">Pre-Consult Briefing</button>
+    </div>
+    <div id="tba-consult-prep" class="tba-set" style="display:none">
+      <button class="tb-btn tb-gold" onclick="gotoPage('active-consult')">Join Consultation</button>
+    </div>
+    <div id="tba-active-consult" class="tba-set" style="display:none">
+      <button class="tb-btn tb-danger" onclick="endConsult()">End Session</button>
+    </div>
+    <div id="tba-post-notes" class="tba-set" style="display:none"></div>
+    <div id="tba-availability" class="tba-set" style="display:none">
+      <button class="tb-btn tb-gold" onclick="openAddSlot()">+ Add Slot</button>
+    </div>
+    <div id="tba-account" class="tba-set" style="display:none"></div>
+  </div><div class="notif-wrap" onclick="toast('3 new notifications')">&#128276;<div class="notif-dot"></div></div></div>
+<div id="reminderBanner"><span>&#128221;</span><span>Post-consultation notes pending for today's session with Sofia R.</span><button onclick="gotoPage('post-notes');document.getElementById('reminderBanner').classList.remove('show')" style="background:rgba(255,167,38,.2);border:1px solid rgba(255,167,38,.4);color:#FFB74D;border-radius:6px;padding:4px 12px;font-size:.64rem;cursor:pointer;font-family:Inter,sans-serif;margin-left:auto;white-space:nowrap">Write Notes &#8594;</button></div>
+<div id="content">
+<div class="page on" id="pg-dashboard">
+<div class="ph"><div><div class="phhead">Good morning, Professor Tresoldi</div><div class="phsub">Saturday, 13 June 2026 &middot; 3 consultations today</div></div>
+<div class="ph-r"><button class="btn btn-gh btn-sm" onclick="gotoPage('availability')">Manage Availability</button><button class="btn btn-g btn-sm" onclick="gotoPage('schedule')">View Schedule</button></div></div>
+<div class="g4" style="margin-bottom:18px">
+<div class="stat"><div class="stat-lbl">Today's Consultations</div><div class="stat-val">3</div><div class="stat-sub">Next: 2:30 PM</div></div>
+<div class="stat"><div class="stat-lbl">My Patients</div><div class="stat-val">47</div><div class="stat-sub">4 new this month</div></div>
+<div class="stat"><div class="stat-lbl">Notes Pending</div><div class="stat-val" style="color:#EF9A9A">1</div><div class="stat-sub" style="color:#FFA726">Action required</div></div>
+<div class="stat"><div class="stat-lbl">This Week</div><div class="stat-val">12</div><div class="stat-sub">consultations</div></div>
+</div>
+<div class="g2" style="margin-bottom:18px">
+<div class="card"><div class="st">Today's Schedule</div>
+<table class="tbl"><thead><tr><th>Time</th><th>Patient</th><th>Tier</th><th>Status</th><th></th></tr></thead><tbody>
+<tr onclick="gotoPage('consult-prep')">
+<td style="color:#C9A84C;font-weight:600">2:30 PM</td>
+<td>Sofia R.</td>
+<td><span class="bdg bg-gold">Junior</span></td>
+<td><span class="bdg bg-g">Booked</span></td>
+<td><button class="btn btn-g btn-sm">Prepare</button></td>
+</tr>
+<tr onclick="gotoPage('schedule')">
+<td style="color:#C9A84C;font-weight:600">4:00 PM</td>
+<td>Marco B.</td>
+<td><span class="bdg bg-pur">Senior</span></td>
+<td><span class="bdg bg-g">Booked</span></td>
+<td><button class="btn btn-g btn-sm">View</button></td>
+</tr>
+<tr onclick="gotoPage('schedule')">
+<td style="color:#C9A84C;font-weight:600">5:30 PM</td>
+<td>Elena F.</td>
+<td><span class="bdg bg-gold">Junior</span></td>
+<td><span class="bdg bg-g">Booked</span></td>
+<td><button class="btn btn-g btn-sm">View</button></td>
+</tr>
+</tbody></table></div>
+<div class="card"><div class="st">Patients Requiring Attention</div>
+<div onclick="gotoPage('patient-detail')" style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;gap:10px;cursor:pointer">
+<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,#8B6914);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:#C9A84C;font-weight:600;flex-shrink:0">SR</div>
+<div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC;font-weight:500">Sofia R.</div><div style="font-size:.64rem;margin-top:1px" style="color:#FFB74D">Lab results reviewed - plan approved</div></div>
+<div style="font-size:.6rem;color:#FFB74D">5 min ago</div>
+</div>
+<div onclick="gotoPage('post-notes')" style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;gap:10px;cursor:pointer">
+<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,#8B6914);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:#C9A84C;font-weight:600;flex-shrink:0">MB</div>
+<div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC;font-weight:500">Marco B.</div><div style="font-size:.64rem;margin-top:1px" style="color:#EF9A9A">Post-consult notes pending</div></div>
+<div style="font-size:.6rem;color:#EF9A9A">Action needed</div>
+</div>
+<div onclick="gotoPage('patient-detail')" style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;gap:10px;cursor:pointer">
+<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,#8B6914);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:#C9A84C;font-weight:600;flex-shrink:0">EF</div>
+<div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC;font-weight:500">Elena F.</div><div style="font-size:.64rem;margin-top:1px" style="color:#81C784">New wearable data synced</div></div>
+<div style="font-size:.6rem;color:#81C784">1 day ago</div>
+</div>
+</div>
+</div>
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="st" style="margin-bottom:0">Consultation Activity - Last 7 Days</div><div style="font-size:.65rem;color:#888">12 total</div></div>
+<div style="display:flex;align-items:flex-end;gap:8px;height:60px">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px">
+<div class="mini-bar" style="width:100%;height:42px"></div>
+<div style="font-size:.58rem;color:#555">M</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px">
+<div class="mini-bar" style="width:100%;height:14px"></div>
+<div style="font-size:.58rem;color:#555">T</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px">
+<div class="mini-bar" style="width:100%;height:28px"></div>
+<div style="font-size:.58rem;color:#555">W</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px">
+<div class="mini-bar" style="width:100%;height:56px"></div>
+<div style="font-size:.58rem;color:#555">T</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px">
+<div class="mini-bar" style="width:100%;height:28px"></div>
+<div style="font-size:.58rem;color:#555">F</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px">
+<div style="width:100%;height:3px"></div>
+<div style="font-size:.58rem;color:#555">S</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px">
+<div class="mini-bar" style="width:100%;height:42px"></div>
+<div style="font-size:.58rem;color:#555">S</div>
+</div>
+</div></div>
+</div>
+<div class="page" id="pg-schedule">
+<div class="ph"><div><div class="phhead">My Schedule</div><div class="phsub">All assigned consultations &middot; Sorted by scheduled time ascending</div></div>
+<div class="ph-r"><select class="inp" style="width:130px;font-size:.7rem;padding:7px 11px"><option>All Statuses</option><option>Booked</option><option>Completed</option><option>Cancelled</option></select>
+<input type="date" class="inp" style="width:150px;font-size:.7rem;padding:7px 11px" value="2026-06-13"></div></div>
+<div class="card" style="padding:0;overflow:hidden">
+<table class="tbl"><thead><tr><th>Patient</th><th>Date &amp; Time</th><th>Duration</th><th>Tier</th><th>Status</th><th>Action</th></tr></thead><tbody>
+<tr onclick="gotoPage('consult-prep')">
+<td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#C9A84C;font-weight:600">SR</div>Sofia R.</div></td>
+<td style="color:#C9A84C;font-weight:600">Today, 2:30 PM</td>
+<td>30 min</td>
+<td><span class="bdg bg-gold">Junior</span></td>
+<td><span class="bdg bg-g">Booked</span></td>
+<td><button class="btn btn-g btn-sm">Prepare</button></td>
+</tr>
+<tr onclick="gotoPage('schedule')">
+<td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#C9A84C;font-weight:600">MB</div>Marco B.</div></td>
+<td style="color:#C9A84C;font-weight:600">Today, 4:00 PM</td>
+<td>45 min</td>
+<td><span class="bdg bg-pur">Senior</span></td>
+<td><span class="bdg bg-g">Booked</span></td>
+<td><button class="btn btn-gh btn-sm">View</button></td>
+</tr>
+<tr onclick="gotoPage('schedule')">
+<td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#C9A84C;font-weight:600">EF</div>Elena F.</div></td>
+<td style="color:#C9A84C;font-weight:600">Today, 5:30 PM</td>
+<td>30 min</td>
+<td><span class="bdg bg-gold">Junior</span></td>
+<td><span class="bdg bg-g">Booked</span></td>
+<td><button class="btn btn-gh btn-sm">View</button></td>
+</tr>
+<tr onclick="gotoPage('post-notes')">
+<td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#C9A84C;font-weight:600">LT</div>Luca T.</div></td>
+<td style="">Yesterday, 3:00 PM</td>
+<td>45 min</td>
+<td><span class="bdg bg-pur">Senior</span></td>
+<td><span class="bdg bg-b">Completed</span></td>
+<td><button class="btn btn-red btn-sm">Notes due</button></td>
+</tr>
+<tr onclick="gotoPage('patient-detail')">
+<td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#C9A84C;font-weight:600">AM</div>Anna M.</div></td>
+<td style="">12 Jun, 10:00 AM</td>
+<td>30 min</td>
+<td><span class="bdg bg-gold">Junior</span></td>
+<td><span class="bdg bg-b">Completed</span></td>
+<td><button class="btn btn-gh btn-sm">View</button></td>
+</tr>
+<tr onclick="gotoPage('schedule')">
+<td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#C9A84C;font-weight:600">RC</div>Roberto C.</div></td>
+<td style="">10 Jun, 2:00 PM</td>
+<td>30 min</td>
+<td><span class="bdg bg-gold">Junior</span></td>
+<td><span class="bdg bg-r">Cancelled</span></td>
+<td><button class="btn btn-gh btn-sm">Details</button></td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="page" id="pg-patients">
+<div class="ph"><div><div class="phhead">My Patients</div><div class="phsub">All patients who have booked a consultation with you. No billing or payment data shown.</div></div>
+<div class="ph-r"><input class="inp" placeholder="Search patients..." style="width:220px;font-size:.74rem;padding:8px 12px"></div></div>
+<div class="card" style="padding:0;overflow:hidden">
+<table class="tbl"><thead><tr><th>Patient ID</th><th>Name</th><th>Last Consultation</th><th>Protocol</th><th>Tier</th><th>Score</th><th></th></tr></thead><tbody>
+<tr onclick="gotoPage('patient-detail')">
+<td style="font-size:.68rem;color:#888;font-family:monospace">OLM-0847</td>
+<td style="font-weight:600;color:#F8F4EC">Sofia R.</td>
+<td>Today</td>
+<td style="font-size:.7rem;color:#888">OLMA Intl. Standard</td>
+<td><span class="bdg bg-gold">Vitality</span></td>
+<td style="font-weight:700;color:#C9A84C">82</td>
+<td><button class="btn btn-o btn-sm">View Summary</button></td>
+</tr>
+<tr onclick="gotoPage('patient-detail')">
+<td style="font-size:.68rem;color:#888;font-family:monospace">OLM-0712</td>
+<td style="font-weight:600;color:#F8F4EC">Marco B.</td>
+<td>Yesterday</td>
+<td style="font-size:.7rem;color:#888">OLMA Intl. Standard</td>
+<td><span class="bdg bg-pur">Longevity Pro</span></td>
+<td style="font-weight:700;color:#C9A84C">74</td>
+<td><button class="btn btn-o btn-sm">View Summary</button></td>
+</tr>
+<tr onclick="gotoPage('patient-detail')">
+<td style="font-size:.68rem;color:#888;font-family:monospace">OLM-0634</td>
+<td style="font-weight:600;color:#F8F4EC">Elena F.</td>
+<td>12 Jun</td>
+<td style="font-size:.7rem;color:#888">OLMA Intl. Standard</td>
+<td><span class="bdg bg-gold">Vitality</span></td>
+<td style="font-weight:700;color:#C9A84C">68</td>
+<td><button class="btn btn-o btn-sm">View Summary</button></td>
+</tr>
+<tr onclick="gotoPage('patient-detail')">
+<td style="font-size:.68rem;color:#888;font-family:monospace">OLM-0521</td>
+<td style="font-weight:600;color:#F8F4EC">Luca T.</td>
+<td>10 Jun</td>
+<td style="font-size:.7rem;color:#888">OLMA Intl. Standard</td>
+<td><span class="bdg bg-pur">Longevity Pro</span></td>
+<td style="font-weight:700;color:#C9A84C">79</td>
+<td><button class="btn btn-o btn-sm">View Summary</button></td>
+</tr>
+<tr onclick="gotoPage('patient-detail')">
+<td style="font-size:.68rem;color:#888;font-family:monospace">OLM-0489</td>
+<td style="font-weight:600;color:#F8F4EC">Anna M.</td>
+<td>08 Jun</td>
+<td style="font-size:.7rem;color:#888">OLMA Intl. Standard</td>
+<td><span class="bdg bg-gold">Vitality</span></td>
+<td style="font-weight:700;color:#C9A84C">65</td>
+<td><button class="btn btn-o btn-sm">View Summary</button></td>
+</tr>
+</tbody></table></div>
+<div style="font-size:.64rem;color:#555;margin-top:10px">Patients assigned to other doctors are not visible. No billing or payment information is shown.</div>
+</div>
+<div class="page" id="pg-patient-detail">
+<div class="ph">
+<div style="display:flex;align-items:center;gap:14px"><div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,#8B6914);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#C9A84C;flex-shrink:0">SR</div><div><div class="phhead">Sofia R. &middot; <span style="font-family:monospace;font-size:1rem;color:#888">OLM-0847</span></div><div class="phsub">Vitality Subscriber &middot; OLMA International Longevity Standard &middot; Last consult: Today</div></div></div>
+<div class="ph-r"><button class="btn btn-o btn-sm" onclick="gotoPage('consult-prep')">Pre-Consult Briefing</button><button class="btn btn-g btn-sm" onclick="gotoPage('active-consult')">Join Consultation</button></div>
+</div>
+<div class="g2" style="margin-bottom:16px">
+<div class="cg"><div class="st">Longevity Score - Read-only</div><div style="display:flex;align-items:center;gap:16px">
+<div class="ring-wrap" style="width:80px;height:80px"><svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)"><circle cx="40" cy="40" r="33" fill="none" stroke="#1e1e1e" stroke-width="6"/><circle cx="40" cy="40" r="33" fill="none" stroke="#C9A84C" stroke-width="6" stroke-dasharray="207.3" stroke-dashoffset="37.3" stroke-linecap="round"/></svg><div class="ring-center"><div class="ring-val" style="font-size:1.2rem">82</div><div class="ring-lbl">Lab</div></div></div>
+<div><div style="font-size:.72rem;color:#C9A84C;font-weight:600">&#8593; +14 from baseline</div><div style="font-size:.65rem;color:#888;margin-top:3px;line-height:1.4">Excellent longevity profile</div><span class="bdg bg-g" style="margin-top:7px;display:inline-block">Lab-Adjusted</span></div>
+</div></div>
+<div class="card"><div class="st">5-Pillar Profile - Read-only</div>
+<div class="pillar" style=""><span style="width:20px;font-size:.85rem">&#10084;</span><span style="font-size:.72rem;flex:1;color:#C8C0B0">Happiness</span><div class="p-bar"><div class="p-fill" style="width:78%"></div></div><span style="font-size:.68rem;color:#C9A84C;font-weight:600;width:22px;text-align:right">78</span><span style="font-size:.58rem;color:#81C784;width:80px;text-align:right">&#8593; Improving</span></div>
+<div class="pillar" style=""><span style="width:20px;font-size:.85rem">&#128170;</span><span style="font-size:.72rem;flex:1;color:#C8C0B0">Fitness</span><div class="p-bar"><div class="p-fill" style="width:65%"></div></div><span style="font-size:.68rem;color:#C9A84C;font-weight:600;width:22px;text-align:right">65</span><span style="font-size:.58rem;color:#888;width:80px;text-align:right">&#8593; Stable</span></div>
+<div class="pillar" style=""><span style="width:20px;font-size:.85rem">&#127919;</span><span style="font-size:.72rem;flex:1;color:#C8C0B0">Purpose</span><div class="p-bar"><div class="p-fill" style="width:82%"></div></div><span style="font-size:.68rem;color:#C9A84C;font-weight:600;width:22px;text-align:right">82</span><span style="font-size:.58rem;color:#81C784;width:80px;text-align:right">&#8593; Improving</span></div>
+<div class="pillar" style=""><span style="width:20px;font-size:.85rem">&#127807;</span><span style="font-size:.72rem;flex:1;color:#C8C0B0">Spirituality</span><div class="p-bar"><div class="p-fill" style="width:70%"></div></div><span style="font-size:.68rem;color:#C9A84C;font-weight:600;width:22px;text-align:right">70</span><span style="font-size:.58rem;color:#888;width:80px;text-align:right">&#8593; Stable</span></div>
+<div class="pillar" style="border-bottom:none"><span style="width:20px;font-size:.85rem">&#129367;</span><span style="font-size:.72rem;flex:1;color:#C8C0B0">Nutrition</span><div class="p-bar"><div class="p-fill" style="width:74%"></div></div><span style="font-size:.68rem;color:#C9A84C;font-weight:600;width:22px;text-align:right">74</span><span style="font-size:.58rem;color:#81C784;width:80px;text-align:right">&#8593; Improving</span></div>
+</div>
+</div>
+<div class="g2" style="margin-bottom:16px">
+<div class="card"><div class="st">Biomarker Results - Read-only - Medically reviewed</div><div style="border-radius:8px;overflow:hidden;border:1px solid #1a1a1a">
+<div class="brow" style=""><span style="font-size:.72rem;flex:1;color:#C8C0B0">HbA1c</span><span style="font-size:.6rem;color:#555;margin-right:5px">&lt;5.4%</span><span style="font-size:.76rem;font-weight:600;color:#81C784">5.2%</span><span class="bdg bg-g" style="font-size:.5rem;margin-left:6px">Optimal</span></div>
+<div class="brow" style=""><span style="font-size:.72rem;flex:1;color:#C8C0B0">Fasting Glucose</span><span style="font-size:.6rem;color:#555;margin-right:5px">70-99</span><span style="font-size:.76rem;font-weight:600;color:#81C784">92 mg/dL</span><span class="bdg bg-g" style="font-size:.5rem;margin-left:6px">Optimal</span></div>
+<div class="brow" style=""><span style="font-size:.72rem;flex:1;color:#C8C0B0">Vitamin D</span><span style="font-size:.6rem;color:#555;margin-right:5px">30-100</span><span style="font-size:.76rem;font-weight:600;color:#FFB74D">38 ng/mL</span><span class="bdg bg-a" style="font-size:.5rem;margin-left:6px">Borderline</span></div>
+<div class="brow" style=""><span style="font-size:.72rem;flex:1;color:#C8C0B0">hs-CRP</span><span style="font-size:.6rem;color:#555;margin-right:5px">&lt;1 mg/L</span><span style="font-size:.76rem;font-weight:600;color:#FFB74D">1.2 mg/L</span><span class="bdg bg-a" style="font-size:.5rem;margin-left:6px">Borderline</span></div>
+<div class="brow" style="border-bottom:none"><span style="font-size:.72rem;flex:1;color:#C8C0B0">ApoB</span><span style="font-size:.6rem;color:#555;margin-right:5px">&lt;80 mg/dL</span><span style="font-size:.76rem;font-weight:600;color:#81C784">74 mg/dL</span><span class="bdg bg-g" style="font-size:.5rem;margin-left:6px">Optimal</span></div>
+</div></div>
+<div class="card"><div class="st">Wearable Data - Apple Watch - Read-only</div><div style="font-size:.62rem;color:#888;margin-bottom:9px">Last sync: 2 hours ago - All data within 24h</div>
+<div class="g2" style="gap:8px;margin-bottom:10px">
+<div class="wmet"><div class="wmet-ico">&#10084;</div><div class="wmet-val">72 bpm</div><div class="wmet-lbl">7-day avg HR</div></div>
+<div class="wmet"><div class="wmet-ico">&#127769;</div><div class="wmet-val">7.2 h</div><div class="wmet-lbl">Sleep avg</div></div>
+<div class="wmet"><div class="wmet-ico">&#128099;</div><div class="wmet-val">7,840</div><div class="wmet-lbl">Steps avg</div></div>
+<div class="wmet"><div class="wmet-ico">&#9889;</div><div class="wmet-val">88%</div><div class="wmet-lbl">Readiness</div></div>
+</div>
+<div style="font-size:.64rem;color:#888;background:#1a1a1a;border-radius:8px;padding:8px 10px;line-height:1.5"><span style="color:#81C784;font-weight:600">ECG:</span> Normal Sinus Rhythm - No abnormality<br><span style="font-size:.58rem;color:#555">CE-certified ECG reading (Class IIa medical device)</span></div>
+</div>
+</div>
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="st" style="margin-bottom:0">Vita Session Topics - Last 3 Sessions</div><div style="font-size:.62rem;color:#888">No verbatim transcripts - No emotional support content</div></div>
+<div class="vtopic"><div class="vtopic-date">13 Jun 2026 - Health Guidance - 18 min</div>Vitamin D supplementation response; Mediterranean diet adherence; energy levels improved; less post-meal fatigue.</div>
+<div class="vtopic"><div class="vtopic-date">10 Jun 2026 - Supplement Guidance - 12 min</div>Omega-3 dosing discussed; supplement timing optimisation; patient asked about increasing D3 dose.</div>
+<div class="vtopic"><div class="vtopic-date">07 Jun 2026 - Health Guidance - 20 min</div>HbA1c improvement plan; carbohydrate reduction strategy; exercise protocol review; sleep quality tracking.</div>
+</div>
+<div class="dv"></div>
+<button class="btn btn-gh btn-sm" onclick="gotoPage('consult-prep')" style="margin-right:8px">Pre-Consultation Briefing</button>
+<button class="btn btn-gh btn-sm" onclick="openCommLog()">View Communication Log</button>
+</div>
+<div class="page" id="pg-consult-prep">
+<div class="ph"><div><div class="phhead">Pre-Consultation Briefing</div><div class="phsub">Sofia R. - Today at 2:30 PM - Junior - 30 minutes</div></div>
+<div class="ph-r" style="align-items:center"><div style="text-align:center;background:#1E1E1E;border:1px solid #2a2a2a;border-radius:10px;padding:8px 16px"><div style="font-size:.56rem;color:#888;letter-spacing:.1em;text-transform:uppercase">Starts in</div><div style="font-family:Cormorant Garamond,serif;font-size:1.5rem;color:#C9A84C;font-weight:500;line-height:1">14:32</div></div>
+<button class="btn btn-g" onclick="gotoPage('active-consult')">Join Consultation &#8594;</button></div></div>
+<div style="display:flex;gap:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div class="cg"><div class="st">What your patient will bring</div><div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+<div class="ring-wrap" style="width:64px;height:64px"><svg width="64" height="64" viewBox="0 0 64 64" style="transform:rotate(-90deg)"><circle cx="32" cy="32" r="26" fill="none" stroke="#1e1e1e" stroke-width="5"/><circle cx="32" cy="32" r="26" fill="none" stroke="#C9A84C" stroke-width="5" stroke-dasharray="163.4" stroke-dashoffset="29.4" stroke-linecap="round"/></svg><div class="ring-center"><div class="ring-val" style="font-size:.95rem">82</div></div></div>
+<div><div style="font-size:.76rem;font-weight:600;color:#F8F4EC">Score: 82 - Lab-Adjusted</div><div style="font-size:.65rem;color:#888;margin-top:2px">+14 from start - Excellent profile</div><div style="font-size:.63rem;color:#C9A84C;margin-top:2px">OLMA International Longevity Standard</div></div>
+</div><div class="dv"></div><div style="font-size:.6rem;color:#888;font-weight:600;margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase">Active Biomarker Flags</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="bdg bg-a">Vitamin D Borderline</span><span class="bdg bg-a">hs-CRP Watch</span><span class="bdg bg-g">HbA1c Optimal</span><span class="bdg bg-g">ApoB Optimal</span></div></div>
+<div class="card"><div class="st">How to Prepare</div>
+<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="color:#C9A84C;font-weight:700;font-size:.68rem;flex-shrink:0">1.</span><span style="font-size:.72rem;color:#888;line-height:1.5">Review Vitamin D and hs-CRP borderline results - patient likely to ask about dosage increase.</span></div>
+<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="color:#C9A84C;font-weight:700;font-size:.68rem;flex-shrink:0">2.</span><span style="font-size:.72rem;color:#888;line-height:1.5">Note HbA1c and energy level improvements since last consultation.</span></div>
+<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="color:#C9A84C;font-weight:700;font-size:.68rem;flex-shrink:0">3.</span><span style="font-size:.72rem;color:#888;line-height:1.5">Check Vita session topics - patient discussed D3 dosage in last session.</span></div>
+<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #1a1a1a;border-bottom:none"><span style="color:#C9A84C;font-weight:700;font-size:.68rem;flex-shrink:0">4.</span><span style="font-size:.72rem;color:#888;line-height:1.5">Test video and microphone before the session starts.</span></div>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div class="card"><div class="st">About the Patient</div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.68rem;color:#888">Subscription</span><span style="font-size:.72rem;color:#F8F4EC">Vitality Subscriber</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.68rem;color:#888">Protocol</span><span style="font-size:.72rem;color:#F8F4EC">OLMA International Standard</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.68rem;color:#888">On plan since</span><span style="font-size:.72rem;color:#F8F4EC">1 June 2026</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.68rem;color:#888">Consultation no.</span><span style="font-size:.72rem;color:#F8F4EC">2nd consultation</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;border-bottom:none"><span style="font-size:.68rem;color:#888">Wearable</span><span style="font-size:.72rem;color:#F8F4EC">Apple Watch - Active</span></div>
+</div>
+<div class="card"><div class="st">Wearable Summary (7-Day)</div><div class="g2" style="gap:8px;margin-bottom:10px">
+<div class="wmet"><div class="wmet-ico">&#10084;</div><div class="wmet-val">72 bpm</div><div class="wmet-lbl">7-day avg HR</div></div>
+<div class="wmet"><div class="wmet-ico">&#127769;</div><div class="wmet-val">7.2 h</div><div class="wmet-lbl">Sleep avg</div></div>
+<div class="wmet"><div class="wmet-ico">&#128099;</div><div class="wmet-val">7,840</div><div class="wmet-lbl">Steps avg</div></div>
+<div class="wmet"><div class="wmet-ico">&#9889;</div><div class="wmet-val">88%</div><div class="wmet-lbl">Readiness</div></div>
+</div><div style="font-size:.64rem;color:#888">ECG: <span style="color:#81C784;font-weight:600">Normal Sinus Rhythm</span> - CE-certified (Class IIa)</div></div>
+<div class="card"><div class="st">Vita Session Topics</div>
+<div class="vtopic" style="margin-bottom:6px"><div class="vtopic-date">13 Jun 2026 - Health Guidance - 18 min</div>Vitamin D supplementation response; Mediterranean diet adher...</div>
+<div class="vtopic" style="margin-bottom:6px"><div class="vtopic-date">10 Jun 2026 - Supplement Guidance - 12 min</div>Omega-3 dosing discussed; supplement timing optimisation; pa...</div>
+<div class="vtopic" style="margin-bottom:6px"><div class="vtopic-date">07 Jun 2026 - Health Guidance - 20 min</div>HbA1c improvement plan; carbohydrate reduction strategy; exe...</div>
+</div>
+</div>
+</div>
+</div>
+<div class="page" id="pg-active-consult">
+<div class="ph"><div><div class="phhead">Active Consultation</div><div class="phsub">Sofia R. - OLM-0847 - Junior - 30 min - Session in progress</div></div>
+<div class="ph-r" style="align-items:center"><div style="background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);border-radius:8px;padding:7px 14px;font-size:.72rem;color:#81C784">&#9679; 14:23 elapsed</div><button class="btn btn-red" onclick="endConsult()">End Session &amp; Write Notes</button></div></div>
+<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:16px;height:calc(100vh - 220px)">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="background:#000;border-radius:var(--r2);aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #2a2a2a;position:relative;overflow:hidden">
+<div style="font-size:3rem;margin-bottom:8px">&#127909;</div><div style="font-size:.8rem;color:#888">Video call via Zoom</div><div style="font-size:.64rem;color:#555;margin-top:4px">Connected - HD - End-to-end encrypted</div>
+<div style="position:absolute;bottom:10px;right:10px;display:flex;gap:7px"><button onclick="toast('Microphone muted')" style="background:rgba(0,0,0,.7);border:1px solid #333;border-radius:7px;padding:6px 12px;color:#888;font-size:.64rem;cursor:pointer;font-family:Inter,sans-serif">&#127908; Mute</button><button onclick="toast('Camera off')" style="background:rgba(0,0,0,.7);border:1px solid #333;border-radius:7px;padding:6px 12px;color:#888;font-size:.64rem;cursor:pointer;font-family:Inter,sans-serif">&#128247; Camera</button></div>
+<div style="position:absolute;bottom:10px;left:10px;background:rgba(229,57,53,.15);border:1px solid rgba(229,57,53,.3);border-radius:6px;padding:4px 10px;font-size:.58rem;color:#EF9A9A">Insufficient connectivity? <span style="text-decoration:underline;cursor:pointer" onclick="toast('Dial-in: +39 02 9977 4400 - ID: 847-2026')">Get dial-in number</span></div>
+</div>
+<div class="card" style="flex:1;overflow-y:auto"><div class="st">Quick Clinical Reference</div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.65rem;color:#888;width:110px;flex-shrink:0">Score</span><span style="font-size:.72rem;color:#F8F4EC">82 - Lab-Adjusted - +14 from start</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.65rem;color:#888;width:110px;flex-shrink:0">Key flags</span><span style="font-size:.72rem;color:#F8F4EC">Vitamin D 38 ng/mL - hs-CRP 1.2 mg/L (both Borderline)</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.65rem;color:#888;width:110px;flex-shrink:0">Current plan</span><span style="font-size:.72rem;color:#F8F4EC">Mediterranean diet - D3+K2 - Omega-3</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;border-bottom:none"><span style="font-size:.65rem;color:#888;width:110px;flex-shrink:0">Last Vita topic</span><span style="font-size:.72rem;color:#F8F4EC">Vitamin D response and carb reduction</span></div>
+</div>
+</div>
+<div class="card" style="display:flex;flex-direction:column;overflow:hidden"><div class="st" style="flex-shrink:0">Live Session Notes</div><div style="font-size:.64rem;color:#888;margin-bottom:10px;flex-shrink:0">Not visible to patient until submitted after session ends</div>
+<textarea class="note-ed" style="flex:1;min-height:0;resize:none;margin-bottom:10px">Patient reports improved energy since reducing refined carbohydrates.
+
+Vitamin D: 38 ng/mL - Borderline. Discussed increasing D3 to 4000 IU daily. Patient agreeable.
+
+Sleep: 7.2h average - good improvement. Recommend consistent schedule.
+
+hs-CRP: 1.2 mg/L - improving. Continue anti-inflammatory protocol.
+
+Agreed: retest in 90 days.</textarea>
+<button class="btn btn-o" onclick="gotoPage('post-notes')">Save Draft &amp; Write Final Notes</button>
+</div>
+</div>
+</div>
+<div class="page" id="pg-post-notes">
+<div class="ph"><div><div class="phhead">Post-Consultation Notes</div><div class="phsub">Sofia R. - 13 Jun 2026 - Junior - 30 min - Completed</div></div><span class="bdg bg-r" style="align-self:flex-start;margin-top:8px">Notes required</span></div>
+<div class="g2">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div class="card"><div class="st">Consultation Summary</div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.68rem;color:#888">Duration</span><span style="font-size:.72rem;color:#F8F4EC">30 minutes</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.68rem;color:#888">Type</span><span style="font-size:.72rem;color:#F8F4EC">Junior Consultation</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;"><span style="font-size:.68rem;color:#888">Status</span><span style="font-size:.72rem;color:#F8F4EC">Completed</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a1a1a;border-bottom:none"><span style="font-size:.68rem;color:#888">Patient</span><span style="font-size:.72rem;color:#F8F4EC">Sofia R. - OLM-0847</span></div>
+</div>
+<div class="card"><div class="st">Recommendations Made This Session</div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;"><span style="color:#C9A84C;font-size:.66rem;font-weight:700;flex-shrink:0">1.</span><span style="font-size:.71rem;color:#888;line-height:1.5">Increase Vitamin D3 to 4000 IU daily with K2 100mcg</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;"><span style="color:#C9A84C;font-size:.66rem;font-weight:700;flex-shrink:0">2.</span><span style="font-size:.71rem;color:#888;line-height:1.5">Maintain Mediterranean diet - continue carbohydrate reduction</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;"><span style="color:#C9A84C;font-size:.66rem;font-weight:700;flex-shrink:0">3.</span><span style="font-size:.71rem;color:#888;line-height:1.5">Continue Omega-3 2g daily</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;"><span style="color:#C9A84C;font-size:.66rem;font-weight:700;flex-shrink:0">4.</span><span style="font-size:.71rem;color:#888;line-height:1.5">Re-test biomarkers in 90 days</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;border-bottom:none"><span style="color:#C9A84C;font-size:.66rem;font-weight:700;flex-shrink:0">5.</span><span style="font-size:.71rem;color:#888;line-height:1.5">Consistent sleep schedule, no screens 1h before bed</span></div>
+</div>
+<div class="card"><div class="st">Previous Note (Consultation 1)</div><div style="background:#1a1a1a;border-radius:8px;padding:11px;font-size:.7rem;color:#666;border:1px solid #1e1e1e;line-height:1.6"><div style="font-size:.6rem;color:#555;margin-bottom:5px;font-family:monospace">01 Jun 2026 - Dr. I. Tresoldi - Consultation 1</div>Initial consultation. Baseline review. OLMA International Standard protocol introduced. Vitamin D deficiency at 38 ng/mL discussed. D3 2000 IU initiated. Mediterranean dietary protocol commenced.</div></div>
+</div>
+<div class="card" style="display:flex;flex-direction:column"><div class="st">Clinical Notes - This Consultation</div>
+<div style="font-size:.64rem;color:#888;margin-bottom:9px">Max 5,000 characters - Visible to patient within 60 seconds of submission - Cannot be deleted after submission</div>
+<textarea class="note-ed" style="flex:1;min-height:220px;resize:none;margin-bottom:8px" id="noteEditor">Consultation focused on Vitamin D supplementation review and dietary adherence progress.
+
+Key findings:
+- Vitamin D: 38 ng/mL (Borderline). Increasing D3 to 4000 IU daily with K2 100mcg. Review in 90 days.
+- Energy levels significantly improved since commencing low-carb Mediterranean protocol.
+- Sleep quality: 7.2h average. Recommend maintaining consistent sleep schedule.
+- hs-CRP: 1.2 mg/L (Borderline, improving). Continue current anti-inflammatory protocol.
+
+Next steps: Re-test biomarkers in 90 days. Continue OLMA International protocol with amended D3 dosing.</textarea>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span id="charCount" style="font-size:.62rem;color:#888">512 / 5,000 characters</span><span style="font-size:.62rem;color:#888">Medically reviewed badge applied on submission</span></div>
+<button class="btn btn-g" onclick="submitNotes()" style="margin-bottom:8px">Submit Notes - Visible to Patient</button>
+<button class="btn btn-gh" onclick="toast('Draft saved')">Save as Draft</button>
+<div style="margin-top:12px;padding:10px;background:#1a1a1a;border-radius:8px;font-size:.64rem;color:#555;line-height:1.5;border:1px solid #1e1e1e">Notes are immutable after submission. To add further information, use the Amendment function which creates a new timestamped entry. Original notes cannot be edited or deleted.</div>
+</div>
+</div>
+</div>
+<div class="page" id="pg-availability">
+<div class="ph"><div><div class="phhead">Manage Availability</div><div class="phsub">Add, edit, or block slots. Changes take effect immediately on the patient booking screen.</div></div>
+<div class="ph-r"><button class="btn btn-gh btn-sm" onclick="toast('Date range blocked. No patients can book during this period.')">Block Dates</button><button class="btn btn-g btn-sm" onclick="openAddSlot()">+ Add Slot</button></div></div>
+<div class="g2" style="margin-bottom:16px">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="st" style="margin-bottom:0">June 2026</div><div style="display:flex;gap:6px"><button class="btn btn-gh btn-sm" onclick="toast('May 2026')">&#8592;</button><button class="btn btn-gh btn-sm" onclick="toast('July 2026')">&#8594;</button></div></div>
+<div class="cal-grid" style="margin-bottom:8px">
+<div class="cal-hd">M</div>
+<div class="cal-hd">T</div>
+<div class="cal-hd">W</div>
+<div class="cal-hd">T</div>
+<div class="cal-hd">F</div>
+<div class="cal-hd">S</div>
+<div class="cal-hd">S</div>
+<div class="cal-day " onclick="toast('No slot on this day')">1</div>
+<div class="cal-day " onclick="toast('No slot on this day')">2</div>
+<div class="cal-day " onclick="toast('No slot on this day')">3</div>
+<div class="cal-day " onclick="toast('No slot on this day')">4</div>
+<div class="cal-day " onclick="toast('No slot on this day')">5</div>
+<div class="cal-day " onclick="toast('No slot on this day')">6</div>
+<div class="cal-day " onclick="toast('No slot on this day')">7</div>
+<div class="cal-day " onclick="toast('No slot on this day')">8</div>
+<div class="cal-day " onclick="toast('No slot on this day')">9</div>
+<div class="cal-day " onclick="toast('No slot on this day')">10</div>
+<div class="cal-day " onclick="toast('No slot on this day')">11</div>
+<div class="cal-day " onclick="toast('No slot on this day')">12</div>
+<div class="cal-day cal-today" onclick="toast('Today: 3 consultations booked')">13</div>
+<div class="cal-day " onclick="toast('No slot on this day')">14</div>
+<div class="cal-day " onclick="toast('No slot on this day')">15</div>
+<div class="cal-day cal-slot" onclick="toast('Available slot - click Add Slot to manage')">16</div>
+<div class="cal-day cal-slot" onclick="toast('Available slot - click Add Slot to manage')">17</div>
+<div class="cal-day " onclick="toast('No slot on this day')">18</div>
+<div class="cal-day " onclick="toast('No slot on this day')">19</div>
+<div class="cal-day cal-slot" onclick="toast('Available slot - click Add Slot to manage')">20</div>
+<div class="cal-day " onclick="toast('No slot on this day')">21</div>
+<div class="cal-day " onclick="toast('No slot on this day')">22</div>
+<div class="cal-day cal-booked" onclick="toast('Slot booked - cannot remove without cancelling')">23</div>
+<div class="cal-day cal-booked" onclick="toast('Slot booked - cannot remove without cancelling')">24</div>
+<div class="cal-day " onclick="toast('No slot on this day')">25</div>
+<div class="cal-day " onclick="toast('No slot on this day')">26</div>
+<div class="cal-day cal-slot" onclick="toast('Available slot - click Add Slot to manage')">27</div>
+<div class="cal-day " onclick="toast('No slot on this day')">28</div>
+<div class="cal-day " onclick="toast('No slot on this day')">29</div>
+<div class="cal-day " onclick="toast('No slot on this day')">30</div>
+</div>
+<div style="display:flex;gap:14px;font-size:.6rem;color:#888;flex-wrap:wrap"><span><span style="color:#C9A84C">&#9632;</span> Booked</span><span><span style="color:#81C784">&#9632;</span> Available</span><span style="font-weight:600;color:#C9A84C">&#9679;</span> Today</div>
+</div>
+<div class="card"><div class="st">Today's Slots - 13 Jun 2026</div>
+<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;gap:10px"><div style="width:60px;font-size:.7rem;color:#C9A84C;font-weight:600;flex-shrink:0">2:30 PM</div><div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC">Sofia R.</div><div style="font-size:.62rem;color:#888;margin-top:1px">Junior - 30 min</div></div><span class="bdg bg-gold">Booked</span><button onclick="toast('Cannot remove — cancel the existing booking first')" class="btn btn-gh btn-sm" style="font-size:.6rem">Remove</button></div>
+
+<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;gap:10px"><div style="width:60px;font-size:.7rem;color:#C9A84C;font-weight:600;flex-shrink:0">4:00 PM</div><div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC">Marco B.</div><div style="font-size:.62rem;color:#888;margin-top:1px">Senior - 45 min</div></div><span class="bdg bg-gold">Booked</span><button onclick="toast('Cannot remove — cancel the existing booking first')" class="btn btn-gh btn-sm" style="font-size:.6rem">Remove</button></div>
+
+<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;gap:10px"><div style="width:60px;font-size:.7rem;color:#C9A84C;font-weight:600;flex-shrink:0">5:30 PM</div><div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC">Elena F.</div><div style="font-size:.62rem;color:#888;margin-top:1px">Junior - 30 min</div></div><span class="bdg bg-gold">Booked</span><button onclick="toast('Cannot remove — cancel the existing booking first')" class="btn btn-gh btn-sm" style="font-size:.6rem">Remove</button></div>
+
+<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;gap:10px"><div style="width:60px;font-size:.7rem;color:#C9A84C;font-weight:600;flex-shrink:0">7:00 PM</div><div style="flex:1"><div style="font-size:.78rem;color:#F8F4EC">Open</div><div style="font-size:.62rem;color:#888;margin-top:1px">Junior - 30 min</div></div><span class="bdg bg-g">Available</span><button onclick="toast('Slot removed from calendar')" class="btn btn-red btn-sm" style="font-size:.6rem">Remove</button></div>
+
+</div>
+</div>
+<div class="card"><div class="st">Add Recurring Availability</div><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+<div><label class="lbl">Day of Week</label><select class="inp" style="width:130px;font-size:.74rem;padding:9px 12px"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>
+<div><label class="lbl">Start Time</label><input type="time" class="inp" value="14:00" style="width:120px;padding:9px 12px;font-size:.74rem"></div>
+<div><label class="lbl">Type</label><select class="inp" style="width:160px;font-size:.74rem;padding:9px 12px"><option>Junior (30 min)</option><option>Senior (45 min)</option><option>Professor (60 min)</option></select></div>
+<div><label class="lbl">Repeat Until</label><input type="date" class="inp" value="2026-09-30" style="width:150px;padding:9px 12px;font-size:.74rem"></div>
+<button class="btn btn-g" onclick="toast('Recurring slots added - visible to patients immediately')">Add Recurring Slots</button>
+</div></div>
+</div>
+<div class="page" id="pg-account">
+<div class="ph"><div><div class="phhead">Account Settings</div><div class="phsub">Manage your profile, security, and notification preferences.</div></div></div>
+<div class="g2">
+<div style="display:flex;flex-direction:column;gap:14px"><div class="card"><div class="st">Profile</div>
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px"><div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#8B6914,#C9A84C);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">&#128105;&#8205;&#9877;</div><div><div style="font-size:.9rem;font-weight:600;color:#F8F4EC">Prof. Ilaria Tresoldi MD, PhD</div><div style="font-size:.67rem;color:#888;margin-top:2px">Longevity Medicine - Senior tier</div><button class="btn btn-gh btn-sm" style="margin-top:7px" onclick="toast('Photo updated')">Change Photo</button></div></div>
+<div style="display:grid;gap:10px">
+<div><label class="lbl">Display Name</label><input class="inp" value="Prof. Ilaria Tresoldi"></div>
+<div><label class="lbl">Email (read-only)</label><input class="inp" value="i.tresoldi@olma.health" style="opacity:.55;cursor:not-allowed" readonly><div style="font-size:.6rem;color:#555;margin-top:3px">To change your email address, please contact your administrator.</div></div>
+<div><label class="lbl">Specialty</label><input class="inp" value="Longevity Medicine"></div>
+<div><label class="lbl">One-line Bio</label><input class="inp" value="Longevity medicine specialist with 22 years in preventive health."></div>
+<div><label class="lbl">Phone</label><input class="inp" value="+39 02 9977 4400" type="tel"></div>
+<button class="btn btn-g" onclick="toast('Profile updated')">Save Changes</button>
+</div></div></div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div class="card"><div class="st">Security</div><div style="display:grid;gap:10px;margin-bottom:12px">
+<div><label class="lbl">Current Password</label><input type="password" class="inp" value="••••••••"></div>
+<div><label class="lbl">New Password</label><input type="password" class="inp" placeholder="New password"></div>
+<div><label class="lbl">Confirm New Password</label><input type="password" class="inp" placeholder="Confirm"></div>
+<button class="btn btn-o" onclick="toast('Password updated. All sessions invalidated - please log in again.')">Change Password</button>
+</div><div class="dv"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><div><div style="font-size:.78rem;color:#F8F4EC">TOTP 2FA</div><div style="font-size:.64rem;color:#81C784;margin-top:2px">Active - Mandatory for all portal access</div></div><button class="btn btn-gh btn-sm" onclick="toast('TOTP regenerated. Scan new QR code.')">Regenerate</button></div>
+<div style="font-size:.62rem;color:#555;padding:8px 10px;background:#1a1a1a;border-radius:8px;line-height:1.5;margin-top:4px">After 5 failed password change attempts, your session ends with a security notice.</div>
+</div>
+<div class="card"><div class="st">Email Notification Preferences</div>
+<div class="tog" style=""><div><div style="font-size:.76rem;color:#C8C0B0">New consultation bookings</div><div style="font-size:.63rem;color:#888;margin-top:1px">Email on each new booking</div></div><div class="tog-pill" onclick="this.classList.toggle('tog-off');toast(this.classList.contains('tog-off')?'Notifications off':'Notifications on')">On</div></div>
+<div class="tog" style=""><div><div style="font-size:.76rem;color:#C8C0B0">Cancellations</div><div style="font-size:.63rem;color:#888;margin-top:1px">Email when a patient cancels</div></div><div class="tog-pill" onclick="this.classList.toggle('tog-off');toast(this.classList.contains('tog-off')?'Notifications off':'Notifications on')">On</div></div>
+<div class="tog" style="border-bottom:none"><div><div style="font-size:.76rem;color:#C8C0B0">24-hour consultation reminders</div><div style="font-size:.63rem;color:#888;margin-top:1px">Email 24h before each session</div></div><div class="tog-pill" onclick="this.classList.toggle('tog-off');toast(this.classList.contains('tog-off')?'Notifications off':'Notifications on')">On</div></div>
+</div>
+<div class="card"><div class="st">Session</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a1a"><div><div style="font-size:.76rem;color:#C8C0B0">Account deletion</div><div style="font-size:.63rem;color:#888;margin-top:1px">Managed by Platform Admin only</div></div><span style="font-size:.64rem;color:#555">Not available</span></div>
+<div style="padding:8px 0"><button class="btn btn-red" onclick="confirmLogout()">Log Out</button></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="overlay" id="commLogOverlay" onclick="if(event.target===this)closeCommLog()">
+<div class="modal" style="width:min(520px,90vw)">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="modal-t">Patient Communication Log</div><button onclick="closeCommLog()" style="background:#1E1E1E;border:1px solid #2a2a2a;border-radius:50%;width:28px;height:28px;color:#888;cursor:pointer;font-size:.85rem">&#x2715;</button></div>
+<div class="modal-s">Sofia R. - OLM-0847 - Read-only - All automated consultation-related notifications</div>
+<div style="max-height:360px;overflow-y:auto;border:1px solid #2a2a2a;border-radius:10px">
+<div class="nitem" style=""><div class="ndot" style="background:#C9A84C"></div><div style="flex:1"><div style="font-size:.76rem;font-weight:600;color:#F8F4EC">Booking Confirmation</div><div style="font-size:.65rem;color:#888;margin-top:2px;line-height:1.4">Junior consultation confirmed for today at 2:30 PM. Video call link sent.</div><div style="font-size:.58rem;color:#555;margin-top:3px">13 Jun 2026 - 09:14 AM</div></div></div>
+<div class="nitem" style=""><div class="ndot" style="background:#C9A84C"></div><div style="flex:1"><div style="font-size:.76rem;font-weight:600;color:#F8F4EC">24-Hour Reminder</div><div style="font-size:.65rem;color:#888;margin-top:2px;line-height:1.4">Reminder: your consultation with Prof. Tresoldi is tomorrow at 2:30 PM.</div><div style="font-size:.58rem;color:#555;margin-top:3px">12 Jun 2026 - 2:30 PM</div></div></div>
+<div class="nitem" style=""><div class="ndot" style="background:#81C784"></div><div style="flex:1"><div style="font-size:.76rem;font-weight:600;color:#F8F4EC">Post-Consult Note Available</div><div style="font-size:.65rem;color:#888;margin-top:2px;line-height:1.4">Dr. Tresoldi has added notes from your 1 June consultation. View in your health summary.</div><div style="font-size:.58rem;color:#555;margin-top:3px">01 Jun 2026 - 4:52 PM</div></div></div>
+<div class="nitem" style="border-bottom:none"><div class="ndot" style="background:#81C784"></div><div style="flex:1"><div style="font-size:.76rem;font-weight:600;color:#F8F4EC">Booking Confirmation</div><div style="font-size:.65rem;color:#888;margin-top:2px;line-height:1.4">Junior consultation confirmed for 1 June at 2:30 PM.</div><div style="font-size:.58rem;color:#555;margin-top:3px">31 May 2026 - 11:22 AM</div></div></div>
+</div>
+<div style="font-size:.62rem;color:#555;margin-top:10px">Read-only. No direct messaging in Phase 1. Post-consultation note notifications appear here when notes are submitted.</div>
+</div></div>
+<div class="overlay" id="addSlotOverlay" onclick="if(event.target===this)closeAddSlot()">
+<div class="modal"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div class="modal-t">Add Available Slot</div><button onclick="closeAddSlot()" style="background:#1E1E1E;border:1px solid #2a2a2a;border-radius:50%;width:28px;height:28px;color:#888;cursor:pointer;font-size:.85rem">&#x2715;</button></div>
+<div class="modal-s">New slot takes effect immediately on the patient booking screen.</div>
+<div style="display:grid;gap:10px">
+<div><label class="lbl">Date</label><input type="date" class="inp" value="2026-06-13"></div>
+<div><label class="lbl">Start Time</label><input type="time" class="inp" value="09:00"></div>
+<div><label class="lbl">Consultation Type</label><select class="inp"><option>Junior (30 min)</option><option>Senior (45 min)</option><option>Professor (60 min)</option></select></div>
+<button class="btn btn-g" onclick="toast('Slot added - visible to patients immediately');closeAddSlot()">Add Slot</button>
+<button class="btn btn-gh" onclick="closeAddSlot()">Cancel</button>
+</div></div></div>
+<div class="overlay" id="logoutOverlay" onclick="if(event.target===this)closeLogout()">
+<div class="modal"><div class="modal-t" style="margin-bottom:6px">Log Out?</div>
+<div class="modal-s">Your session will be cleared and you will be returned to the login screen.</div>
+<div style="display:flex;gap:10px"><button class="btn btn-g" style="flex:1" onclick="doLogout()">Log Out</button><button class="btn btn-gh" style="flex:1" onclick="closeLogout()">Cancel</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var toastTimer;
+function toast(msg){
+  clearTimeout(toastTimer);
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  toastTimer=setTimeout(function(){t.classList.remove('show');},2600);
+}
+
+
+function updateTopbarActions(pid){
+  document.querySelectorAll('.tba-set').forEach(function(el){el.style.display='none';});
+  var el = document.getElementById('tba-'+pid);
+  if(el) el.style.display='flex';
+}
+function gotoPage(pid){
+  var el = document.getElementById('pg-' + pid);
+  if(!el) return;
+  document.querySelectorAll('.sitem').forEach(function(i){ i.classList.remove('on'); });
+  var sidebar_item = document.querySelector('.sitem[onclick*="' + pid + '"]');
+  if(sidebar_item) sidebar_item.classList.add('on');
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  el.classList.add('on');
+  document.getElementById('content').scrollTop = 0;
+  var titles = {dashboard:'Dashboard',schedule:'My Schedule',patients:'My Patients','patient-detail':'Patient Health Summary','consult-prep':'Pre-Consultation Briefing','active-consult':'Active Consultation','post-notes':'Post-Consultation Notes',availability:'Manage Availability',account:'Account Settings'};
+  document.getElementById('tbTitle').textContent = titles[pid] || pid;
+  updateTopbarActions(pid);
+}
+function showMain(){
+  document.getElementById('loginPage').classList.remove('show');
+  document.getElementById('app').style.display='flex';
+  document.getElementById('reminderBanner').classList.add('show');
+  updateTopbarActions('dashboard');
+  toast('Welcome back, Professor Tresoldi');
+}
+
+function endConsult(){
+  gotoPage('post-notes');
+  document.getElementById('reminderBanner').classList.remove('show');
+  toast('Session ended. Please submit your consultation notes.');
+}
+
+function submitNotes(){
+  toast('Notes submitted - Sofia R. notified. Visible in her health summary within 60 seconds.');
+  gotoPage('schedule');
+}
+
+function openCommLog(){document.getElementById('commLogOverlay').classList.add('open');}
+function closeCommLog(){document.getElementById('commLogOverlay').classList.remove('open');}
+function openAddSlot(){document.getElementById('addSlotOverlay').classList.add('open');}
+function closeAddSlot(){document.getElementById('addSlotOverlay').classList.remove('open');}
+function confirmLogout(){document.getElementById('logoutOverlay').classList.add('open');}
+function closeLogout(){document.getElementById('logoutOverlay').classList.remove('open');}
+
+function doLogout(){
+  closeLogout();
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginPage').classList.add('show');
+  toast('Logged out. Session cleared.');
+}
+
+var noteEd=document.getElementById('noteEditor');
+if(noteEd){
+  noteEd.addEventListener('input',function(){
+    var len=this.value.length;
+    var cc=document.getElementById('charCount');
+    if(cc) cc.textContent=len+' / 5,000 characters';
+    this.style.borderColor=len>4800?'#E53935':len>4000?'#FFA726':'#2E2E2E';
+  });
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') document.querySelectorAll('.overlay').forEach(function(o){o.classList.remove('open');});
+});
+</script>
+
+</body>
+</html>
