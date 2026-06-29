@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OLMA Network — Hand-Drawn Wireframes (All Pages)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap">
+<style>
+  :root{
+    --text-primary:#1a1a1a;
+    --text-secondary:#666666;
+    --text-muted:#999999;
+    --surface-2:#ffffff;
+    --surface-1:#f5f5f5;
+    --border:#dddddd;
+    --border-strong:#999999;
+  }
+  body{
+    font-family:'Patrick Hand',cursive;
+    background:#f0ece2;
+    color:var(--text-primary);
+    margin:0;
+    padding:30px 20px 80px;
+  }
+  h1.doc-title{
+    text-align:center;
+    font-size:30px;
+    margin-bottom:6px;
+  }
+  p.doc-sub{
+    text-align:center;
+    color:var(--text-secondary);
+    font-size:14px;
+    margin-bottom:36px;
+  }
+  .group{
+    max-width:1100px;
+    margin:0 auto 50px;
+  }
+  .group h2{
+    font-size:18px;
+    border-bottom:2px dashed var(--border-strong);
+    padding-bottom:6px;
+    margin-bottom:16px;
+  }
+  .wfwrap{font-size:13px}
+  .wfcard{background:var(--surface-2);border:2.5px solid var(--text-primary);border-radius:3px;padding:14px}
+  .wftitle{font-size:18px;text-align:center;margin-bottom:10px;text-decoration:underline;text-decoration-style:wavy}
+  .wfsec{border:2px dashed var(--text-secondary);border-radius:2px;padding:8px 10px;margin-bottom:10px;position:relative}
+  .wflbl{font-size:11px;color:var(--text-muted);position:absolute;top:-9px;left:8px;background:var(--surface-2);padding:0 4px}
+  .pill{border:1.5px solid var(--text-primary);border-radius:11px;padding:2px 9px;display:inline-block;font-size:12px;margin:2px 3px 2px 0}
+  .mini{border:1.5px dashed var(--text-secondary);border-radius:3px;padding:5px 7px;font-size:11px}
+  table.wft{width:100%;border-collapse:collapse;font-size:10px}
+  table.wft td,table.wft th{border:1px solid var(--text-secondary);padding:3px 4px;text-align:center}
+  table.wft th{background:var(--surface-1)}
+  table.wft td:first-child,table.wft th:first-child{text-align:left}
+  .fld{border:1.5px solid var(--text-secondary);border-radius:3px;padding:4px 6px;font-size:11px;margin:3px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media (max-width:800px){ .grid2,.grid4{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">OLMA Network — Hand-Drawn Wireframes</h1>
+<p class="doc-sub">All 14 prototype pages, labeled with the exact navigation, footer, headline, button, and field text from the live HTML prototype.</p>
+
+<!-- ================= HOME ================= -->
+<div class="group">
+<h2>Home</h2>
+<div class="wfwrap">
+<div class="wfcard">
+<div class="wftitle">Home</div>
+
+<div class="wfsec"><span class="wflbl">nav bar</span>
+<b>Logo</b> &nbsp;|&nbsp; Home &middot; About &middot; Benefits &middot; Accreditation &middot; Pricing &middot; Directory &middot; Treatments &middot; Categories &middot; Contact &nbsp; <span class="pill">🌐 EN ▾</span>
+</div>
+
+<div class="wfsec"><span class="wflbl">hero banner (photo background)</span>
+<div style="font-size:16px;margin-top:6px"><b>H1: "Welcome to OLMA Network"</b></div>
+<div>Subtext: "The Global Authority in Longevity Medicine Excellence &amp; Accreditation"</div>
+<div style="margin-top:6px"><span class="pill">Explore Partners</span><span class="pill">Become a Partner</span></div>
+</div>
+
+<div class="wfsec"><span class="wflbl">section: "Why Choose OLMA?"</span>
+<div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Subtitle: "Join the world's most prestigious network of accredited longevity medicine providers"</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+<div class="mini">🌍 Global Recognition</div><div class="mini">📈 Increased Visibility</div><div class="mini">✓ Quality Assurance</div>
+<div class="mini">🤝 Partnership Opportunities</div><div class="mini">📚 Continuous Education</div><div class="mini">🏆 Premium Support</div>
+</div>
+</div>
+
+<div class="wfsec"><span class="wflbl">section: "Featured Partners"</span>
+<div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Subtitle: "Leading healthcare providers accredited by OLMA"</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px">
+<div class="mini"><b>Elite Medical Clinic</b><br>Munich, Germany<br>Premium Partner</div>
+<div class="mini"><b>Swiss Wellness Center</b><br>Zurich, Switzerland<br>Featured Partner</div>
+<div class="mini"><b>London Bio Labs</b><br>London, UK<br>Accredited</div>
+<div class="mini"><b>Barcelona Rehab Institute</b><br>Barcelona, Spain<br>Premium Partner</div>
+<div class="mini"><b>Paris Longevity Clinic</b><br>Paris, France<br>Premium Partner</div>
+</div>
+</div>
+
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">footer</span>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:11px">
+<div><b>Quick Links</b><br>Home<br>About OLMA<br>Partner Benefits<br>Partner Directory<br>Contact</div>
+<div><b>Services</b><br>Treatments<br>Partner Categories<br>Accreditation<br>Pricing</div>
+<div><b>Legal</b><br>Terms &amp; Conditions<br>Privacy Policy<br>Compliance<br>GDPR &amp; Data Protection</div>
+<div><b>Connect With Us</b><br>Facebook<br>LinkedIn<br>Twitter<br>Instagram</div>
+</div>
+<div style="text-align:center;margin-top:8px;font-size:10px;color:var(--text-muted)">© 2026 OLMA Network. All Rights Reserved. | Advancing Longevity Medicine Excellence Worldwide</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ================= ABOUT + BENEFITS ================= -->
+<div class="group">
+<h2>About &amp; Benefits</h2>
+<div class="wfwrap grid2">
+
+<div class="wfcard">
+<div class="wftitle">About</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "About OLMA"</b><br>Sub: "Leading the Future of Longevity Medicine"</div>
+<div class="wfsec"><span class="wflbl">section: "Our Mission"</span>
+<div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">Subtitle: "To establish and maintain a global network of the highest quality longevity medicine providers..."</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+<div class="mini">🎯 Vision</div><div class="mini">💎 Values</div><div class="mini">🌐 Global Impact</div>
+</div></div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">section: "Leadership & Expertise"</span>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-size:11px">
+<div class="mini"><b>Prof. Ilaria Tresoldi</b><br>Founder &amp; Chief Medical Director</div>
+<div class="mini"><b>Dr. Marcus Reinholt</b><br>Head of Clinical Accreditation</div>
+<div class="mini"><b>Dr. Sofia Caldwell</b><br>Director of Research &amp; Innovation</div>
+<div class="mini"><b>Rajiv Nandakumar</b><br>Global Partnerships &amp; Operations</div>
+</div></div>
+</div>
+
+<div class="wfcard">
+<div class="wftitle">Benefits</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Partner Benefits"</b><br>Sub: "Why Healthcare Leaders Choose OLMA"</div>
+<div class="wfsec"><span class="wflbl">benefit cards (6)</span>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px">
+<div class="mini">🎯 Increased Patient Referrals</div><div class="mini">⭐ Enhanced Credibility</div>
+<div class="mini">📊 Business Growth</div><div class="mini">📚 Education &amp; Training</div>
+<div class="mini">🌟 Prestigious Community</div><div class="mini">🏅 Dedicated Support</div>
+</div></div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">cta banner</span>
+<b>"Ready to Partner with OLMA?"</b><br>Sub: "Transform your facility's visibility and reach with OLMA accreditation"<br>
+<span class="pill">Join OLMA Today</span>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ================= ACCREDITATION + PRICING ================= -->
+<div class="group">
+<h2>Accreditation &amp; Pricing</h2>
+<div class="wfwrap grid2">
+
+<div class="wfcard">
+<div class="wftitle">Accreditation</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Accreditation Framework"</b><br>Sub: "A Rigorous 6-Stage Process Ensuring Excellence"</div>
+<div class="wfsec"><span class="wflbl">section: "Our Comprehensive Process" — 6 numbered stages</span>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px">
+<div class="mini">1. Application Submission</div><div class="mini">2. Documentation Review</div>
+<div class="mini">3. Quality Assessment</div><div class="mini">4. Clinical Validation</div>
+<div class="mini">5. Approval Decision</div><div class="mini">6. Publication &amp; Launch</div>
+</div></div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">callout: "Premium Accreditation Criteria" + cta</span>
+✓ Clinical Excellence &nbsp; ✓ International Standards &nbsp; ✓ Advanced Technologies &nbsp; ✓ Medical Expertise<br>
+<b>"Ready to Apply?"</b> &nbsp; <span class="pill">Start Accreditation Process</span>
+</div>
+</div>
+
+<div class="wfcard">
+<div class="wftitle">Pricing</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Pricing & Accreditation Fees"</b><br>Sub: "Transparent, Value-Based Pricing Tiers"</div>
+<div class="wfsec"><span class="wflbl">comparison table — columns: Standard / Premium / Featured</span>
+<table class="wft">
+<tr><th>Feature</th><th>Standard</th><th>Premium</th><th>Featured</th></tr>
+<tr><td>Annual Fee</td><td>€2,500</td><td>€5,000</td><td>€10,000</td></tr>
+<tr><td>Accreditation Status</td><td colspan="3">…</td></tr>
+<tr><td>Directory Listing</td><td colspan="3">…</td></tr>
+<tr><td>Profile Gallery</td><td colspan="3">…</td></tr>
+<tr><td>Video Support</td><td colspan="3">…</td></tr>
+<tr><td>Lead Notifications</td><td colspan="3">…</td></tr>
+<tr><td>Dedicated Support</td><td colspan="3">…</td></tr>
+<tr><td>Homepage Visibility</td><td colspan="3">…</td></tr>
+</table>
+</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">3 feature cards + cta</span>
+✓ Annual Accreditation Fees &nbsp; ✓ No Hidden Costs &nbsp; ✓ ROI Guaranteed<br>
+<b>"Select Your Plan"</b> &nbsp; <span class="pill">Get Started</span>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ================= DIRECTORY + PROFILE ================= -->
+<div class="group">
+<h2>Directory &amp; Partner Profile</h2>
+<div class="wfwrap grid2">
+
+<div class="wfcard">
+<div class="wftitle">Directory</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Partner Directory"</b><br>Sub: "Discover OLMA Accredited Healthcare Providers"</div>
+<div class="wfsec"><span class="wflbl">section: "Search & Discover"</span>
+<div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">Sub: "Find the perfect healthcare partner from our global network of accredited providers"</div>
+<span class="pill">Search by facility name…</span><span class="pill">All Partner Categories ▾</span><span class="pill">All Locations ▾</span>
+</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">partner cards (6)</span>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;font-size:10px">
+<div class="mini"><b>Elite Medical Clinic</b><br>Munich, Germany — Premium Partner</div>
+<div class="mini"><b>Swiss Wellness Center</b><br>Zurich, Switzerland — Featured Partner</div>
+<div class="mini"><b>London Bio Labs</b><br>London, UK — Accredited</div>
+<div class="mini"><b>Barcelona Rehab Institute</b><br>Barcelona, Spain — Premium Partner</div>
+<div class="mini"><b>Paris Longevity Clinic</b><br>Paris, France — Premium Partner</div>
+<div class="mini"><b>Geneva Aesthetic Center</b><br>Geneva, Switzerland — Accredited</div>
+</div></div>
+</div>
+
+<div class="wfcard">
+<div class="wftitle">Partner Profile</div>
+<div class="wfsec"><span class="wflbl">profile header (gold band)</span>
+<span class="pill">← Back to Directory</span><br><b>H1: "Elite Medical Clinic"</b> — Munich, Germany
+</div>
+<div class="wfsec"><span class="wflbl">3 info cards</span>
+<div class="mini"><b>Accreditation Status:</b> Premium Partner</div>
+<div class="mini" style="margin-top:4px"><b>Specializations:</b> Longevity Medicine, Preventive Health, Diagnostic Services</div>
+<div class="mini" style="margin-top:4px"><b>Contact Information:</b> +49 89 1234 5678, www.elite-medical.de</div>
+</div>
+<div class="wfsec"><span class="wflbl">"About This Facility" + "Services Offered"</span>
+About paragraph…<br>Services: Longevity Assessments, Biomarker Testing, IV Therapies
+</div>
+<div class="wfsec"><span class="wflbl">"Medical Team"</span><b>Dr. Klaus Mueller, MD, PhD</b> — Founder &amp; Medical Director</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">"Operational Information"</span>
+Languages: German, English, French, Spanish<br>Hours of Operation: Mon–Fri 8AM–7PM, Sat 9AM–3PM, Sun Closed<br>Services: International patient coordination available
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ================= TREATMENTS + CATEGORIES ================= -->
+<div class="group">
+<h2>Treatments &amp; Categories</h2>
+<div class="wfwrap grid2">
+
+<div class="wfcard">
+<div class="wftitle">Treatments</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Treatment Offerings"</b><br>Sub: "Comprehensive Longevity Medicine Services"</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">10 numbered category sections (title + tags + description)</span>
+<div style="display:grid;grid-template-columns:1fr;gap:4px">
+<div class="mini">1. Longevity &amp; Preventive Medicine — tags: Longevity Assessments, Preventive Programs, Executive Health</div>
+<div class="mini">2. Biomarker &amp; Diagnostic Services — tags: Blood Biomarker Testing, Hormonal Profiling, Genetic Testing, Microbiome Analysis</div>
+<div class="mini">3. Nutrition &amp; Metabolic Health — tags: Personalized Nutrition, Weight Management, Metabolic Optimization</div>
+<div class="mini">4. Regenerative Medicine — tags: PRP Therapies, Stem Cell Therapies, Orthobiologic Treatments</div>
+<div class="mini">5. Hormonal Optimization — tags: Hormone Replacement Therapy, Endocrine Health Programs</div>
+<div class="mini">6. Recovery &amp; Performance — tags: HBOT, Cryotherapy, Recovery Protocols, Sports Performance</div>
+<div class="mini">7. Intravenous Therapies — tags: Vitamin IV Therapy, NAD+ Therapy, Custom Infusions</div>
+<div class="mini">8. Rehabilitation — tags: Musculoskeletal Rehab, Orthopedic Rehab, Sports Injury Rehab</div>
+<div class="mini">9. Medical Aesthetics — tags: Skin Rejuvenation, Body Contouring, Anti-Aging Treatments</div>
+<div class="mini">10. Wellness Programs — tags: Sleep Optimization, Stress Management, Mindfulness Programs, Detoxification</div>
+</div></div>
+</div>
+
+<div class="wfcard">
+<div class="wftitle">Categories</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Partner Categories"</b><br>Sub: "Diverse Healthcare Providers in the OLMA Network"</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">6 numbered category sections (title + tags + description)</span>
+<div style="display:grid;grid-template-columns:1fr;gap:4px">
+<div class="mini">1. Laboratories — tags: Clinical Labs, Biomarker Testing, Genetic Testing, Diagnostic Centers</div>
+<div class="mini">2. Medical Clinics — tags: General Medical, Functional Medicine, Preventive Medicine, Longevity Clinics</div>
+<div class="mini">3. Regenerative Medicine Centers — tags: PRP Centers, Stem Cell Therapy, Orthobiologics</div>
+<div class="mini">4. Wellness &amp; Longevity Facilities — tags: Wellness Resorts, Medical Spas, Longevity Retreats, Biohacking Centers</div>
+<div class="mini">5. Rehabilitation Centers — tags: Physiotherapy, Sports Medicine, Orthopedic Rehab</div>
+<div class="mini">6. Aesthetic Medicine Centers — tags: Medical Aesthetics, Anti-Aging Centers</div>
+</div></div>
+</div>
+
+</div>
+</div>
+
+<!-- ================= CONTACT ================= -->
+<div class="group">
+<h2>Contact</h2>
+<div class="wfwrap">
+<div class="wfcard" style="max-width:520px;margin:0 auto">
+<div class="wftitle">Contact</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Contact for Accreditation"</b><br>Sub: "Begin Your Partnership Journey with OLMA"</div>
+<div class="wfsec"><span class="wflbl">form fields (* = required)</span>
+<div class="fld">Facility Name *</div>
+<div class="fld">Contact Person *</div>
+<div class="fld">Email Address *</div>
+<div class="fld">Phone Number *</div>
+<div class="fld">Partner Category * — dropdown: Laboratories / Medical Clinics / Regenerative Medicine Centers / Wellness &amp; Longevity Facilities / Rehabilitation Centers / Aesthetic Medicine Centers</div>
+<div class="fld">Treatment Categories (Select all that apply) * — checkboxes: Longevity &amp; Preventive Medicine, Biomarker &amp; Diagnostics, Nutrition &amp; Metabolic Health, Regenerative Medicine, Hormonal Optimization, Recovery &amp; Performance, Intravenous Therapies, Rehabilitation, Medical Aesthetics, Wellness Programs</div>
+<div class="fld">Country * — dropdown: Germany / Switzerland / United Kingdom / France / Spain / Austria / Netherlands / Other</div>
+<div class="fld">City / Region *</div>
+<div class="fld">Website (Optional)</div>
+<div class="fld">Number of Employees (Optional)</div>
+<div class="fld">Upload Image/Video (Optional)</div>
+<div class="fld">Message or Inquiry *</div>
+<div style="text-align:center;margin-top:6px"><span class="pill">Submit Application</span></div>
+</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">contact info box</span>📧 info@olma-network.com &nbsp; 📞 +43 1 234 5678</div>
+</div>
+</div>
+</div>
+
+<!-- ================= LEGAL PAGES ================= -->
+<div class="group">
+<h2>Legal Pages — Terms, Privacy, Compliance, GDPR</h2>
+<div class="wfwrap grid4">
+
+<div class="wfcard">
+<div class="wftitle" style="font-size:15px">Terms &amp; Conditions</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Terms &amp; Conditions"</b><br>Sub: "Last updated: June 2026"</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">7 numbered sections</span>
+<div class="mini">1. Acceptance of Terms<br>2. Use of the Platform<br>3. Partner Obligations<br>4. Intellectual Property<br>5. Limitation of Liability<br>6. Termination<br>7. Governing Law</div>
+<div class="mini" style="margin-top:4px">+ disclaimer callout box</div>
+</div>
+</div>
+
+<div class="wfcard">
+<div class="wftitle" style="font-size:15px">Privacy Policy</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Privacy Policy"</b><br>Sub: "Last updated: June 2026"</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">7 numbered sections</span>
+<div class="mini">1. Information We Collect<br>2. How We Use Your Information<br>3. Data Sharing &amp; Disclosure<br>4. Data Security<br>5. Your Rights<br>6. Cookies<br>7. Updates to This Policy</div>
+<div class="mini" style="margin-top:4px">+ disclaimer callout box</div>
+</div>
+</div>
+
+<div class="wfcard">
+<div class="wftitle" style="font-size:15px">Compliance</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "Compliance"</b><br>Sub: "Maintaining the Highest Standards of Regulatory & Clinical Integrity"</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">5 numbered sections</span>
+<div class="mini">1. Regulatory Compliance<br>2. Accreditation Standards<br>3. Quality Assurance<br>4. Audit &amp; Monitoring<br>5. Reporting Violations</div>
+<div class="mini" style="margin-top:4px">+ disclaimer callout box</div>
+</div>
+</div>
+
+<div class="wfcard">
+<div class="wftitle" style="font-size:15px">GDPR &amp; Data Protection</div>
+<div class="wfsec"><span class="wflbl">nav bar</span>same nav as Home</div>
+<div class="wfsec"><span class="wflbl">page hero</span><b>H1: "GDPR &amp; Data Protection"</b><br>Sub: "Our Commitment to Data Privacy Under EU Regulation"</div>
+<div class="wfsec" style="margin-bottom:0"><span class="wflbl">6 numbered sections</span>
+<div class="mini">1. Our Commitment to GDPR<br>2. Legal Basis for Processing<br>3. Data Subject Rights<br>4. International Data Transfers<br>5. Data Retention<br>6. Data Protection Officer</div>
+<div class="mini" style="margin-top:4px">+ disclaimer callout box</div>
+</div>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>
