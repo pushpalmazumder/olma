@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>OLMA — Clinical rule engine</title>
+<title>OLMA — Clinical Rule Engine</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -168,6 +168,20 @@
   .th-override{grid-template-columns:1fr 1fr 32px;}
   .trend-default-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 
+  .opr-card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:8px; cursor:pointer;}
+  .opr-top{display:grid; grid-template-columns:1fr 110px 130px 90px 16px; align-items:center; gap:10px;}
+  .opr-trigger{font-size:14px; font-weight:500;}
+  .opr-source{font-family:var(--mono); font-size:11px; color:var(--ink-soft); display:block; margin-top:2px;}
+  .pill-auto{background:var(--green-soft); color:var(--green);}
+  .pill-hold{background:var(--amber-soft); color:var(--amber);}
+  .pill-blockaction{background:var(--red-soft); color:var(--red);}
+  .opr-caret{color:var(--ink-soft); text-align:right; transition:transform .12s;}
+  .opr-detail{margin-top:12px; padding-top:12px; border-top:1px solid var(--line); display:none; font-size:13px; color:var(--ink-soft);}
+  .opr-detail.open{display:block;}
+  .opr-detail-row{display:flex; justify-content:space-between; align-items:center; padding:6px 0;}
+  .gate-badge{background:var(--red-soft); color:var(--red); font-size:11px; font-weight:600; padding:3px 9px; border-radius:100px;}
+  .gate-badge.clear{background:var(--green-soft); color:var(--green);}
+
   .hidden{display:none;}
 </style>
 </head>
@@ -187,6 +201,7 @@
     <button class="tab" id="tab-conflicts" onclick="switchSection('conflicts')">Conflict rules</button>
     <button class="tab" id="tab-bands" onclick="switchSection('bands')">Biomarker bands</button>
     <button class="tab" id="tab-trend" onclick="switchSection('trend')">Trend rules</button>
+    <button class="tab" id="tab-operational" onclick="switchSection('operational')">Operational rules map</button>
     <button class="tab" id="tab-queue" onclick="switchSection('queue')">Review queue <span class="badge" id="queue-badge"></span></button>
   </div>
 
@@ -424,6 +439,18 @@
     </div>
   </div>
 
+  <!-- ===================== OPERATIONAL RULES MAP ===================== -->
+  <div id="view-operational" class="hidden">
+    <div class="page-head">
+      <div>
+        <h1>Operational rules map</h1>
+        <p class="subtitle">Which biomarker, pattern, or conflict result triggers which type of guidance — and whether it can auto-release.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-bottom:18px;">This is an index, not the guidance content itself. Click a row to see what it links to — the actual supplement/nutrition detail and dosage information lives in the review workbook, not here, since that content is still pending clinical sign-off.</p>
+    <div id="operational-list"></div>
+  </div>
+
   <!-- ===================== REVIEW QUEUE ===================== -->
   <div id="view-queue" class="hidden">
     <div class="page-head">
@@ -522,6 +549,19 @@ let trendOverrides = [
   {biomarker:'Lp(a)', period:'180 days', minChange:'10%', reason:'Largely genetically determined and stable; rarely needs frequent retesting.'},
 ];
 
+let operationalRules = [
+  {id:'OPR-001', source:'Pattern', trigger:'CVD-003 — Elevated CV risk cluster', category:'Supplement',
+   linkedName:'Omega-3 / CoQ10 protocol', linkedStatus:'draft', action:'hold', physicianReview:true, blocked:true, status:'draft'},
+  {id:'OPR-002', source:'Biomarker band', trigger:'Vitamin D — Requires attention', category:'Supplement',
+   linkedName:'Vitamin D3', linkedStatus:'draft', action:'auto', physicianReview:false, blocked:false, status:'draft'},
+  {id:'OPR-003', source:'Biomarker band', trigger:'HbA1c — Requires attention', category:'Nutrition',
+   linkedName:'Glycemic-load adjustment', linkedStatus:'draft', action:'auto', physicianReview:false, blocked:false, status:'pending'},
+  {id:'OPR-004', source:'Conflict', trigger:'CNF-002 — Fasting glucose vs HbA1c mismatch', category:'Vita guidance',
+   linkedName:'Held pending retest message', linkedStatus:'draft', action:'block', physicianReview:true, blocked:false, status:'draft'},
+  {id:'OPR-005', source:'Biomarker band', trigger:'LDL — Physician review', category:'Supplement',
+   linkedName:'Plant sterol supplement', linkedStatus:'pending', action:'hold', physicianReview:true, blocked:true, status:'approved'},
+];
+
 let currentBand = null, isNewBand = false, bandIdCounter = 7;
 let current = null, isNew = false, idCounter = 9;
 let currentConflict = null, isNewConflict = false, conflictIdCounter = 7;
@@ -530,8 +570,8 @@ let activeSection = 'patterns';
 /* ===================== SECTION SWITCH ===================== */
 function switchSection(section){
   activeSection = section;
-  ['tab-patterns','tab-conflicts','tab-bands','tab-trend','tab-queue'].forEach(t => document.getElementById(t).classList.remove('active'));
-  ['view-dashboard','view-editor','view-conflict-dashboard','view-conflict-editor','view-bands-dashboard','view-band-editor','view-trend','view-queue'].forEach(v => document.getElementById(v).classList.add('hidden'));
+  ['tab-patterns','tab-conflicts','tab-bands','tab-trend','tab-operational','tab-queue'].forEach(t => document.getElementById(t).classList.remove('active'));
+  ['view-dashboard','view-editor','view-conflict-dashboard','view-conflict-editor','view-bands-dashboard','view-band-editor','view-trend','view-operational','view-queue'].forEach(v => document.getElementById(v).classList.add('hidden'));
   document.getElementById('crumb').innerHTML = '';
   if(section === 'patterns'){
     document.getElementById('tab-patterns').classList.add('active');
@@ -549,6 +589,10 @@ function switchSection(section){
     document.getElementById('tab-trend').classList.add('active');
     document.getElementById('view-trend').classList.remove('hidden');
     renderTrendPage();
+  } else if(section === 'operational'){
+    document.getElementById('tab-operational').classList.add('active');
+    document.getElementById('view-operational').classList.remove('hidden');
+    renderOperationalList();
   } else {
     document.getElementById('tab-queue').classList.add('active');
     document.getElementById('view-queue').classList.remove('hidden');
@@ -924,6 +968,37 @@ function renderTrendOverrides(){
 }
 function addTrendOverride(){ trendOverrides.push({biomarker:'', period:'', minChange:'', reason:''}); renderTrendOverrides(); }
 function removeTrendOverride(i){ trendOverrides.splice(i,1); renderTrendOverrides(); }
+
+/* ===================== OPERATIONAL RULES MAP ===================== */
+function actionPillClass(a){ return {auto:'pill-auto', hold:'pill-hold', block:'pill-blockaction'}[a]; }
+function actionLabel(a){ return {auto:'Auto-release', hold:'Hold for review', block:'Block'}[a]; }
+let openOperationalRow = null;
+
+function renderOperationalList(){
+  document.getElementById('operational-list').innerHTML = operationalRules.map((o,i) => `
+    <div class="opr-card" onclick="toggleOperationalRow(${i})">
+      <div class="opr-top">
+        <div>
+          <div class="opr-trigger">${o.trigger}</div>
+          <span class="opr-source">${o.source} → ${o.category}</span>
+        </div>
+        <span class="pill ${actionPillClass(o.action)}">${actionLabel(o.action)}</span>
+        <span class="pill ${pillClass(o.status)}">${statusLabel(o.status)}</span>
+        <span class="gate-badge ${o.blocked ? '' : 'clear'}">${o.blocked ? 'Gated' : 'Clear'}</span>
+        <span class="opr-caret">${openOperationalRow === i ? '\u25B4' : '\u25BE'}</span>
+      </div>
+      <div class="opr-detail ${openOperationalRow === i ? 'open' : ''}">
+        <div class="opr-detail-row"><span>Linked ${o.category.toLowerCase()} entry</span><span>${o.linkedName} · <span class="pill ${pillClass(o.linkedStatus)}" style="padding:2px 8px;">${statusLabel(o.linkedStatus)}</span></span></div>
+        <div class="opr-detail-row"><span>Physician review required</span><span>${o.physicianReview ? 'Yes' : 'No'}</span></div>
+        <div class="opr-detail-row"><span>Gated by Contraindications rules</span><span class="gate-badge ${o.blocked ? '' : 'clear'}">${o.blocked ? 'Yes — checked before release' : 'No active gate'}</span></div>
+        <div class="opr-detail-row" style="border-top:1px dashed var(--line); margin-top:4px; padding-top:10px;"><span style="color:var(--ink-soft); font-size:12px;">Full dosage / recommendation content lives in the Supplement or Nutrition & movement tab of the review workbook — not shown here.</span></div>
+      </div>
+    </div>`).join('');
+}
+function toggleOperationalRow(i){
+  openOperationalRow = openOperationalRow === i ? null : i;
+  renderOperationalList();
+}
 
 /* ===================== REVIEW QUEUE ===================== */
 function queuePillClass(s){ return {held:'pill-held', released:'pill-released', suppressed:'pill-suppressed', in_review:'pill-inreview'}[s]; }
